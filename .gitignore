@@ -10,3 +10,11 @@
 *.lai
 *.la
 *.a
+
+# NetBeans project
+build/
+nbproject/
+# It's not good to ignore makefile, but it has includes from nbproject/
+# If we'll preserve it, project will not compile.
+# It's better to create a new project with new makefile on each computer.
+Makefile
