@@ -21,3 +21,6 @@ Makefile
 
 # Eclipse project
 Debug/
+.metadata/
+.cproject
+.project
