@@ -1,4 +1,3 @@
-#include "stdinclude.h"
 #include "HTMLLogger.h"
 
 

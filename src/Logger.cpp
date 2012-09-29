@@ -4,8 +4,6 @@
  * 
  * Created on September 26, 2012, 6:02 PM
  */
-
-#include "stdinclude.h"
 #include "Logger.h"
 
 
