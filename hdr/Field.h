@@ -3,9 +3,13 @@
  */
 
 #ifndef FIELD_H
-#define	FIELD_H
+#define FIELD_H
 
-#include <string.h>
+#include <string>
+
+#include "FieldMember.h"
+
+using namespace std;
 
 class Field {
 
@@ -16,7 +20,7 @@ public:
      *
      * param ASCIIMap Map in ASCII. See specification for details.
      */
-    Field(std::string ASCIIMap);
+    Field(string& ASCIIMap);
     /*
      * Copy constructor makes a copy of the object referenced by a given reference.
      *

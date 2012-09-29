@@ -4,6 +4,10 @@
  * 
  * Created on September 26, 2012, 6:02 PM
  */
+
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "Logger.h"
 
 

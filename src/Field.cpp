@@ -1,13 +1,14 @@
-/* 
- * File:   Field.cpp
- * Author: yaromir
- * 
- * Created on September 29, 2012, 4:15 AM
+/*
+ * Represents field.
  */
+
+#include <string>
 
 #include "Field.h"
 
-Field::Field() {
+using namespace std;
+
+Field::Field(string& ASCIIMap) {
 }
 
 Field::Field(const Field& orig) {

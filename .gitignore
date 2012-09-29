@@ -24,3 +24,4 @@ Debug/
 .metadata/
 .cproject
 .project
+/dist/

@@ -40,8 +40,8 @@ public:
 private:
 
     // Value class - immutable.
-    const int x;
-    const int y;
+    int x;
+    int y;
 
 };
 
