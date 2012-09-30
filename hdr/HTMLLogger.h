@@ -1,5 +1,8 @@
 #pragma once
+
 #include <fstream>
+
+#include "Logger.h"
 
 class HTMLLogger : public Logger
 {
