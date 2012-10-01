@@ -6,32 +6,83 @@
  */
 
 #include "AStar.h"
+#include <algorithm>
 
-void AStar::addToOpenedList(const AStarPoint& p) {
+// Реализация алгоритма А*
+vector<Point> AStar::solve(const Point& s, const Point& f, const Field& field) {
+	AStarPoint start(field.getXY(s));
+	AStarPoint finish(field.getXY(f));
+	addNeighboursToOpenedList(start);
+	closedList.push_back(start);
+
+	while (!isInOpenedList(finish) || !openedList.empty()) {
+		AStarPoint current = openedList.front();
+		openedList.pop_front();
+		addNeighboursToOpenedList(current);
+		closedList.push_back(current);
+	}
+
+	vector<Point> result;
+	if (openedList.empty()) {
+		return result;
+	}
+	AStarPoint *pCurrent = &finish;
+	while (!pCurrent) {
+		result.push_back(pCurrent->getCell()->getCoordinate());
+		pCurrent = pCurrent->getParent();
+	}
+	return result;
+}
+
+void AStar::addToOpenedList(AStarPoint param) {
 	list<AStarPoint>::iterator it = openedList.begin();
 	list<AStarPoint>::iterator end = openedList.end();
+	int cost = param.getPathCost();
 	for (; it != end; it++) {
-		if (it->cell->getMetric() >= p.cell->getMetric()) {
-			openedList.insert(it, p);
+		if (it->getPathCost() >= cost) {
+			openedList.insert(it, param);
 			return;
 		}
 	}
-	openedList.push_back(p);
+	openedList.push_back(param);
 }
 
-// Реализация алгоритма А*
-Path AStar::solve(const Point& s, const Point& finish, const Field& field) {
-	AStarPoint start;
-	start.cell = field.getXY(s);
-	start.parent = NULL;
-	addToOpenedList(start);
+bool AStar::isInClosedList(const AStarPoint& param) const {
+	list<AStarPoint>::const_iterator it = std::find(closedList.begin(), closedList.end(), param);
+	return (it != closedList.end());
+}
 
-	field.getXY(Point(s.getX(), s.getY() + 1));
-	field.getXY(Point(s.getX(), s.getY() - 1));
-	field.getXY(Point(s.getX() + 1, s.getY()));
-	field.getXY(Point(s.getX() - 1, s.getY()));
+bool AStar::isInOpenedList(const AStarPoint& param) const {
+	list<AStarPoint>::const_iterator it = std::find(openedList.begin(), openedList.end(), param);
+	return (it != openedList.end());
+}
 
-	openedList.remove(start);
+// ToDo: оптимизировать этот метод
+void AStar::addNeighboursToOpenedList(const AStarPoint& point) {
+	int x = point.getCell()->getCoordinate()->getX();
+	int y = point.getCell()->getCoordinate()->getY();
+	AStarPoint up(field.getXY(Point(x, y + 1)), point);
+	checkPoint(up);
+	AStarPoint down(field.getXY(Point(x, y - 1)), point);
+	checkPoint(down);
+	AStarPoint right(field.getXY(Point(x + 1, y)), point);
+	checkPoint(right);
+	AStarPoint left(field.getXY(Point(x - 1, y)), point);
+	checkPoint(left);
+}
 
-
+void AStar::checkPoint(const AStarPoint& point) {
+	if (point.getCell()->isPassable() && !isInClosedList(point)) {
+		list<AStarPoint>::const_iterator it = std::find(openedList.begin(), openedList.end(), point);
+		if (it == openedList.end()) {
+			addToOpenedList(point);
+		} else {
+			if (it->getGeneralCost() < point.getParent()->getGeneralCost() + point.getCell()->getMetric()) {
+				AStarPoint newPoint = *it;
+				newPoint.setParent(point);
+				openedList.remove(*it);
+				addToOpenedList(newPoint);
+			}
+		}
+	}
 }

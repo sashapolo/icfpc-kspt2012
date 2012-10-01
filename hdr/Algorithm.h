@@ -8,11 +8,11 @@
 #ifndef ALGORITHM_H_
 #define ALGORITHM_H_
 
-
+#include <vector>
 
 class Algorithm {
 public:
-	virtual Path solve(const Point&, const Point&, const Field&) = 0;
+	virtual std::vector<Point> solve(const Point&, const Point&, const Field&) = 0;
 	virtual ~Algorithm();
 };
 

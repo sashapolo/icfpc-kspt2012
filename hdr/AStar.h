@@ -9,31 +9,28 @@
 #define ASTAR_H_
 
 #include <list>
-#include "Path.h"
 #include "Field.h"
 #include "FieldMember.h"
+#include "AStarPoint.h"
 #include "Algorithm.h"
+
+using namespace std;
 
 class AStar: public Algorithm {
 private:
-	struct AStarPoint {
-		FieldMember *cell;
-		AStarPoint *parent;
-
-		bool operator== (const AStarPoint& x) {
-			return (this->cell == x.cell);
-		};
-	};
 
 	//ToDo: реализовать бинарную кучу для открытого списка
 	//открытый список отсортирован
-	std::list<AStarPoint> openedList;
-	std::list<AStarPoint> closedList;
-
+	list<AStarPoint> openedList;
+	list<AStarPoint> closedList;
 
 public:
-	Path solve(const Point&, const Point&, const Field&);
-	void addToOpenedList(const AStarPoint&);
+	vector<Point> solve(const Point&, const Point&, const Field&);
+	void addToOpenedList(AStarPoint);
+	bool isInClosedList(const AStarPoint&) const;
+	bool isInOpenedList(const AStarPoint&) const;
+	void checkPoint(const AStarPoint&);
+	void addNeighboursToOpenedList(const AStarPoint&);
 	~AStar();
 };
 
