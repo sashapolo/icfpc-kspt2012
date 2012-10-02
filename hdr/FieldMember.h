@@ -7,6 +7,9 @@
 
 #include "Point.h"
 
+#define METRIC_NORMAL 10
+#define METRIC_INFINITY 100
+
 enum CellType {CLOSED_LIFT, EARTH, EMPTY, LAMBDA, OPEN_LIFT, ROBOT, ROCK, WALL};
 
 class FieldMember {
@@ -51,7 +54,6 @@ private:
     // Referenced object is immutable
     const Point* pCoordinate;
     CellType cellType;
-    int metric;
 
 };
 

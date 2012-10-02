@@ -10,9 +10,6 @@
 
 #include "FieldMember.h"
 
-#define METRIC_NORMAL 10
-#define METRIC_INFINITY 100
-
 using namespace std;
 
 class Field {
@@ -52,6 +49,7 @@ public:
      *
      * param pPoint pointer to the point object representing coordinates of the cell to retrieve
      */
+    const FieldMember* getXY(const Point &rPoint) const;
     FieldMember* getXY(const Point &rPoint);
 
     pair<int, int> getSize();
@@ -79,7 +77,7 @@ public:
      * @param rFieldMember
      */
     // ToDo: need in throwing any exceptions?
-    void setFieldMember(FieldMember fieldMember);
+    void setFieldMember(FieldMember* fieldMember);
 
 private:
 

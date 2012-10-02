@@ -24,14 +24,14 @@ private:
 	list<AStarPoint> openedList;
 	list<AStarPoint> closedList;
 
-public:
-	vector<Point> solve(const Point&, const Point&, const Field&);
 	void addToOpenedList(AStarPoint);
 	bool isInClosedList(const AStarPoint&) const;
 	bool isInOpenedList(const AStarPoint&) const;
 	void checkPoint(const AStarPoint&);
-	void addNeighboursToOpenedList(const AStarPoint&);
-	~AStar();
+	void addNeighboursToOpenedList(const AStarPoint&, const Field&);
+
+public:
+	vector<Point> solve(const Point&, const Point&, const Field&);
 };
 
 #endif /* ASTAR_H_ */

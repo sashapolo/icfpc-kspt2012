@@ -19,10 +19,6 @@ FieldMember::~FieldMember() {
 
 }
 
-void FieldMember::setMetric(int metric) {
-    this->metric = metric;
-}
-
 bool FieldMember::isPassable() const {
     switch (cellType) {
         case EARTH:

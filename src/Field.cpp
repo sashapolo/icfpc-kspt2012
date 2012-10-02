@@ -26,6 +26,10 @@ void Field::deleteStoneFromCache(const Point &rPoint) {
     
 }
 
+const FieldMember* Field::getXY(const Point &point) const{
+    return &field.at(point.getY()).at(point.getX());
+}
+
 FieldMember* Field::getXY(const Point &point) {
     return &field.at(point.getY()).at(point.getX());
 }
@@ -35,16 +39,16 @@ void Field::swap(const Point &cell1, const Point &cell2) {
     tmp1->setCoordinate(cell2);
     FieldMember* tmp2 = getXY(cell2);
     tmp2->setCoordinate(cell1);
-    setFieldMember(*tmp1);
-    setFieldMember(*tmp2);
+    setFieldMember(tmp1);
+    setFieldMember(tmp2);
 }
 
 CellType Field::getCellType(const Point &point) {
     return getXY(point)->getType();
 }
 
-void Field::setFieldMember(FieldMember fieldMember) {
-    int x = fieldMember.getCoordinate()->getX();
-    int y = fieldMember.getCoordinate()->getY();
-    field.at(y).at(x) = fieldMember;
+void Field::setFieldMember(FieldMember* fieldMember) {
+    int x = fieldMember->getCoordinate()->getX();
+    int y = fieldMember->getCoordinate()->getY();
+    field.at(y).at(x) = *fieldMember;
 }

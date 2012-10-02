@@ -12,13 +12,13 @@
 vector<Point> AStar::solve(const Point& s, const Point& f, const Field& field) {
 	AStarPoint start(field.getXY(s));
 	AStarPoint finish(field.getXY(f));
-	addNeighboursToOpenedList(start);
+	addNeighboursToOpenedList(start, field);
 	closedList.push_back(start);
 
 	while (!isInOpenedList(finish) || !openedList.empty()) {
 		AStarPoint current = openedList.front();
 		openedList.pop_front();
-		addNeighboursToOpenedList(current);
+		addNeighboursToOpenedList(current, field);
 		closedList.push_back(current);
 	}
 
@@ -26,9 +26,9 @@ vector<Point> AStar::solve(const Point& s, const Point& f, const Field& field) {
 	if (openedList.empty()) {
 		return result;
 	}
-	AStarPoint *pCurrent = &finish;
+	const AStarPoint *pCurrent = &finish;
 	while (!pCurrent) {
-		result.push_back(pCurrent->getCell()->getCoordinate());
+		result.push_back(*(pCurrent->getCell()->getCoordinate()));
 		pCurrent = pCurrent->getParent();
 	}
 	return result;
@@ -58,16 +58,16 @@ bool AStar::isInOpenedList(const AStarPoint& param) const {
 }
 
 // ToDo: оптимизировать этот метод
-void AStar::addNeighboursToOpenedList(const AStarPoint& point) {
+void AStar::addNeighboursToOpenedList(const AStarPoint& point, const Field& field) {
 	int x = point.getCell()->getCoordinate()->getX();
 	int y = point.getCell()->getCoordinate()->getY();
-	AStarPoint up(field.getXY(Point(x, y + 1)), point);
+	AStarPoint up(field.getXY(Point(x, y + 1)), &point);
 	checkPoint(up);
-	AStarPoint down(field.getXY(Point(x, y - 1)), point);
+	AStarPoint down(field.getXY(Point(x, y - 1)), &point);
 	checkPoint(down);
-	AStarPoint right(field.getXY(Point(x + 1, y)), point);
+	AStarPoint right(field.getXY(Point(x + 1, y)), &point);
 	checkPoint(right);
-	AStarPoint left(field.getXY(Point(x - 1, y)), point);
+	AStarPoint left(field.getXY(Point(x - 1, y)), &point);
 	checkPoint(left);
 }
 
@@ -77,7 +77,7 @@ void AStar::checkPoint(const AStarPoint& point) {
 		if (it == openedList.end()) {
 			addToOpenedList(point);
 		} else {
-			if (it->getGeneralCost() < point.getParent()->getGeneralCost() + point.getCell()->getMetric()) {
+			if (it->getGeneralCost() < point.getParent()->getGeneralCost() + METRIC_NORMAL) {
 				AStarPoint newPoint = *it;
 				newPoint.setParent(point);
 				openedList.remove(*it);

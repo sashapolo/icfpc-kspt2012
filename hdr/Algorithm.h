@@ -13,7 +13,7 @@
 class Algorithm {
 public:
 	virtual std::vector<Point> solve(const Point&, const Point&, const Field&) = 0;
-	virtual ~Algorithm();
+	virtual ~Algorithm() {};
 };
 
 #endif /* ALGORITHM_H_ */

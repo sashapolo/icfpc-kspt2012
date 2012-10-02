@@ -23,7 +23,7 @@ public:
 		pParent = parent;
 		H = 0;
 		if (parent) {
-			G = parent->G + cell->getMetric();
+			G = parent->G + METRIC_NORMAL;
 		} else {
 			G = 0;
 		}
@@ -39,7 +39,7 @@ public:
 
 	void setParent(const AStarPoint& parent) {
 		pParent = &parent;
-		G = parent.G + pCell->getMetric();
+		G = parent.G + METRIC_NORMAL;
 	}
 
 	const AStarPoint* getParent() const {
@@ -54,7 +54,7 @@ public:
 		H = value;
 	}
 
-	bool operator== (const AStarPoint& x) {
+	bool operator== (const AStarPoint& x) const{
 		return (pCell == x.pCell);
 	}
 };
