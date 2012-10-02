@@ -49,6 +49,7 @@ public:
         return this->cellType;
     }
 
+    int getDistance(const FieldMember&) const;
 private:
 
     // Referenced object is immutable

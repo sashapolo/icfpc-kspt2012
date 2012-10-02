@@ -28,7 +28,7 @@ private:
 	bool isInClosedList(const AStarPoint&) const;
 	bool isInOpenedList(const AStarPoint&) const;
 	void checkPoint(const AStarPoint&);
-	void addNeighboursToOpenedList(const AStarPoint&, const Field&);
+	void addNeighboursToOpenedList(const AStarPoint&, const AStarPoint&, const Field&);
 
 public:
 	vector<Point> solve(const Point&, const Point&, const Field&);

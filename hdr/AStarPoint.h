@@ -18,10 +18,14 @@ private:
 	int H;	// эвристика
 
 public:
-	AStarPoint(const FieldMember *cell, const AStarPoint *parent = NULL) {
+	AStarPoint(const FieldMember *cell, const AStarPoint* parent = NULL, const AStarPoint* target = NULL) {
 		pCell = cell;
 		pParent = parent;
-		H = 0;
+		if (target) {
+			H = cell->getDistance(*target->pCell);
+		} else {
+			H = 0;
+		}
 		if (parent) {
 			G = parent->G + METRIC_NORMAL;
 		} else {
@@ -48,10 +52,6 @@ public:
 
 	const FieldMember* getCell() const {
 		return pCell;
-	}
-
-	void setHeuristics(int value) {
-		H = value;
 	}
 
 	bool operator== (const AStarPoint& x) const{

@@ -10,15 +10,15 @@
 
 // Реализация алгоритма А*
 vector<Point> AStar::solve(const Point& s, const Point& f, const Field& field) {
-	AStarPoint start(field.getXY(s));
 	AStarPoint finish(field.getXY(f));
-	addNeighboursToOpenedList(start, field);
+	AStarPoint start(field.getXY(s), NULL, &finish);
+	addNeighboursToOpenedList(start, finish, field);
 	closedList.push_back(start);
 
 	while (!isInOpenedList(finish) || !openedList.empty()) {
 		AStarPoint current = openedList.front();
 		openedList.pop_front();
-		addNeighboursToOpenedList(current, field);
+		addNeighboursToOpenedList(current, finish, field);
 		closedList.push_back(current);
 	}
 
@@ -58,16 +58,16 @@ bool AStar::isInOpenedList(const AStarPoint& param) const {
 }
 
 // ToDo: оптимизировать этот метод
-void AStar::addNeighboursToOpenedList(const AStarPoint& point, const Field& field) {
-	int x = point.getCell()->getCoordinate()->getX();
-	int y = point.getCell()->getCoordinate()->getY();
-	AStarPoint up(field.getXY(Point(x, y + 1)), &point);
+void AStar::addNeighboursToOpenedList(const AStarPoint& parent, const AStarPoint& target, const Field& field) {
+	int x = parent.getCell()->getCoordinate()->getX();
+	int y = parent.getCell()->getCoordinate()->getY();
+	AStarPoint up(field.getXY(Point(x, y + 1)), &parent, &target);
 	checkPoint(up);
-	AStarPoint down(field.getXY(Point(x, y - 1)), &point);
+	AStarPoint down(field.getXY(Point(x, y - 1)), &parent, &target);
 	checkPoint(down);
-	AStarPoint right(field.getXY(Point(x + 1, y)), &point);
+	AStarPoint right(field.getXY(Point(x + 1, y)), &parent, &target);
 	checkPoint(right);
-	AStarPoint left(field.getXY(Point(x - 1, y)), &point);
+	AStarPoint left(field.getXY(Point(x - 1, y)), &parent, &target);
 	checkPoint(left);
 }
 

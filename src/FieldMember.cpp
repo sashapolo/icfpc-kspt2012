@@ -29,3 +29,11 @@ bool FieldMember::isPassable() const {
             return true;
     }
 }
+
+int FieldMember::getDistance(const FieldMember& to) const {
+	int x = pCoordinate->getX() - to.getCoordinate()->getX();
+	int y = pCoordinate->getY() - to.getCoordinate()->getY();
+	x = (x < 0)? -x : x;
+	y = (y < 0)? -y : y;
+	return x + y;
+}
