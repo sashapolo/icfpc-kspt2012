@@ -50,6 +50,8 @@ public:
     }
 
     int getDistance(const FieldMember&) const;
+
+    bool operator==(const FieldMember&) const;
 private:
 
     // Referenced object is immutable

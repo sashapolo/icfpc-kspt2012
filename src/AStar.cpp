@@ -11,35 +11,39 @@
 // Реализация алгоритма А*
 vector<Point> AStar::solve(const Point& s, const Point& f, const Field& field) {
 	AStarPoint finish(field.getXY(f));
+	// начинаем со стартовой точки
 	AStarPoint start(field.getXY(s), NULL, &finish);
-	addNeighboursToOpenedList(start, finish, field);
-	closedList.push_back(start);
+	addNeighboursToOpenedList(start, finish, field); // добавляем соседей в открытый список
+	closedList.push_back(start); //добавляем стартовую точку в закрытый список
 
 	while (!isInOpenedList(finish) || !openedList.empty()) {
+		// Выбираем точку с наименьшей стоимостью пути
 		AStarPoint current = openedList.front();
-		openedList.pop_front();
+		openedList.pop_front(); // удаляем из открытого списка и добавляем в закрытый
 		addNeighboursToOpenedList(current, finish, field);
 		closedList.push_back(current);
 	}
 
+	// формирование результата
 	vector<Point> result;
 	if (openedList.empty()) {
 		return result;
 	}
-	const AStarPoint *pCurrent = &finish;
+	list<AStarPoint>::const_iterator it = std::find(openedList.begin(), openedList.end(), finish);
+	const AStarPoint *pCurrent = &(*it);
 	while (!pCurrent) {
-		result.push_back(*(pCurrent->getCell()->getCoordinate()));
+		result.push_back(*pCurrent->getCell()->getCoordinate());
 		pCurrent = pCurrent->getParent();
 	}
 	return result;
 }
 
-void AStar::addToOpenedList(AStarPoint param) {
+void AStar::addToOpenedList(const AStarPoint& param) {
 	list<AStarPoint>::iterator it = openedList.begin();
 	list<AStarPoint>::iterator end = openedList.end();
 	int cost = param.getPathCost();
 	for (; it != end; it++) {
-		if (it->getPathCost() >= cost) {
+		if (cost <= it->getPathCost()) {
 			openedList.insert(it, param);
 			return;
 		}
@@ -57,7 +61,6 @@ bool AStar::isInOpenedList(const AStarPoint& param) const {
 	return (it != openedList.end());
 }
 
-// ToDo: оптимизировать этот метод
 void AStar::addNeighboursToOpenedList(const AStarPoint& parent, const AStarPoint& target, const Field& field) {
 	int x = parent.getCell()->getCoordinate()->getX();
 	int y = parent.getCell()->getCoordinate()->getY();

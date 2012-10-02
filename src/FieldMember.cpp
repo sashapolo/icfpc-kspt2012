@@ -37,3 +37,7 @@ int FieldMember::getDistance(const FieldMember& to) const {
 	y = (y < 0)? -y : y;
 	return x + y;
 }
+
+bool FieldMember::operator==(const FieldMember& param) const {
+	return (cellType == param.cellType && *pCoordinate == *param.pCoordinate);
+}

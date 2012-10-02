@@ -41,6 +41,7 @@ public:
 		return G;
 	}
 
+	// при задании нового родителя необходимо пересчитать метрику G
 	void setParent(const AStarPoint& parent) {
 		pParent = &parent;
 		G = parent.G + METRIC_NORMAL;

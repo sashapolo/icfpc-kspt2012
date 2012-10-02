@@ -24,7 +24,7 @@ private:
 	list<AStarPoint> openedList;
 	list<AStarPoint> closedList;
 
-	void addToOpenedList(AStarPoint);
+	void addToOpenedList(const AStarPoint&);
 	bool isInClosedList(const AStarPoint&) const;
 	bool isInOpenedList(const AStarPoint&) const;
 	void checkPoint(const AStarPoint&);
