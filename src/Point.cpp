@@ -18,10 +18,10 @@ Point::Point(const Point& orig) {
 Point::~Point() {
 }
 
-int Point::getX() {
+int Point::getX() const {
     return this->x;
 }
 
-int Point::getY() {
+int Point::getY() const {
     return this->y;
 }

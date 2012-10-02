@@ -32,6 +32,20 @@ public:
      */
     void setMetric(int metric);
 
+    bool isPassable() const;
+
+    const Point* getCoordinate() const {
+        return pCoordinate;
+    };
+
+    void setCoordinate(const Point &point) {
+        this->pCoordinate = &point;
+    }
+
+    CellType getType() const{
+        return this->cellType;
+    }
+
 private:
 
     // Referenced object is immutable
