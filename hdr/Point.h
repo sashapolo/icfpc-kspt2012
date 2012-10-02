@@ -31,15 +31,16 @@ public:
     /*
      * Get X coordinate of the point.
      */
-    int getX();
+    int getX() const;
     /*
      * Get Y coordinate of the point.
      */
-    int getY();
+    int getY() const;
+
+    // Value class - immutable. No setters.
 
 private:
 
-    // Value class - immutable.
     int x;
     int y;
 

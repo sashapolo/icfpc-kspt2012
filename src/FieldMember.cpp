@@ -16,9 +16,20 @@ FieldMember::FieldMember(const FieldMember& orig) {
 
 // ToDo: what if object pointed to is shared?
 FieldMember::~FieldMember() {
-    delete pCoordinate;
+
 }
 
 void FieldMember::setMetric(int metric) {
     this->metric = metric;
+}
+
+bool FieldMember::isPassable() const {
+    switch (cellType) {
+        case EARTH:
+        case WALL:
+        case CLOSED_LIFT:
+            return false;
+        default:
+            return true;
+    }
 }
