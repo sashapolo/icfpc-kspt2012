@@ -21,6 +21,7 @@ public:
      *
      * param ASCIIMap Map in ASCII. See specification for details.
      */
+    Field();
     Field(const string &ASCIIMap);
     /**
      * Copy constructor makes a copy of the object referenced by a given reference.
@@ -79,6 +80,10 @@ public:
     // ToDo: need in throwing any exceptions?
     void setFieldMember(FieldMember* fieldMember);
 
+    //Added by Kirill
+    bool load(string Path);
+    void clear();
+    
 private:
 
     vector< vector<FieldMember> > field;
