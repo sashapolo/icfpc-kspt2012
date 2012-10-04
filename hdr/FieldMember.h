@@ -5,9 +5,11 @@
 #ifndef FIELDMEMBER_H
 #define FIELDMEMBER_H
 
+#include <climits>
+
 #include "Point.h"
 
-enum CellType {CLOSED_LIFT, EARTH, EMPTY, LAMBDA, OPEN_LIFT, ROBOT, ROCK, WALL};
+enum CellType {CLOSED_LIFT, EARTH, EMPTY, LAMBDA, OPENED_LIFT, ROBOT, STONE, WALL};
 
 class FieldMember {
 
@@ -47,12 +49,14 @@ public:
     }
 
 private:
-
+    const static int METRIC_NORMAL = 10;
+    const static int METRIC_INFINITY = INT_MAX;
     // Referenced object is immutable
     const Point* pCoordinate;
     CellType cellType;
     int metric;
-
+    
+    
 };
 
 #endif	/* FIELDMEMBER_H */
