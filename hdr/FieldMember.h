@@ -48,15 +48,18 @@ public:
         return this->cellType;
     }
 
+    int getDistance(const FieldMember&) const;
+
+    bool operator==(const FieldMember&) const;
 private:
+
     const static int METRIC_NORMAL = 10;
     const static int METRIC_INFINITY = INT_MAX;
     // Referenced object is immutable
     const Point* pCoordinate;
     CellType cellType;
     int metric;
-    
-    
+
 };
 
 #endif	/* FIELDMEMBER_H */

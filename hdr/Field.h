@@ -24,6 +24,7 @@ public:
      *
      * param ASCIIMap Map in ASCII. See specification for details.
      */
+    Field();
     Field(const string &ASCIIMap);
     /**
      * Copy constructor makes a copy of the object referenced by a given reference.
@@ -52,6 +53,7 @@ public:
      *
      * param pPoint pointer to the point object representing coordinates of the cell to retrieve
      */
+    const FieldMember* getXY(const Point &rPoint) const;
     FieldMember* getXY(const Point &rPoint);
 
     pair<int, int> getSize();
@@ -79,8 +81,12 @@ public:
      * @param rFieldMember
      */
     // ToDo: need in throwing any exceptions?
-    void setFieldMember(FieldMember fieldMember);
+    void setFieldMember(FieldMember* fieldMember);
 
+    //Added by Kirill
+    bool load(string Path);
+    void clear();
+    
 private:
 
     vector< vector<FieldMember> > field;

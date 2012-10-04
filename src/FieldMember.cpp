@@ -20,10 +20,6 @@ FieldMember::~FieldMember() {
 
 }
 
-void FieldMember::setMetric(int metric) {
-    this->metric = metric;
-}
-
 bool FieldMember::isPassable() const {
     switch (metric) {
         case METRIC_NORMAL:
@@ -31,4 +27,18 @@ bool FieldMember::isPassable() const {
         default:
             return false;
     }
+}
+
+int FieldMember::getDistance(const FieldMember& to) const {
+	int x = pCoordinate->getX() - to.getCoordinate()->getX();
+	int y = pCoordinate->getY() - to.getCoordinate()->getY();
+	x = (x < 0)? -x : x;
+	y = (y < 0)? -y : y;
+	return x + y;
+}
+
+bool FieldMember::operator==(const FieldMember& param) const {
+	//ToDo: почему не работает *pCoordinate == *param.pCoordinate?
+	return (cellType == param.cellType && pCoordinate->getX() == param.pCoordinate->getX()
+			&& pCoordinate->getY() == param.pCoordinate->getY());
 }
