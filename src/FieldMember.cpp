@@ -3,6 +3,7 @@
  */
 
 #include "FieldMember.h"
+#include "Field.h"
 
 FieldMember::FieldMember(const Point *pCoordinate, CellType cellType) {
     this->pCoordinate = pCoordinate;
@@ -20,13 +21,11 @@ FieldMember::~FieldMember() {
 }
 
 bool FieldMember::isPassable() const {
-    switch (cellType) {
-        case EARTH:
-        case WALL:
-        case CLOSED_LIFT:
-            return false;
-        default:
+    switch (metric) {
+        case METRIC_NORMAL:
             return true;
+        default:
+            return false;
     }
 }
 

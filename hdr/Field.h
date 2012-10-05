@@ -18,6 +18,9 @@ public:
 
     /**
      * Trivial constructor: makes field cell of given coordinate with given cell type.
+     * Lines in the map being passed are of variable length.
+     * Horizontal size of the map is determined by the line of the maximum length.
+     * All other lines are padded with empty cells.
      *
      * param ASCIIMap Map in ASCII. See specification for details.
      */
