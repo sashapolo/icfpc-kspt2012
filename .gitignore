@@ -24,4 +24,8 @@ Debug/
 .metadata/
 .cproject
 .project
+.settings
 /dist/
+
+# Logger data
+LOG.html

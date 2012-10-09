@@ -1,4 +1,4 @@
-LIBS=
+LIBS=-lcppunit
 
 CC=g++
 CFLAGS=-I hdr -c

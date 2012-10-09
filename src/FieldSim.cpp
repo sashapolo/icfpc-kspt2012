@@ -23,13 +23,13 @@ void DrawField(Field* pField, int nStep)
             {
                 case ROBOT: cellsymb='R'; break;
                 case LAMBDA: cellsymb='\\'; break;
-                case ROCK: cellsymb='*'; break;
+                case STONE: cellsymb='*'; break;
                 case WALL: cellsymb='#'; break;
                 case EMPTY: cellsymb=' '; break;
                 case CLOSED_LIFT: cellsymb='L'; break;
-                case OPEN_LIFT: cellsymb='L'; break;
+                case OPENED_LIFT: cellsymb='L'; break;
                 case EARTH: cellsymb='.'; break;
-                default: cellsymb='U';
+                default: cellsymb='U'; break;
             }
             printf("%c",cellsymb);
         }
@@ -56,13 +56,13 @@ void FieldSim::CalcNextState(Field* pField)
         {
             CellType cell=pField->getCellType(Point(x,y));
             
-            if(cell==ROCK)
+            if(cell==STONE)
             {
                 if(pField->getCellType(Point(x,y-1))==EMPTY)
                 {
                     NewField.swap(Point(x,y),Point(x,y-1));
                 }
-                else if((pField->getCellType(Point(x,y-1))==ROCK))
+                else if((pField->getCellType(Point(x,y-1))==STONE))
                 {
 
                     if((pField->getCellType(Point(x+1,y))==EMPTY) &&

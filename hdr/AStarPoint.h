@@ -27,7 +27,7 @@ public:
 			H = 0;
 		}
 		if (parent) {
-			G = parent->G + METRIC_NORMAL;
+			G = parent->G + FieldMember::METRIC_NORMAL;
 		} else {
 			G = 0;
 		}
@@ -44,7 +44,7 @@ public:
 	// при задании нового родителя необходимо пересчитать метрику G
 	void setParent(const AStarPoint& parent) {
 		pParent = &parent;
-		G = parent.G + METRIC_NORMAL;
+		G = parent.G + FieldMember::METRIC_NORMAL;
 	}
 
 	const AStarPoint* getParent() const {

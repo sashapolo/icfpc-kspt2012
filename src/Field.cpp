@@ -204,14 +204,14 @@ bool Field::load(string Path)
         {
             case 'R': CurrentCell=ROBOT; break;
             case '#': CurrentCell=WALL; break;
-            case '*': CurrentCell=ROCK; break;
+            case '*': CurrentCell=STONE; break;
             case '\\': CurrentCell=LAMBDA; break;
             case 'L': CurrentCell=CLOSED_LIFT; break;
             case '.': CurrentCell=EARTH; break;
             case ' ': CurrentCell=EMPTY; break;
             case '\n': bSkip=true; break;
             case '\r': bSkip=true; break;
-            default: CurrentCell=EMPTY;
+            default: CurrentCell=EMPTY; break;
         };
         
         if(!bSkip) 

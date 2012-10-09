@@ -80,7 +80,7 @@ void AStar::checkPoint(const AStarPoint& point) {
 		if (it == openedList.end()) {
 			addToOpenedList(point);
 		} else {
-			if (it->getGeneralCost() < point.getParent()->getGeneralCost() + METRIC_NORMAL) {
+			if (it->getGeneralCost() < point.getParent()->getGeneralCost() + FieldMember::METRIC_NORMAL) {
 				AStarPoint newPoint = *it;
 				newPoint.setParent(point);
 				openedList.remove(*it);

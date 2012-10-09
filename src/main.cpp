@@ -7,7 +7,7 @@
 //============================================================================
 
 #include <cstdlib>
-#include <term.h>
+//#include <term.h>
 #include "stdinclude.h"
 
 using namespace std;

@@ -14,6 +14,8 @@ enum CellType {CLOSED_LIFT, EARTH, EMPTY, LAMBDA, OPENED_LIFT, ROBOT, STONE, WAL
 class FieldMember {
 
 public:
+    const static int METRIC_NORMAL = 10;
+    const static int METRIC_INFINITY = INT_MAX;
 
     /*
      * Trivial constructor: makes field cell of given coordinate with given cell type.
@@ -52,9 +54,6 @@ public:
 
     bool operator==(const FieldMember&) const;
 private:
-
-    const static int METRIC_NORMAL = 10;
-    const static int METRIC_INFINITY = INT_MAX;
     // Referenced object is immutable
     const Point* pCoordinate;
     CellType cellType;
