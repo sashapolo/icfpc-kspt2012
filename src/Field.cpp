@@ -9,12 +9,11 @@
 
 using namespace std;
 
-Field::Field()
-{
+// TODO: наверное, этот метод надо оптимизировать, так как создание карты
+// получается путем наращивания векторов,
+// но это будет делаться всего один раз, так что, возможно, это не так уж и накладно
 
-}
-
-Field::Field(const string &ASCIIMap) {
+Field::Field(const string &ASCIIMap): field(), lambdaCache(), stoneCache() {
     /*
      * Index used when filling vectors while reading the map.
      * At this stage vectors are variable length.
@@ -23,105 +22,115 @@ Field::Field(const string &ASCIIMap) {
      */
     int numOfVector = 0,       // Number of field line (Y coordinate)
         nestedVectorIndex = 0; // (X coordinate)
+
     // Reading the map
     for(int i = 0; i < ASCIIMap.length(); i++) {
+    	vector<FieldMember> array;
         if(ASCIIMap[i] == '\n') {
             // Jump to the next line
             numOfVector++;
             nestedVectorIndex = 0;
+            field.push_back(array);
         } else {
+        	FieldMember* tmp;
+			CellType cellType;
+			Point coor(numOfVector, nestedVectorIndex);
             switch (ASCIIMap[i]) {
-                // ToDo: implement validation that there is only one robot in the map
-                CellType cellType;
-                case ('R'):    
-                    cellType = ROBOT;
-                    // ToDo: should be dynamically allocated?
-                    field[numOfVector][nestedVectorIndex] = FieldMember(new Point(numOfVector, nestedVectorIndex), cellType);
+                // ToDo: implement validation that there is only one robot and
+            	// one closed OR opened lift on the map
+                case ('R'):
+					cellType = ROBOT;
+                	tmp = new FieldMember(coor, cellType);
+                	this->pRobot = tmp;
                     break;
                 case ('\\'):
                     cellType = LAMBDA;
-                    // ToDo: Implement cache
-                    // ToDo: should be dynamically allocated?
-                    field[numOfVector][nestedVectorIndex] = FieldMember(new Point(numOfVector, nestedVectorIndex), cellType);
+                    tmp = new FieldMember(coor, cellType);
+                    this->lambdaCache.push_back(tmp);
                     break;
                 case ('#'):
                     cellType = WALL;
-                    // ToDo: should be dynamically allocated?
-                    field[numOfVector][nestedVectorIndex] = FieldMember(new Point(numOfVector, nestedVectorIndex), cellType);
+                	tmp = new FieldMember(coor, cellType);
                     break;
                 case (' '):
                     cellType = EMPTY;
-                    // ToDo: should be dynamically allocated?
-                    field[numOfVector][nestedVectorIndex] = FieldMember(new Point(numOfVector, nestedVectorIndex), cellType);
+                	tmp = new FieldMember(coor, cellType);
                     break;
                 case ('*'):
                     cellType = STONE;
-                    // ToDo: Implement stone
-                    // ToDo: should be dynamically allocated?
-                    field[numOfVector][nestedVectorIndex] = FieldMember(new Point(numOfVector, nestedVectorIndex), cellType);
+                	tmp = new FieldMember(coor, cellType);
+                	this->stoneCache.push_back(tmp);
                     break;
                 case ('L'):
                     cellType = CLOSED_LIFT;
-                    // ToDo: should be dynamically allocated?
-                    field[numOfVector][nestedVectorIndex] = FieldMember(new Point(numOfVector, nestedVectorIndex), cellType);
+                	tmp = new FieldMember(coor, cellType);
+                	this->pLift = tmp;
                     break;
                 case ('O'):
                     cellType = OPENED_LIFT;
-                    // ToDo: should be dynamically allocated?
-                    field[numOfVector][nestedVectorIndex] = FieldMember(new Point(numOfVector, nestedVectorIndex), cellType);
+                	tmp = new FieldMember(coor, cellType);
+                	this->pLift = tmp;
                     break;
                 default:
                     // ToDo: throw an exception
                     break;
-                nestedVectorIndex++;
             }
+            array.push_back(*tmp);
+            nestedVectorIndex++;
         }
     }
+    // TODO: нужно ли вообще чем-нибудь заполнять?
+    /*
     // Aligning the map
     // Searching the line with the maximum length
     int maxLen = 0;
-    for(numOfVector = 0; numOfVector < field.size(); numOfVector) {
+    for(numOfVector = 0; numOfVector < field.size(); numOfVector++) {
         if(maxLen < field[numOfVector].size() ) {
             maxLen = field[numOfVector].size();
         }
     }
     // Padding other lines with empty cells
-    int sizeToPad, // Minor optimization: declaration is pulled out from cycle
-        vectSize;  // Performance gain?
-    for(numOfVector = 0; numOfVector < field.size(); numOfVector) {
-        vectSize = field[numOfVector].size(); // Performance gain?
+    for(numOfVector = 0; numOfVector < field.size(); numOfVector++) {
+        int vectSize = field[numOfVector].size();
         if(vectSize != maxLen) {
-            sizeToPad = maxLen - vectSize;
+            int sizeToPad = maxLen - vectSize;
             for(int i = 0; i < sizeToPad; i++) {
                 // ToDo: possible bug: +1?
                 CellType cellType = WALL;
                 field[numOfVector][vectSize + 1 + i] = FieldMember(new Point(numOfVector, nestedVectorIndex), cellType);
             }
         }
+    }*/
+}
+
+Field::Field(const Field& orig): lambdaCache(), stoneCache() {
+    field = orig.field;
+    int ySize = field.size();
+    int xSize = field[0].size();	// так как все массивы одинакового размера
+    // перерасчет кэшей
+    for (int i = 0; i < ySize; i++) {
+    	for (int j = 0; j < xSize; j++) {
+    		switch (field[i][j].getType()) {
+    		case (ROBOT):
+				this->pRobot = &field[i][j];
+				break;
+    		case (CLOSED_LIFT):
+				this->pLift = &field[i][j];
+				break;
+    		case (OPENED_LIFT):
+				this->pLift = &field[i][j];
+				break;
+			case (LAMBDA):
+				this->lambdaCache.push_back(&field[i][j]);
+				break;
+			case (STONE):
+				this->stoneCache.push_back(&field[i][j]);
+				break;
+			default:
+				break;
+    		}
+    	}
     }
-}
-
-Field::Field(const Field& orig) {
-    field=orig.field;//Added by Kirill
-}
-
-Field::~Field() {
-}
-
-void Field::deleteLambdaFromCache(const Point &rPoint) {
-    
-}
-
-void Field::deleteStoneFromCache(const Point &rPoint) {
-    
-}
-
-const FieldMember* Field::getXY(const Point &point) const{
-    return &field.at(point.getY()).at(point.getX());
-}
-
-FieldMember* Field::getXY(const Point &point) {
-    return &field.at(point.getY()).at(point.getX());
 }
 
 void Field::swap(const Point &cell1, const Point &cell2) {
@@ -130,27 +139,13 @@ void Field::swap(const Point &cell1, const Point &cell2) {
     FieldMember* tmp2 = getXY(cell2);
     tmp2->setCoordinate(cell1);
     
-    FieldMember ttt=* tmp2;//Added by Kirill
-    setFieldMember(tmp1);
-    setFieldMember(&ttt);
+    FieldMember t = *tmp2;
+    setFieldMember(*tmp1);
+    setFieldMember(t);
 }
 
-CellType Field::getCellType(const Point &point) {
-    return getXY(point)->getType();
-}
-
-void Field::setFieldMember(FieldMember* fieldMember) {
-    int x = fieldMember->getCoordinate()->getX();
-    int y = fieldMember->getCoordinate()->getY();
-    field.at(y).at(x) = *fieldMember;
-}
-
-void Field::clear()
-{
-    field.clear();
-}
-
-bool Field::load(string Path)
+//TODO: удалить этот метод
+/*bool Field::load(string Path)
 {
     clear();
     ifstream file;
@@ -230,10 +225,4 @@ bool Field::load(string Path)
     delete [] file_buf;
     LOGINFO("Map loaded from \"%s\"",Path.c_str());
     return true;
-}
-
-pair<int, int> Field::getSize()
-{
-    if(field.size()==0) return make_pair(0,0);
-    return make_pair(field.size(),field[0].size());
-}
+}*/

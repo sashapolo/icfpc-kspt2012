@@ -12,38 +12,40 @@
 enum CellType {CLOSED_LIFT, EARTH, EMPTY, LAMBDA, OPENED_LIFT, ROBOT, STONE, WALL};
 
 class FieldMember {
+private:
+
+    Point coordinate;
+    CellType cellType;
+    int metric;
 
 public:
+
     const static int METRIC_NORMAL = 10;
     const static int METRIC_INFINITY = INT_MAX;
 
-    /*
-     * Trivial constructor: makes field cell of given coordinate with given cell type.
-     *
-     * param pCoordinate pointer to the coordinate object. Pointer is just assigned to internal pointer because object to which it points is immutable.
-     */
-    FieldMember(const Point *pCoordinate, CellType cellType);
-    /*
-     * Copy constructor makes a copy of the object referenced by a given reference.
-     *
-     * param orig reference to the object being copied
-     */
-    FieldMember(const FieldMember& orig);
-    virtual ~FieldMember();
+    FieldMember(const Point& coordinate, CellType cellType);
+    FieldMember(const Point& coordinate, CellType cellType, int metric): coordinate(coordinate) {
+    	this->cellType = cellType;
+    	this->metric = metric;
+    }
 
     /*
      * Sets some metric used by algorithm.
      */
-    void setMetric(int metric);
+    void setMetric(int metric) {
+    	this->metric = metric;
+    }
 
-    bool isPassable() const;
+    bool isPassable() const {
+    	return (metric == METRIC_NORMAL);
+    }
 
-    const Point* getCoordinate() const {
-        return pCoordinate;
+    Point getCoordinate() const {
+        return coordinate;
     };
 
     void setCoordinate(const Point &point) {
-        this->pCoordinate = &point;
+        this->coordinate = point;
     }
 
     CellType getType() const{
@@ -51,14 +53,6 @@ public:
     }
 
     int getDistance(const FieldMember&) const;
-
-    bool operator==(const FieldMember&) const;
-private:
-    // Referenced object is immutable
-    const Point* pCoordinate;
-    CellType cellType;
-    int metric;
-
 };
 
 #endif	/* FIELDMEMBER_H */

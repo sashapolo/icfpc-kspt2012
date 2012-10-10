@@ -3,42 +3,33 @@
  */
 
 #include "FieldMember.h"
-#include "Field.h"
 
-FieldMember::FieldMember(const Point *pCoordinate, CellType cellType) {
-    this->pCoordinate = pCoordinate;
+FieldMember::FieldMember(const Point& coordinate, CellType cellType): coordinate(coordinate) {
     this->cellType = cellType;
-}
-
-FieldMember::FieldMember(const FieldMember& orig) {
-    this->cellType = orig.cellType;
-    this->pCoordinate = orig.pCoordinate;
-}
-
-// ToDo: what if object pointed to is shared?
-FieldMember::~FieldMember() {
-
-}
-
-bool FieldMember::isPassable() const {
-    switch (metric) {
-        case METRIC_NORMAL:
-            return true;
-        default:
-            return false;
+    switch (cellType) {
+    case ROBOT:
+    case STONE:
+    case WALL:
+    case CLOSED_LIFT:
+    	this->metric = METRIC_INFINITY;
+    	break;
+    case EMPTY:
+    case EARTH:
+    case LAMBDA:
+    case OPENED_LIFT:
+    	this->metric = METRIC_NORMAL;
+    	break;
+    default:
+    	this->metric = METRIC_NORMAL;  // просто так, на всякий случай
+    	break;
     }
 }
 
 int FieldMember::getDistance(const FieldMember& to) const {
-	int x = pCoordinate->getX() - to.getCoordinate()->getX();
-	int y = pCoordinate->getY() - to.getCoordinate()->getY();
+	int x = coordinate.x - to.getCoordinate().x;
+	int y = coordinate.y - to.getCoordinate().y;
 	x = (x < 0)? -x : x;
 	y = (y < 0)? -y : y;
 	return x + y;
 }
 
-bool FieldMember::operator==(const FieldMember& param) const {
-	//ToDo: почему не работает *pCoordinate == *param.pCoordinate?
-	return (cellType == param.cellType && pCoordinate->getX() == param.pCoordinate->getX()
-			&& pCoordinate->getY() == param.pCoordinate->getY());
-}

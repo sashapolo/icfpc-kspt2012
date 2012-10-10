@@ -7,12 +7,19 @@
 
 #include <string>
 #include <vector>
+#include <list>
 
 #include "FieldMember.h"
 
 using namespace std;
 
 class Field {
+private:
+    vector< vector<FieldMember> > field;
+    list<FieldMember*> lambdaCache;
+    list<FieldMember*> stoneCache;
+    FieldMember* pRobot;
+    FieldMember* pLift;
 
 public:
 
@@ -24,7 +31,6 @@ public:
      *
      * param ASCIIMap Map in ASCII. See specification for details.
      */
-    Field();
     Field(const string &ASCIIMap);
     /**
      * Copy constructor makes a copy of the object referenced by a given reference.
@@ -32,40 +38,61 @@ public:
      * param orig reference to the object being copied
      */
     Field(const Field& orig);
-    virtual ~Field();
 
-    // ToDo: Really point?
+    // TODO: нужен ли деструктор?
+    virtual ~Field() {}
+
     /**
      * There are caches of Lambdas and Stones to provide some assistance to algorithm.
-     * Deletes a Lambda with specified coordinates from the list.
      */
-    // ToDo If given cell is not a lambda - throw exception?
-    void deleteLambdaFromCache(const Point &rPoint);
-    /**
-     * There are caches of Lambdas and Stones to provide some assistance to algorithm.
-     * Deletes a Lambda with specified coordinates from the list.
-     */
-    // ToDo If given cell is not a stone - throw exception?
-    void deleteStoneFromCache(const Point &rPoint);
+    list<FieldMember*>::const_iterator getLambdaCacheIt() const{
+    	return lambdaCache.begin();
+    }
+    list<FieldMember*>::iterator getLambdaCacheIt() {
+    	return lambdaCache.begin();
+    }
+
+    list<FieldMember*>::const_iterator getStoneCacheIt() const{
+    	return stoneCache.begin();
+    }
+    list<FieldMember*>::iterator getStoneCacheIt() {
+    	return stoneCache.begin();
+    }
+
+    void deleteLambdaFromCache(list<FieldMember*>::iterator it) {
+    	lambdaCache.erase(it);
+    }
+    void deleteStoneFromCache(list<FieldMember*>::iterator it) {
+    	stoneCache.erase(it);
+    }
 
     /**
      * Returns cell with given coordinates.
      *
      * param pPoint pointer to the point object representing coordinates of the cell to retrieve
      */
-    const FieldMember* getXY(const Point &rPoint) const;
-    FieldMember* getXY(const Point &rPoint);
+    const FieldMember* getXY(const Point &point) const {
+        return &field.at(point.y).at(point.x);
+    }
+    FieldMember* getXY(const Point &point) {
+        return &field.at(point.y).at(point.x);
+    }
 
-    pair<int, int> getSize();
 
-    // ToDo: write in doc comments that Points are immutable.
+    pair<int, int> getSize() {
+        if (field.size() == 0) {
+        	return make_pair(0,0);
+        }
+        return make_pair(field.size(), field[0].size());
+    }
+
     /**
      * Swaps contents of the two cells.
      *
      * @param rCell1 coordinates of the first cell
      * @param rCell2 coordinates of the second cell
      */
-    void swap(const Point &rCell1, const Point &rCell2);
+    void swap(const Point &Cell1, const Point &Cell2);
 
     /**
      * Returns type of the cell with given coordinates.
@@ -73,7 +100,9 @@ public:
      * @param rPoint
      * @return 
      */
-    CellType getCellType(const Point &rPoint);
+    CellType getCellType(const Point &point) const {
+        return getXY(point)->getType();
+    }
 
     /**
      * Writes given field member into position, specified by coordinates contained in field member.
@@ -81,16 +110,11 @@ public:
      * @param rFieldMember
      */
     // ToDo: need in throwing any exceptions?
-    void setFieldMember(FieldMember* fieldMember);
-
-    //Added by Kirill
-    bool load(string Path);
-    void clear();
-    
-private:
-
-    vector< vector<FieldMember> > field;
-
+    void setFieldMember(const FieldMember& fieldMember) {
+        int x = fieldMember.getCoordinate().x;
+        int y = fieldMember.getCoordinate().y;
+        field.at(y).at(x) = fieldMember;
+    }
 };
 
 #endif	/* FIELD_H */

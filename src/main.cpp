@@ -14,7 +14,9 @@ using namespace std;
 
 int main(int argc, char** argv) {
 
-    HTMLLogger Logger;
+// TODO: сделать считывание карты из файла
+
+/*    HTMLLogger Logger;
     Logger.Init("LOG.html","MainLog");
     SetLogger(&Logger);
     
@@ -33,5 +35,5 @@ int main(int argc, char** argv) {
         getchar();
     };
     
-    return 0;
+    return 0;*/
 }
