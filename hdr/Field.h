@@ -115,6 +115,17 @@ public:
         int y = fieldMember.getCoordinate().y;
         field.at(y).at(x) = fieldMember;
     }
+
+    const FieldMember* getRobot() const {
+    	return pRobot;
+    }
+    FieldMember* getRobot() {
+		return pRobot;
+    }
+
+    const FieldMember* getLift() const {
+		return pLift;
+	}
 };
 
 #endif	/* FIELD_H */
