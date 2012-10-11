@@ -22,7 +22,7 @@ private:
     FieldMember* pLift;
 
 public:
-
+    struct FieldParseException {}; // ислючение, говорящее о неправильности задания карты
     /**
      * Trivial constructor: makes field cell of given coordinate with given cell type.
      * Lines in the map being passed are of variable length.

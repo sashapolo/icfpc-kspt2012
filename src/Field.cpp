@@ -20,8 +20,11 @@ Field::Field(const string &ASCIIMap): field(), lambdaCache(), stoneCache() {
      * Further after determining the maximum length
      * all other vectors will be padded with empty cells.
      */
+
     int numOfVector = 0,       // Number of field line (Y coordinate)
-        nestedVectorIndex = 0; // (X coordinate)
+        nestedVectorIndex = 0,
+        numOfRobots = 0,
+        numOfLifts = 0; // (X coordinate)
 
     // Reading the map
     vector<FieldMember*> array;
@@ -37,9 +40,10 @@ Field::Field(const string &ASCIIMap): field(), lambdaCache(), stoneCache() {
 			CellType cellType;
 			Point coor(nestedVectorIndex, numOfVector);
             switch (ASCIIMap[i]) {
-                // ToDo: implement validation that there is only one robot and
-            	// one closed OR opened lift on the map
                 case ('R'):
+                	if (++numOfRobots > 1) {
+                		throw FieldParseException();
+                	}
 					cellType = ROBOT;
                 	tmp = new FieldMember(coor, cellType);
                 	this->pRobot = tmp;
@@ -67,45 +71,32 @@ Field::Field(const string &ASCIIMap): field(), lambdaCache(), stoneCache() {
 					tmp = new FieldMember(coor, cellType);
 					break;
                 case ('L'):
+					if (++numOfLifts > 1) {
+						throw FieldParseException();
+					}
                     cellType = CLOSED_LIFT;
                 	tmp = new FieldMember(coor, cellType);
                 	this->pLift = tmp;
                     break;
                 case ('O'):
+					if (++numOfLifts > 1) {
+						throw FieldParseException();
+					}
                     cellType = OPENED_LIFT;
                 	tmp = new FieldMember(coor, cellType);
                 	this->pLift = tmp;
                     break;
                 default:
-                    // ToDo: throw an exception
+                	throw FieldParseException();
                     break;
             }
             array.push_back(tmp);
             nestedVectorIndex++;
         }
     }
-    // TODO: нужно ли вообще чем-нибудь заполнять?
-    /*
-    // Aligning the map
-    // Searching the line with the maximum length
-    int maxLen = 0;
-    for(numOfVector = 0; numOfVector < field.size(); numOfVector++) {
-        if(maxLen < field[numOfVector].size() ) {
-            maxLen = field[numOfVector].size();
-        }
+    if (!lambdaCache.empty() && pLift->getType() == OPENED_LIFT) {
+    	throw FieldParseException();
     }
-    // Padding other lines with empty cells
-    for(numOfVector = 0; numOfVector < field.size(); numOfVector++) {
-        int vectSize = field[numOfVector].size();
-        if(vectSize != maxLen) {
-            int sizeToPad = maxLen - vectSize;
-            for(int i = 0; i < sizeToPad; i++) {
-                // ToDo: possible bug: +1?
-                CellType cellType = WALL;
-                field[numOfVector][vectSize + 1 + i] = FieldMember(new Point(numOfVector, nestedVectorIndex), cellType);
-            }
-        }
-    }*/
 }
 
 Field::Field(const Field& orig): field(orig.field.size(), vector<FieldMember*>(orig.field[0].size())),

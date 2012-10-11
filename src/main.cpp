@@ -38,7 +38,15 @@ Field* createField(const string mapFileName) {
 	file.seekg(0, ios::beg);
 	file.read(file_buf, file_size);
 	file.close();
-	Field *result = new Field(file_buf);
+	Field *result;
+	try {
+		result = new Field(file_buf);
+	} catch (Field::FieldParseException&) {
+		LOGERROR("Can't load map from \"%s\": map is incorrect", mapFileName.c_str());
+		file.close();
+		delete [] file_buf;
+		return NULL;
+	}
 	delete [] file_buf;
 	LOGINFO("Map loaded from \"%s\"", mapFileName.c_str());
 	return result;
