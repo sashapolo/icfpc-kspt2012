@@ -13,11 +13,10 @@
 #include "Field.h"
 #include "FieldMember.h"
 #include "AStarPoint.h"
-#include "Algorithm.h"
 
 using namespace std;
 
-class AStar: public Algorithm {
+class AStar {
 private:
 
 	//ToDo: реализовать бинарную кучу для открытого списка

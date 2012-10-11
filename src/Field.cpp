@@ -25,7 +25,7 @@ Field::Field(const string &ASCIIMap): field(), lambdaCache(), stoneCache() {
 
     // Reading the map
     vector<FieldMember*> array;
-    for(int i = 0; i < ASCIIMap.length(); i++) {
+    for(unsigned int i = 0; i < ASCIIMap.length(); i++) {
         if(ASCIIMap[i] == '\n') {
             // Jump to the next line
             numOfVector++;

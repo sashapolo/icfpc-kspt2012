@@ -51,9 +51,9 @@ Field* FieldSim::CalcNextState(Field* pField)
 {
     Field *NewField = new Field(*pField);
     
-    list<FieldMember*>::iterator it=pField->getStoneCacheIt();
+//    list<FieldMember*>::iterator it=pField->getStoneCacheIt();
     
-    int x,y;
+//    int x,y;
 //    while(it!=pField->getStoneCacheEnd())
 //    {
 //        x=(*it)->getCoordinate().x;

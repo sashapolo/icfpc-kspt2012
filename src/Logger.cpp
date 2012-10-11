@@ -26,6 +26,7 @@ bool LogError(const char* Msg,...)
     va_start(args, Msg);
     pCurrentLogger->BaseOutV(LOGGER_MSG_TYPE_ERROR,Msg,args);
     va_end(args);
+    return true;
 };
 
 bool LogWarning(const char* Msg,...)
@@ -35,6 +36,7 @@ bool LogWarning(const char* Msg,...)
     va_start(args, Msg);
     pCurrentLogger->BaseOutV(LOGGER_MSG_TYPE_WARNING,Msg,args);
     va_end(args);
+    return true;
 };
 
 bool LogInfo(const char* Msg,...)
@@ -44,6 +46,7 @@ bool LogInfo(const char* Msg,...)
     va_start(args, Msg);
     pCurrentLogger->BaseOutV(LOGGER_MSG_TYPE_INFO,Msg,args);
     va_end(args);
+    return true;
 };
 
 ///////////////////////////////////////////////////////

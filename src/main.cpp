@@ -44,6 +44,24 @@ Field* createField(const string mapFileName) {
 	return result;
 }
 
+string convert(const vector<Point>& coordinates) {
+	string result;
+	for (int i = coordinates.size() - 2; i >= 0; i--) {
+		if (coordinates[i + 1].x - coordinates[i].x == 1) {
+			result += 'L';
+		} else if (coordinates[i + 1].x - coordinates[i].x == -1) {
+			result += 'R';
+		} else if (coordinates[i + 1].y - coordinates[i].y == 1) {
+			result += 'U';
+		} else if (coordinates[i + 1].y - coordinates[i].y == -1) {
+			result += 'D';
+		} else {
+			result += 'W';
+		}
+	}
+	return result;
+}
+
 int main(int argc, char** argv) {
     HTMLLogger Logger;
     Logger.Init("LOG.html","MainLog");
@@ -57,10 +75,7 @@ int main(int argc, char** argv) {
     
     AStar astar;
     vector<Point> result = astar.solve(field->getRobot()->getCoordinate(), field->getLift()->getCoordinate(), *field);
-    for (int i = 0; i < result.size(); i++) {
-    	cout << result[i].x << " " << result[i].y << endl;
-    }
-    cout<<"done"<<endl;
+    cout << convert(result) << endl;
     /*FieldSim fieldSim;
   
     int nStep=0;
