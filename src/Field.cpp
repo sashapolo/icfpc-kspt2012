@@ -139,6 +139,35 @@ Field::Field(const Field& orig): field(orig.field.size(), vector<FieldMember*>(o
     }
 }
 
+void Field::write(Point xy, CellType type)
+{
+    CellType prevType=getXY(xy)->getType();
+    FieldMember* pOldMember=field[xy.y][xy.x];
+    delete field[xy.y][xy.x];
+    FieldMember* pNewMember=new FieldMember(xy,type);
+    field[xy.y][xy.x]=pNewMember;
+    
+    list<FieldMember*>::iterator it;
+    if(prevType==LAMBDA)
+    {
+        it=getLambdaCacheIt();
+        while(it!=getLambdaCacheEnd())
+        {
+            if((*it)==pOldMember) {(*it)=pNewMember; break;}
+            it++;
+        }
+    }
+    else if(prevType==STONE)
+    {
+        it=getStoneCacheIt();
+        while(it!=getStoneCacheEnd())
+        {
+            if((*it)==pOldMember) {(*it)=pNewMember; break;}
+            it++;
+        }
+    }
+}
+
 void Field::swap(const Point &cell1, const Point &cell2) {
     FieldMember* tmp1 = getXY(cell1);
     tmp1->setCoordinate(cell2);

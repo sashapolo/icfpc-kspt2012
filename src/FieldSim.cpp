@@ -50,6 +50,46 @@ FieldSim::~FieldSim() {
 Field* FieldSim::CalcNextState(Field* pField)
 {
     Field *NewField = new Field(*pField);
+    
+    list<FieldMember*>::iterator it=pField->getStoneCacheIt();
+    
+    int x,y;
+//    while(it!=pField->getStoneCacheEnd())
+//    {
+//        x=(*it)->getCoordinate().x;
+//        y=(*it)->getCoordinate().y;
+//        
+//        if(pField->getCellType(Point(x,y+1))==EMPTY)
+//        {
+//            NewField->write((*it)->getCoordinate(),EMPTY);
+//            NewField->write(Point(x,y+1),STONE);
+//        }
+//        else if((pField->getCellType(Point(x,y+1))==STONE))
+//        {
+//            if((pField->getCellType(Point(x+1,y))==EMPTY) &&
+//                (pField->getCellType(Point(x+1,y+1))==EMPTY))
+//            {
+//                NewField->write((*it)->getCoordinate(),EMPTY);
+//                NewField->write(Point(x+1,y+1),STONE);
+//            }
+//            else if((pField->getCellType(Point(x-1,y))==EMPTY) &&
+//                (pField->getCellType(Point(x-1,y+1))==EMPTY))
+//            {
+//                NewField->write((*it)->getCoordinate(),EMPTY);
+//                NewField->write(Point(x-1,y+1),STONE);
+//            }
+//        }
+//        else if((pField->getCellType(Point(x,y+1))==LAMBDA) &&
+//                        (pField->getCellType(Point(x+1,y))==EMPTY) &&
+//                        (pField->getCellType(Point(x+1,y+1))==EMPTY))
+//        {
+//            NewField->write((*it)->getCoordinate(),EMPTY);
+//            NewField->write(Point(x+1,y+1),STONE);
+//        }
+//        
+//        it++;
+//    }
+    
     for(int y = pField->getSize().second - 2; y >= 0; y--)
     {
         for(int x=0;x<pField->getSize().first - 1;x++)
@@ -60,7 +100,8 @@ Field* FieldSim::CalcNextState(Field* pField)
             {
                 if(pField->getCellType(Point(x,y+1))==EMPTY)
                 {
-                    NewField->swap(Point(x,y),Point(x,y+1));
+                    NewField->write(Point(x,y),EMPTY);
+                    NewField->write(Point(x,y+1),STONE);
                 }
                 else if((pField->getCellType(Point(x,y+1))==STONE))
                 {
@@ -68,19 +109,22 @@ Field* FieldSim::CalcNextState(Field* pField)
                     if((pField->getCellType(Point(x+1,y))==EMPTY) &&
                         (pField->getCellType(Point(x+1,y+1))==EMPTY))
                     {
-                        NewField->swap(Point(x,y),Point(x+1,y+1));
+                        NewField->write(Point(x,y),EMPTY);
+                        NewField->write(Point(x+1,y+1),STONE);
                     }
                     else if((pField->getCellType(Point(x-1,y))==EMPTY) &&
                         (pField->getCellType(Point(x-1,y+1))==EMPTY))
                     {
-                        NewField->swap(Point(x,y),Point(x-1,y+1));
+                        NewField->write(Point(x,y),EMPTY);
+                        NewField->write(Point(x-1,y+1),STONE);
                     }
                 }
                 else if((pField->getCellType(Point(x,y+1))==LAMBDA) &&
                         (pField->getCellType(Point(x+1,y))==EMPTY) &&
                         (pField->getCellType(Point(x+1,y+1))==EMPTY))
                 {
-                    NewField->swap(Point(x,y),Point(x-1,y+1));
+                    NewField->write(Point(x,y),EMPTY);
+                    NewField->write(Point(x+1,y+1),STONE);
                 }
                 ///+Add CLOSED_LIFT Reaction/////
             }
