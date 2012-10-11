@@ -83,7 +83,7 @@ private:
 
 //////////LOGGER EXTERNAL//////
 void SetLogger(Logger* pLogger);
-bool LogError(char* Msg,...);
-bool LogWarning(char* Msg,...);
-bool LogInfo(char* Msg,...);
+bool LogError(const char* Msg,...);
+bool LogWarning(const char* Msg,...);
+bool LogInfo(const char* Msg,...);
 ///////////////////////////////

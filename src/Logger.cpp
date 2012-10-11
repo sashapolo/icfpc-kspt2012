@@ -19,7 +19,7 @@ void SetLogger(Logger* pLogger)
     pCurrentLogger=pLogger;
 };
 
-bool LogError(char* Msg,...)
+bool LogError(const char* Msg,...)
 {
     if(!pCurrentLogger) return false;
     va_list args;
@@ -28,7 +28,7 @@ bool LogError(char* Msg,...)
     va_end(args);
 };
 
-bool LogWarning(char* Msg,...)
+bool LogWarning(const char* Msg,...)
 {
     if(!pCurrentLogger) return false;
     va_list args;
@@ -37,7 +37,7 @@ bool LogWarning(char* Msg,...)
     va_end(args);
 };
 
-bool LogInfo(char* Msg,...)
+bool LogInfo(const char* Msg,...)
 {
     if(!pCurrentLogger) return false;
     va_list args;

@@ -10,7 +10,7 @@ public:
 	HTMLLogger(void);
 	~HTMLLogger(void);
 
-	void Init(char* FilePath, char* LogName);
+	void Init(const char* FilePath, const char* LogName);
 	void Close();
 	void OnMessageOut(LOGGER_MSG& Msg);
 private:
