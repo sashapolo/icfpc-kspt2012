@@ -11,12 +11,10 @@
 // Реализация алгоритма А*
 vector<Point> AStar::solve(const Point& s, const Point& f, const Field& field) {
 	AStarPoint finish(field.getXY(f));
-	// начинаем со стартовой точки
 	AStarPoint start(field.getXY(s), NULL, &finish);
 	addNeighboursToOpenedList(start, finish, field); // добавляем соседей в открытый список
 	closedList.push_back(start); //добавляем стартовую точку в закрытый список
-
-	while (!isInOpenedList(finish) || !openedList.empty()) {
+	while (!isInOpenedList(finish) && !openedList.empty()) {
 		// Выбираем точку с наименьшей стоимостью пути
 		AStarPoint current = openedList.front();
 		openedList.pop_front(); // удаляем из открытого списка и добавляем в закрытый
@@ -31,7 +29,7 @@ vector<Point> AStar::solve(const Point& s, const Point& f, const Field& field) {
 	}
 	list<AStarPoint>::const_iterator it = std::find(openedList.begin(), openedList.end(), finish);
 	const AStarPoint *pCurrent = &(*it);
-	for (;!pCurrent; pCurrent = pCurrent->getParent()) {
+	for (;pCurrent != NULL; pCurrent = pCurrent->getParent()) {
 		result.push_back(pCurrent->getCell()->getCoordinate());
 	}
 	return result;
@@ -60,31 +58,31 @@ bool AStar::isInOpenedList(const AStarPoint& param) const {
 	return (it != openedList.end());
 }
 
-void AStar::addNeighboursToOpenedList(const AStarPoint& parent, const AStarPoint& target, const Field& field) {
-	int x = parent.getCell()->getCoordinate().x;
-	int y = parent.getCell()->getCoordinate().y;
-	AStarPoint down(field.getXY(Point(x, y + 1)), &parent, &target);
-	checkPoint(down);
-	AStarPoint up(field.getXY(Point(x, y - 1)), &parent, &target);
-	checkPoint(up);
-	AStarPoint right(field.getXY(Point(x + 1, y)), &parent, &target);
-	checkPoint(right);
-	AStarPoint left(field.getXY(Point(x - 1, y)), &parent, &target);
-	checkPoint(left);
+void AStar::addNeighboursToOpenedList(const AStarPoint& current, const AStarPoint& target, const Field& field) {
+	int x = current.getCell()->getCoordinate().x;
+	int y = current.getCell()->getCoordinate().y;
+	// ToDo: убрать здесь утечку
+	AStarPoint *newPoint = new AStarPoint(current);
+	AStarPoint down(field.getXY(Point(x, y + 1)), newPoint, &target);
+	checkPoint(down, *newPoint);
+	AStarPoint up(field.getXY(Point(x, y - 1)), newPoint, &target);
+	checkPoint(up, *newPoint);
+	AStarPoint right(field.getXY(Point(x + 1, y)), newPoint, &target);
+	checkPoint(right, *newPoint);
+	AStarPoint left(field.getXY(Point(x - 1, y)), newPoint, &target);
+	checkPoint(left, *newPoint);
 }
 
-void AStar::checkPoint(const AStarPoint& point) {
+void AStar::checkPoint(const AStarPoint& point, const AStarPoint& current) {
 	if (point.getCell()->isPassable() && !isInClosedList(point)) {
-		list<AStarPoint>::const_iterator it = std::find(openedList.begin(), openedList.end(), point);
+		list<AStarPoint>::iterator it = std::find(openedList.begin(), openedList.end(), point);
 		if (it == openedList.end()) {
 			addToOpenedList(point);
-		} else {
-			if (it->getGeneralCost() < point.getParent()->getGeneralCost() + FieldMember::METRIC_NORMAL) {
-				AStarPoint newPoint = *it;
-				newPoint.setParent(point);
-				openedList.remove(*it);
-				addToOpenedList(newPoint);
-			}
+		} else if (it->getGeneralCost() < current.getGeneralCost() + FieldMember::METRIC_NORMAL) {
+			AStarPoint newPoint = *it;
+			newPoint.setParent(current);
+			openedList.erase(it);
+			addToOpenedList(newPoint);
 		}
 	}
 }

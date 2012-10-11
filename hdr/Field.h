@@ -40,8 +40,8 @@ public:
     Field(const Field& orig);
 
     virtual ~Field() {
-    	for (int i = 0; i < field.size(); i++) {
-    		for (int j = 0; j < field[i].size(); j++) {
+    	for (unsigned int i = 0; i < field.size(); i++) {
+    		for (unsigned int j = 0; j < field[i].size(); j++) {
     			delete field[i][j];
     		}
     	}

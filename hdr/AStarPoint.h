@@ -12,12 +12,14 @@
 
 class AStarPoint {
 private:
+
 	const FieldMember *pCell;
 	const AStarPoint *pParent;
 	int G;	// стоимость
 	int H;	// эвристика
 
 public:
+
 	AStarPoint(const FieldMember *cell, const AStarPoint* parent = NULL, const AStarPoint* target = NULL) {
 		pCell = cell;
 		pParent = parent;
@@ -31,6 +33,13 @@ public:
 		} else {
 			G = 0;
 		}
+	}
+
+	AStarPoint(const AStarPoint& orig) {
+		pCell = orig.pCell;
+		pParent = orig.pParent;
+		G = orig.G;
+		H = orig.H;
 	}
 
 	int getPathCost() const {
@@ -56,8 +65,12 @@ public:
 	}
 
 	bool operator== (const AStarPoint& x) const{
-		return (pCell == x.pCell);
+		return (pCell == x.pCell); // равны, если указывают на один и тот же FieldMember
 	}
+
+/*	virtual ~AStarPoint() {
+		delete pParent;
+	}*/
 };
 
 #endif /* ASTARPOINT_H_ */

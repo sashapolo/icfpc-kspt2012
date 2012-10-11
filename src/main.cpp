@@ -7,8 +7,10 @@
 //============================================================================
 
 #include <cstdlib>
+#include <iostream>
 //#include <term.h>
 #include "stdinclude.h"
+#include "AStar.h"
 
 using namespace std;
 
@@ -53,7 +55,13 @@ int main(int argc, char** argv) {
     	return 0;
     }
     
-    FieldSim fieldSim;
+    AStar astar;
+    vector<Point> result = astar.solve(field->getRobot()->getCoordinate(), field->getLift()->getCoordinate(), *field);
+    for (int i = 0; i < result.size(); i++) {
+    	cout << result[i].x << " " << result[i].y << endl;
+    }
+    cout<<"done"<<endl;
+    /*FieldSim fieldSim;
   
     int nStep=0;
     
@@ -65,6 +73,6 @@ int main(int argc, char** argv) {
         DrawField(newField, nStep++);
         oldField = newField;
         getchar();
-    };
+    };*/
     return 0;
 }
