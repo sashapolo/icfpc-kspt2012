@@ -135,6 +135,8 @@ public:
     bool isRobotAlive() const {
     	return pRobot;
     }
+
+    Field& operator=(const Field&);
 };
 
 #endif	/* FIELD_H */

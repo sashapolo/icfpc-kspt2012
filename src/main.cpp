@@ -43,9 +43,6 @@ Field* createField(const string mapFileName) {
 }
 
 int main(int argc, char** argv) {
-
-// TODO: сделать считывание карты из файла
-
     HTMLLogger Logger;
     Logger.Init("LOG.html","MainLog");
     SetLogger(&Logger);
@@ -69,7 +66,5 @@ int main(int argc, char** argv) {
         oldField = newField;
         getchar();
     };
-    
-    delete field;
     return 0;
 }

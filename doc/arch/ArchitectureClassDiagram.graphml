@@ -18,10 +18,10 @@
       <data key="d4"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="205.0" width="293.0" x="90.0" y="280.0"/>
+          <y:Geometry height="219.95246868686866" width="321.04517171717174" x="36.95482828282823" y="318.0237656565657"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="39.9150390625" x="126.54248046875" y="3.0">Field<y:LabelModel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="39.9150390625" x="140.56506632733587" y="3.0">Field<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -29,19 +29,17 @@
             </y:ModelParameter>
           </y:NodeLabel>
           <y:UML clipContent="true" constraint="" omitDetails="false" stereotype="" use3DEffect="true">
-            <y:AttributeLabel>vectot&lt;vector&lt;FieldMember&gt;&gt; field;
-list&lt;FieldMember&gt; lambdaCache;
-list&lt;FieldMember&gt; stoneCache;</y:AttributeLabel>
-            <y:MethodLabel>Field(const string&amp;);
-void deleteLambdaFromCache(const Point&amp;);
-void deleteStoneFromCache(const Point&amp;);
-*FieldMember getXY(const Point&amp;);
+            <y:AttributeLabel>vectot&lt;vector&lt;FieldMember*&gt;&gt; field;
+list&lt;FieldMember*&gt; lambdaCache;
+list&lt;FieldMember*&gt; stoneCache;
+FieldMember* pRobot;
+FieldMember* pLift;</y:AttributeLabel>
+            <y:MethodLabel>Field(const string &amp;ASCIIMap);
+Field(const Field&amp; orig);
 pair&lt;int, int&gt; getSize();
-void swap(const Point&amp;, const Point&amp;);
-CellType getCellType(const Point&amp;);
-void setFieldMember(FieldMember*);
-
-</y:MethodLabel>
+void swap(const Point &amp;Cell1, const Point &amp;Cell2);
+CellType getCellType(const Point &amp;point) const;
+bool isRobotAlive() const;</y:MethodLabel>
           </y:UML>
         </y:UMLClassNode>
       </data>
@@ -50,7 +48,7 @@ void setFieldMember(FieldMember*);
       <data key="d4"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="61.0" width="244.0" x="106.0" y="507.0"/>
+          <y:Geometry height="61.0" width="244.0" x="118.5" y="669.4643232323232"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="67.27978515625" x="88.360107421875" y="3.0">FieldSim<y:LabelModel>
@@ -62,7 +60,7 @@ void setFieldMember(FieldMember*);
           </y:NodeLabel>
           <y:UML clipContent="true" constraint="" omitDetails="false" stereotype="" use3DEffect="true">
             <y:AttributeLabel/>
-            <y:MethodLabel>Field getNextState(const Field&amp;, char);</y:MethodLabel>
+            <y:MethodLabel>Field* getNextState(const Field&amp;, char);</y:MethodLabel>
           </y:UML>
         </y:UMLClassNode>
       </data>
@@ -190,7 +188,7 @@ void setFieldMember(FieldMember*);
           <y:UML clipContent="true" constraint="" omitDetails="false" stereotype="" use3DEffect="true">
             <y:AttributeLabel>int metric;
 CellType cellType;
-const Point* pCoordinate;</y:AttributeLabel>
+Point coordinate;</y:AttributeLabel>
             <y:MethodLabel>bool isPassable();
 int getDistance(const FieldMember&amp;);</y:MethodLabel>
           </y:UML>
