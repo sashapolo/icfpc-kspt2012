@@ -24,17 +24,18 @@ Field::Field(const string &ASCIIMap): field(), lambdaCache(), stoneCache() {
         nestedVectorIndex = 0; // (X coordinate)
 
     // Reading the map
+    vector<FieldMember*> array;
     for(int i = 0; i < ASCIIMap.length(); i++) {
-    	vector<FieldMember> array;
         if(ASCIIMap[i] == '\n') {
             // Jump to the next line
             numOfVector++;
             nestedVectorIndex = 0;
             field.push_back(array);
+            array.clear();
         } else {
         	FieldMember* tmp;
 			CellType cellType;
-			Point coor(numOfVector, nestedVectorIndex);
+			Point coor(nestedVectorIndex, numOfVector);
             switch (ASCIIMap[i]) {
                 // ToDo: implement validation that there is only one robot and
             	// one closed OR opened lift on the map
@@ -61,6 +62,10 @@ Field::Field(const string &ASCIIMap): field(), lambdaCache(), stoneCache() {
                 	tmp = new FieldMember(coor, cellType);
                 	this->stoneCache.push_back(tmp);
                     break;
+                case ('.'):
+					cellType = EARTH;
+					tmp = new FieldMember(coor, cellType);
+					break;
                 case ('L'):
                     cellType = CLOSED_LIFT;
                 	tmp = new FieldMember(coor, cellType);
@@ -75,7 +80,7 @@ Field::Field(const string &ASCIIMap): field(), lambdaCache(), stoneCache() {
                     // ToDo: throw an exception
                     break;
             }
-            array.push_back(*tmp);
+            array.push_back(tmp);
             nestedVectorIndex++;
         }
     }
@@ -103,28 +108,29 @@ Field::Field(const string &ASCIIMap): field(), lambdaCache(), stoneCache() {
     }*/
 }
 
-Field::Field(const Field& orig): lambdaCache(), stoneCache() {
-    field = orig.field;
+Field::Field(const Field& orig): field(orig.field.size(), vector<FieldMember*>(orig.field[0].size())),
+		lambdaCache(), stoneCache() {
     int ySize = field.size();
     int xSize = field[0].size();	// так как все массивы одинакового размера
     // перерасчет кэшей
     for (int i = 0; i < ySize; i++) {
     	for (int j = 0; j < xSize; j++) {
-    		switch (field[i][j].getType()) {
+    		field[i][j] = new FieldMember(*orig.field[i][j]);
+    		switch (field[i][j]->getType()) {
     		case (ROBOT):
-				this->pRobot = &field[i][j];
+				this->pRobot = field[i][j];
 				break;
     		case (CLOSED_LIFT):
-				this->pLift = &field[i][j];
+				this->pLift = field[i][j];
 				break;
     		case (OPENED_LIFT):
-				this->pLift = &field[i][j];
+				this->pLift = field[i][j];
 				break;
 			case (LAMBDA):
-				this->lambdaCache.push_back(&field[i][j]);
+				this->lambdaCache.push_back(field[i][j]);
 				break;
 			case (STONE):
-				this->stoneCache.push_back(&field[i][j]);
+				this->stoneCache.push_back(field[i][j]);
 				break;
 			default:
 				break;

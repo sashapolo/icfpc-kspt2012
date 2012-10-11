@@ -14,9 +14,9 @@ void DrawField(Field* pField, int nStep)
     char cellsymb;
     
     printf("\nStep: %d\n\t",nStep);
-    for(int i=pField->getSize().second-1;i>=0;i--)
+    for(int i=0; i < pField->getSize().second; i++)
     {
-        for(int j=0;j<pField->getSize().first;j++)
+        for(int j=0; j < pField->getSize().first; j++)
         {
             cell=pField->getCellType(Point(j,i));
             switch(cell)
@@ -47,46 +47,45 @@ FieldSim::FieldSim(const FieldSim& orig) {
 FieldSim::~FieldSim() {
 }
 
-void FieldSim::CalcNextState(Field* pField)
+Field* FieldSim::CalcNextState(Field* pField)
 {
-    Field NewField=(*pField);
-    for(int y=0;y<pField->getSize().second;y++)
+    Field *NewField = new Field(*pField);
+    for(int y = pField->getSize().second - 2; y >= 0; y--)
     {
-        for(int x=0;x<pField->getSize().first;x++)
+        for(int x=0;x<pField->getSize().first - 1;x++)
         {
             CellType cell=pField->getCellType(Point(x,y));
             
             if(cell==STONE)
             {
-                if(pField->getCellType(Point(x,y-1))==EMPTY)
+                if(pField->getCellType(Point(x,y+1))==EMPTY)
                 {
-                    NewField.swap(Point(x,y),Point(x,y-1));
+                    NewField->swap(Point(x,y),Point(x,y+1));
                 }
-                else if((pField->getCellType(Point(x,y-1))==STONE))
+                else if((pField->getCellType(Point(x,y+1))==STONE))
                 {
 
                     if((pField->getCellType(Point(x+1,y))==EMPTY) &&
-                        (pField->getCellType(Point(x+1,y-1))==EMPTY))
+                        (pField->getCellType(Point(x+1,y+1))==EMPTY))
                     {
-                        NewField.swap(Point(x,y),Point(x+1,y-1));
+                        NewField->swap(Point(x,y),Point(x+1,y+1));
                     }
                     else if((pField->getCellType(Point(x-1,y))==EMPTY) &&
-                        (pField->getCellType(Point(x-1,y-1))==EMPTY))
+                        (pField->getCellType(Point(x-1,y+1))==EMPTY))
                     {
-                        NewField.swap(Point(x,y),Point(x-1,y-1));
+                        NewField->swap(Point(x,y),Point(x-1,y+1));
                     }
                 }
-                else if((pField->getCellType(Point(x,y-1))==LAMBDA) &&
+                else if((pField->getCellType(Point(x,y+1))==LAMBDA) &&
                         (pField->getCellType(Point(x+1,y))==EMPTY) &&
-                        (pField->getCellType(Point(x+1,y-1))==EMPTY))
+                        (pField->getCellType(Point(x+1,y+1))==EMPTY))
                 {
-                    NewField.swap(Point(x,y),Point(x-1,y-1));
+                    NewField->swap(Point(x,y),Point(x-1,y+1));
                 }
                 ///+Add CLOSED_LIFT Reaction/////
             }
         }
     }
     
-    (*pField)=NewField;
-    
+    return NewField;
 }

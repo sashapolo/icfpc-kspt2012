@@ -15,7 +15,7 @@ using namespace std;
 
 class Field {
 private:
-    vector< vector<FieldMember> > field;
+    vector< vector<FieldMember*> > field;
     list<FieldMember*> lambdaCache;
     list<FieldMember*> stoneCache;
     FieldMember* pRobot;
@@ -39,8 +39,13 @@ public:
      */
     Field(const Field& orig);
 
-    // TODO: нужен ли деструктор?
-    virtual ~Field() {}
+    virtual ~Field() {
+    	for (int i = 0; i < field.size(); i++) {
+    		for (int j = 0; j < field[i].size(); j++) {
+    			delete field[i][j];
+    		}
+    	}
+    }
 
     /**
      * There are caches of Lambdas and Stones to provide some assistance to algorithm.
@@ -72,10 +77,10 @@ public:
      * param pPoint pointer to the point object representing coordinates of the cell to retrieve
      */
     const FieldMember* getXY(const Point &point) const {
-        return &field.at(point.y).at(point.x);
+        return field.at(point.y).at(point.x);
     }
     FieldMember* getXY(const Point &point) {
-        return &field.at(point.y).at(point.x);
+        return field.at(point.y).at(point.x);
     }
 
 
@@ -113,7 +118,7 @@ public:
     void setFieldMember(const FieldMember& fieldMember) {
         int x = fieldMember.getCoordinate().x;
         int y = fieldMember.getCoordinate().y;
-        field.at(y).at(x) = fieldMember;
+        *(field.at(y).at(x)) = fieldMember;
     }
 
     const FieldMember* getRobot() const {
@@ -126,6 +131,10 @@ public:
     const FieldMember* getLift() const {
 		return pLift;
 	}
+
+    bool isRobotAlive() const {
+    	return pRobot;
+    }
 };
 
 #endif	/* FIELD_H */

@@ -16,7 +16,7 @@ public:
     FieldSim(const FieldSim& orig);
     virtual ~FieldSim();
     
-    void CalcNextState(Field* pField);
+    Field* CalcNextState(Field* pField);
 private:
 
 };
