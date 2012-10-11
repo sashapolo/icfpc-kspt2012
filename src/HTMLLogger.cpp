@@ -12,7 +12,7 @@ HTMLLogger::~HTMLLogger(void)
     Close();
 }
 
-void HTMLLogger::Init(char* FilePath, char* LogName)
+void HTMLLogger::Init(const char* FilePath, const char* LogName)
 {
 	Close();
 

@@ -56,6 +56,9 @@ public:
     list<FieldMember*>::iterator getLambdaCacheIt() {
     	return lambdaCache.begin();
     }
+    list<FieldMember*>::iterator getLambdaCacheEnd() {
+    	return stoneCache.end();
+    }
 
     list<FieldMember*>::const_iterator getStoneCacheIt() const{
     	return stoneCache.begin();
@@ -63,13 +66,18 @@ public:
     list<FieldMember*>::iterator getStoneCacheIt() {
     	return stoneCache.begin();
     }
+    list<FieldMember*>::iterator getStoneCacheEnd() {
+    	return stoneCache.end();
+    }
 
-    void deleteLambdaFromCache(list<FieldMember*>::iterator it) {
-    	lambdaCache.erase(it);
+    list<FieldMember*>::iterator deleteLambdaFromCache(list<FieldMember*>::iterator it) {
+    	return lambdaCache.erase(it);
     }
-    void deleteStoneFromCache(list<FieldMember*>::iterator it) {
-    	stoneCache.erase(it);
+    list<FieldMember*>::iterator deleteStoneFromCache(list<FieldMember*>::iterator it) {
+    	return stoneCache.erase(it);
     }
+    
+    void write(Point xy, CellType type);
 
     /**
      * Returns cell with given coordinates.
