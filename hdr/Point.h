@@ -18,21 +18,19 @@ public:
         y=Y;
     }
     
-    Point operator + (Point& other) {
+    Point operator + (Point other) {
         return Point(x+other.x,y+other.y);
     }
-    Point operator - (Point& other) {
+    Point operator - (Point other) {
         return Point(x-other.x,y-other.y);
     }
-    void operator += (Point& other) {
+    void operator += (Point other) {
         x+=other.x;
         y+=other.y;
-        //(*this)=(*this)+other;
     }
-    void operator -= (Point& other) {
+    void operator -= (Point other) {
         x-=other.x;
         y-=other.y;
-        //(*this)=(*this)-other;
     }
     
 //    Point& operator = (Point& other)
@@ -41,11 +39,11 @@ public:
 //        y=other.y;
 //        return (*this);
 //    }
-    bool operator == (Point& other) {
+    bool operator == (Point other) {
         if((x==other.x) && (y==other.y)) return true;
         return false;
     }
-    bool operator != (Point& other) {
+    bool operator != (Point other) {
         return !((*this)==other);
     }
 

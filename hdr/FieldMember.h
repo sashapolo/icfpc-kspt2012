@@ -11,6 +11,10 @@
 
 enum CellType {CLOSED_LIFT, EARTH, EMPTY, LAMBDA, OPENED_LIFT, ROBOT, STONE, WALL};
 
+char cellTypeToChar(CellType type);
+CellType charToCellType(char c);
+
+
 class FieldMember {
 private:
 
@@ -21,6 +25,7 @@ private:
 public:
 
     const static int METRIC_NORMAL = 10;
+    const static int METRIC_MEDIUM = 50;        //for bad places (metric - ?)
     const static int METRIC_INFINITY = INT_MAX;
 
     FieldMember(const Point& coordinate, CellType cellType);
@@ -35,6 +40,12 @@ public:
     void setMetric(int metric) {
     	this->metric = metric;
     }
+    
+    int getMetric() {
+        return this->metric;
+    }
+    
+    void setDefaultMetric();
 
     bool isPassable() const {
     	return (metric == METRIC_NORMAL);

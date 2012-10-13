@@ -143,6 +143,9 @@ public:
     bool isRobotAlive() const {
     	return pRobot;
     }
+    
+    int getLambdaCount() {return lambdaCache.size();};
+    int getStoneCount() {return stoneCache.size();};
 
     Field& operator=(const Field&);
 };

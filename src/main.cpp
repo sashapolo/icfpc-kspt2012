@@ -81,21 +81,24 @@ int main(int argc, char** argv) {
     	return 0;
     }
     
-    AStar astar;
-    vector<Point> result = astar.solve(field->getRobot()->getCoordinate(), field->getLift()->getCoordinate(), *field);
-    cout << convert(result) << endl;
-    /*FieldSim fieldSim;
-  
+    //AStar astar;
+   // vector<Point> result = astar.solve(field->getRobot()->getCoordinate(), field->getLift()->getCoordinate(), *field);
+    //cout << convert(result) << endl;
+    FieldSim fieldSim;
     int nStep=0;
-    
-    DrawField(field, nStep++);
     Field* oldField = field;
+    sSimResult res; //Robot simulation result (end state, steps, lambdas, path)
+    char inStr[128];
+    
+    printf("Controls:\n\tU - up\n\tD - down\n\tL - left\n\tR - right\n\tW - wait\n\tA - abort\nEnter - accept\n");
+    DrawField(field,&res.path, nStep++);
     while(true)
     {
-        Field *newField = fieldSim.CalcNextState(oldField);
-        DrawField(newField, nStep++);
+        scanf("%s",inStr);
+        Field *newField = fieldSim.CalcRobotSteps(oldField,inStr,&res);
+        DrawField(newField,&res.path, nStep++);
+        printf("NumSteps: %d, NumLambdas: %d, State: %s\n",res.stepsTaken,res.lambdaReceived,stateToStr(res.state));
         oldField = newField;
-        getchar();
-    };*/
+    };
     return 0;
 }

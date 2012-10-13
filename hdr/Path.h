@@ -14,6 +14,7 @@
 class Path {
 	std::vector<Point> path;
 public:
+        int getSize();
 	Point getCell(int);
 	void addCell(const Point&);
 };
