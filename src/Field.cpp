@@ -175,6 +175,7 @@ void Field::write(Point xy, CellType type)
         case OPENED_LIFT: pLift=pNewMember; break;
         case CLOSED_LIFT: pLift=pNewMember; break;
         case ROBOT: pRobot=pNewMember; break;
+        default: break;
     }
 }
 
