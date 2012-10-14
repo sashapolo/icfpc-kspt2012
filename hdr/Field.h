@@ -122,7 +122,6 @@ public:
      *
      * @param rFieldMember
      */
-    // ToDo: need in throwing any exceptions?
     void setFieldMember(const FieldMember& fieldMember) {
         int x = fieldMember.getCoordinate().x;
         int y = fieldMember.getCoordinate().y;
