@@ -14,3 +14,8 @@ Point Path::getCell(int index) {
 void Path::addCell(const Point& c) {
 	path.push_back(c);
 }
+
+int Path::getSize()
+{
+    return path.size();
+}

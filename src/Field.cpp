@@ -133,6 +133,8 @@ Field::Field(const Field& orig): field(orig.field.size(), vector<FieldMember*>(o
 void Field::write(Point xy, CellType type)
 {
     CellType prevType=getXY(xy)->getType();
+    if(prevType==type) return;
+    
     FieldMember* pOldMember=field[xy.y][xy.x];
     delete field[xy.y][xy.x];
     FieldMember* pNewMember=new FieldMember(xy,type);
@@ -144,7 +146,7 @@ void Field::write(Point xy, CellType type)
         it=getLambdaCacheIt();
         while(it!=getLambdaCacheEnd())
         {
-            if((*it)==pOldMember) {(*it)=pNewMember; break;}
+            if((*it)==pOldMember) {(it)=lambdaCache.erase(it); break;}
             it++;
         }
     }
@@ -153,9 +155,26 @@ void Field::write(Point xy, CellType type)
         it=getStoneCacheIt();
         while(it!=getStoneCacheEnd())
         {
-            if((*it)==pOldMember) {(*it)=pNewMember; break;}
+            if((*it)==pOldMember) {(it)=stoneCache.erase(it); break;}
             it++;
         }
+    }
+    else if(prevType==ROBOT)
+    {
+        pRobot=NULL;
+    }
+    else if((prevType==CLOSED_LIFT) || (prevType==CLOSED_LIFT))
+    {
+        pLift=NULL;
+    }
+    
+    switch(type)
+    {
+        case STONE: stoneCache.push_back(pNewMember); break;
+        case LAMBDA: lambdaCache.push_back(pNewMember); break;
+        case OPENED_LIFT: pLift=pNewMember; break;
+        case CLOSED_LIFT: pLift=pNewMember; break;
+        case ROBOT: pRobot=pNewMember; break;
     }
 }
 

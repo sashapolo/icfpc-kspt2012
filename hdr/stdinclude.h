@@ -17,6 +17,7 @@
 #include "HTMLLogger.h"
 
 #include "Point.h"
+#include "Path.h"
 #include "FieldMember.h"
 #include "Field.h"
 
