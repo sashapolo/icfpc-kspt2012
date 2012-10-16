@@ -8,8 +8,9 @@
 
 #include <cstdlib>
 #include <iostream>
+//#include <term.h>
 #include "stdinclude.h"
-#include "Solver.h"
+#include "AStar.h"
 
 using namespace std;
 
@@ -51,6 +52,24 @@ Field* createField(const string mapFileName) {
 	return result;
 }
 
+string convert(const vector<Point>& coordinates) {
+	string result;
+	for (int i = coordinates.size() - 2; i >= 0; i--) {
+		if (coordinates[i + 1].x - coordinates[i].x == 1) {
+			result += 'L';
+		} else if (coordinates[i + 1].x - coordinates[i].x == -1) {
+			result += 'R';
+		} else if (coordinates[i + 1].y - coordinates[i].y == 1) {
+			result += 'U';
+		} else if (coordinates[i + 1].y - coordinates[i].y == -1) {
+			result += 'D';
+		} else {
+			result += 'W';
+		}
+	}
+	return result;
+}
+
 int main(int argc, char** argv) {
     HTMLLogger Logger;
     Logger.Init("LOG.html","MainLog");
@@ -62,24 +81,15 @@ int main(int argc, char** argv) {
     	return 0;
     }
     
+    //AStar astar;
+   // vector<Point> result = astar.solve(field->getRobot()->getCoordinate(), field->getLift()->getCoordinate(), *field);
+    //cout << convert(result) << endl;
     FieldSim fieldSim;
-	int nStep=0;
-	Field* oldField = field;
-	sSimResult res; //Robot simulation result (end state, steps, lambdas, path)
-	Solver s;
-	string result = s.solve(field);
-	DrawField(field, &res.path, nStep++);
-	Field *newField = fieldSim.CalcRobotSteps(oldField, result, &res);
-	DrawField(newField, &res.path, nStep++);
-	printf("NumSteps: %d, NumLambdas: %d, State: %s\n",res.stepsTaken,res.lambdaReceived,stateToStr(res.state));
-
-
-/*    FieldSim fieldSim;
     int nStep=0;
     Field* oldField = field;
     sSimResult res; //Robot simulation result (end state, steps, lambdas, path)
     char inStr[128];
-
+    
     printf("Controls:\n\tU - up\n\tD - down\n\tL - left\n\tR - right\n\tW - wait\n\tA - abort\nEnter - accept\n");
     DrawField(field,&res.path, nStep++);
     while(true)
@@ -89,6 +99,6 @@ int main(int argc, char** argv) {
         DrawField(newField,&res.path, nStep++);
         printf("NumSteps: %d, NumLambdas: %d, State: %s\n",res.stepsTaken,res.lambdaReceived,stateToStr(res.state));
         oldField = newField;
-    };*/
+    };
     return 0;
 }

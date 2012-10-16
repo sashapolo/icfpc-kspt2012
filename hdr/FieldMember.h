@@ -62,6 +62,8 @@ public:
     CellType getType() const{
         return this->cellType;
     }
+
+    int getDistance(const FieldMember&) const;
 };
 
 #endif	/* FIELDMEMBER_H */

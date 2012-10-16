@@ -56,16 +56,9 @@ public:
     list<FieldMember*>::iterator getLambdaCacheIt() {
     	return lambdaCache.begin();
     }
-    list<FieldMember*>::const_iterator getLambdaCacheEnd() const{
-    	return lambdaCache.end();
+    list<FieldMember*>::iterator getLambdaCacheEnd() {
+    	return stoneCache.end();
     }
-    bool lambdaCacheEmpty() const {
-    	return lambdaCache.empty();
-    }
-    list<FieldMember*>::iterator deleteLambdaFromCache(list<FieldMember*>::iterator it) {
-    	return lambdaCache.erase(it);
-    }
-
 
     list<FieldMember*>::const_iterator getStoneCacheIt() const{
     	return stoneCache.begin();
@@ -77,11 +70,13 @@ public:
     	return stoneCache.end();
     }
 
+    list<FieldMember*>::iterator deleteLambdaFromCache(list<FieldMember*>::iterator it) {
+    	return lambdaCache.erase(it);
+    }
     list<FieldMember*>::iterator deleteStoneFromCache(list<FieldMember*>::iterator it) {
     	return stoneCache.erase(it);
     }
     
-
     void write(Point xy, CellType type);
 
     /**
@@ -152,13 +147,6 @@ public:
     int getStoneCount() {return stoneCache.size();};
 
     Field& operator=(const Field&);
-    int getDistance(const Point& from, const Point to) const {
-    	int x = from.x - to.x;
-    	int y = from.y - to.y;
-    	x = (x < 0)? -x : x;
-    	y = (y < 0)? -y : y;
-    	return x + y;
-    }
 };
 
 #endif	/* FIELD_H */

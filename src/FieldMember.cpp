@@ -39,6 +39,14 @@ FieldMember::FieldMember(const Point& coordinate, CellType cellType): coordinate
     setDefaultMetric();
 }
 
+int FieldMember::getDistance(const FieldMember& to) const {
+	int x = coordinate.x - to.getCoordinate().x;
+	int y = coordinate.y - to.getCoordinate().y;
+	x = (x < 0)? -x : x;
+	y = (y < 0)? -y : y;
+	return x + y;
+}
+
 void FieldMember::setDefaultMetric()
 {
     switch (cellType) {

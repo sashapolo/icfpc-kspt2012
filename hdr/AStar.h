@@ -18,9 +18,6 @@ using namespace std;
 
 class AStar {
 private:
-	AStarPoint *start;
-	AStarPoint *goal;
-	const Field *field;
 
 	//ToDo: реализовать бинарную кучу для открытого списка
 	list<AStarPoint> openedList; //открытый список отсортирован
@@ -30,21 +27,9 @@ private:
 	bool isInClosedList(const AStarPoint&) const;
 	bool isInOpenedList(const AStarPoint&) const;
 	void checkPoint(const AStarPoint&, const AStarPoint&);
-	void addNeighboursToOpenedList(const AStarPoint&);
-	int calculateHeuristics(const AStarPoint&) const;
+	void addNeighboursToOpenedList(const AStarPoint&, const AStarPoint&, const Field&);
 public:
-	AStar(const Field* field, const FieldMember* s, const FieldMember* g) {
-		this->field = field;
-		start = new AStarPoint(s);
-		goal = new AStarPoint(g);
-	}
-
-	const vector<Point> solve();
-
-	~AStar() {
-		delete start;
-		delete goal;
-	}
+	vector<Point> solve(const Point&, const Point&, const Field&);
 };
 
 #endif /* ASTAR_H_ */

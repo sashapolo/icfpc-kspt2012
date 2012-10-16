@@ -16,12 +16,18 @@ private:
 	const FieldMember *pCell;
 	const AStarPoint *pParent;
 	int G;	// стоимость
+	int H;	// эвристика
 
 public:
 
-	AStarPoint(const FieldMember *cell, const AStarPoint* parent = NULL) {
+	AStarPoint(const FieldMember *cell, const AStarPoint* parent = NULL, const AStarPoint* target = NULL) {
 		pCell = cell;
 		pParent = parent;
+		if (target) {
+			H = cell->getDistance(*target->pCell);
+		} else {
+			H = 0;
+		}
 		if (parent) {
 			G = parent->G + FieldMember::METRIC_NORMAL;
 		} else {
@@ -33,10 +39,11 @@ public:
 		pCell = orig.pCell;
 		pParent = orig.pParent;
 		G = orig.G;
+		H = orig.H;
 	}
 
-	int getPathCost(int HeuristicValue) const {
-		return (G + HeuristicValue);
+	int getPathCost() const {
+		return (G + H);
 	}
 
 	int getGeneralCost() const {
