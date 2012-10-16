@@ -61,7 +61,7 @@ void DrawField(Field* pField, Path* pPath,  int nStep)
                 case FieldMember::METRIC_NORMAL: cellsymb=cellTypeToChar(cell); break;
                 case FieldMember::METRIC_MEDIUM: cellsymb='?'; break;
                 case FieldMember::METRIC_INFINITY: cellsymb='!'; break;
-                default: cellsymb='X';
+                default: cellsymb='X'; break;
             }
             printf("%c",cellsymb);
         }
@@ -221,7 +221,7 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed)
      
      Point NextPos(0,0);
      Point AbsNextPos(0,0);
-     for(int i=0;i<Steps.size();i++)
+     for(unsigned int i=0;i<Steps.size();i++)
      {
          switch(Steps[i])
          {
@@ -308,6 +308,7 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed)
                  {
                      return pField;
                  }
+                 break;
          }
          
          pField=CalcNextState(pField,&bDestroyed);

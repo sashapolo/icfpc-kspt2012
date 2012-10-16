@@ -52,24 +52,6 @@ Field* createField(const string mapFileName) {
 	return result;
 }
 
-string convert(const vector<Point>& coordinates) {
-	string result;
-	for (int i = coordinates.size() - 2; i >= 0; i--) {
-		if (coordinates[i + 1].x - coordinates[i].x == 1) {
-			result += 'L';
-		} else if (coordinates[i + 1].x - coordinates[i].x == -1) {
-			result += 'R';
-		} else if (coordinates[i + 1].y - coordinates[i].y == 1) {
-			result += 'U';
-		} else if (coordinates[i + 1].y - coordinates[i].y == -1) {
-			result += 'D';
-		} else {
-			result += 'W';
-		}
-	}
-	return result;
-}
-
 int main(int argc, char** argv) {
     HTMLLogger Logger;
     Logger.Init("LOG.html","MainLog");
