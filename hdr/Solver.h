@@ -8,19 +8,15 @@
 #ifndef SOLVER_H_
 #define SOLVER_H_
 
-#include "Point.h"
-#include "Field.h"
-#include "AStar.h"
+#include "Dijkstra.h"
 using namespace std;
 
 class Solver {
 private:
-	string convertResultToString(const vector<Point>&) const;
+
 public:
-	string solve(const Field* pField) {
-		AStar astar(pField, pField->getRobot(), pField->getLift());
-		return convertResultToString(astar.solve());
-	}
+	string convertResultToString(const Path&) const;
+	vector<Path> solve(const Field*) const;
 };
 
 

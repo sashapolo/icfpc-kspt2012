@@ -6,10 +6,9 @@
  */
 
 #include "AStar.h"
-#include <algorithm>
 
 // Реализация алгоритма А*
-const vector<Point> AStar::solve() {
+const Path AStar::solve() {
 	addNeighboursToOpenedList(*start); // добавляем соседей в открытый список
 	closedList.push_back(*start); //добавляем стартовую точку в закрытый список
 	while (!isInOpenedList(*goal) && !openedList.empty()) {
@@ -21,26 +20,21 @@ const vector<Point> AStar::solve() {
 	}
 
 	// формирование результата
-	vector<Point> result;
 	if (openedList.empty()) {
-		return result;
+		return Path();
 	}
 	list<AStarPoint>::const_iterator it = std::find(openedList.begin(), openedList.end(), *goal);
 	const AStarPoint *pCurrent = &(*it);
-	for (;pCurrent != NULL; pCurrent = pCurrent->getParent()) {
-		result.push_back(pCurrent->getCell()->getCoordinate());
-	}
-	return result;
+	return constructPath(pCurrent);
 }
 
 
 void AStar::addToOpenedList(const AStarPoint& param) {
 	list<AStarPoint>::iterator it = openedList.begin();
 	list<AStarPoint>::iterator end = openedList.end();
-	int h = calculateHeuristics(param);
-	int cost = param.getPathCost(h);
+	int cost = param.getPathCost();
 	for (; it != end; it++) {
-		if (cost <= it->getPathCost(h)) {
+		if (cost <= it->getPathCost()) {
 			openedList.insert(it, param);
 			return;
 		}
@@ -67,12 +61,16 @@ void AStar::addNeighboursToOpenedList(const AStarPoint& current) {
 	// ToDo: убрать здесь утечку
 	AStarPoint *newPoint = new AStarPoint(current);
 	AStarPoint down(field->getXY(Point(x, y + 1)), newPoint);
+	down.setHeuristics(calculateHeuristics(down));
 	checkPoint(down, *newPoint);
 	AStarPoint up(field->getXY(Point(x, y - 1)), newPoint);
+	up.setHeuristics(calculateHeuristics(down));
 	checkPoint(up, *newPoint);
 	AStarPoint right(field->getXY(Point(x + 1, y)), newPoint);
+	right.setHeuristics(calculateHeuristics(down));
 	checkPoint(right, *newPoint);
 	AStarPoint left(field->getXY(Point(x - 1, y)), newPoint);
+	left.setHeuristics(calculateHeuristics(down));
 	checkPoint(left, *newPoint);
 }
 
@@ -93,20 +91,14 @@ void AStar::checkPoint(const AStarPoint& point, const AStarPoint& current) {
 
 
 int AStar::calculateHeuristics(const AStarPoint& current) const {
-	int min;
-	if (field->lambdaCacheEmpty()) {
-		min = field->getDistance(current.getCell()->getCoordinate(), field->getLift()->getCoordinate());
-	} else {
-		list<FieldMember*>::const_iterator it = field->getLambdaCacheIt();
-		int t = field->getDistance(current.getCell()->getCoordinate(), (*it)->getCoordinate());
-		min = t;
-		it++;
-		for (;it != field->getLambdaCacheEnd(); it++) {
-			t = field->getDistance(current.getCell()->getCoordinate(), (*it)->getCoordinate());
-			if (min > t) {
-				min = t;
-			}
-		}
+	return field->getDistance(current.getCell()->getCoordinate(), goal->getCell()->getCoordinate());
+}
+
+
+Path AStar::constructPath(const AStarPoint *pBegin) const {
+	Path result;
+	for (;pBegin != NULL; pBegin = pBegin->getParent()) {
+		result.addCell(pBegin->getCell()->getCoordinate());
 	}
-	return min * 10;
+	return result;
 }

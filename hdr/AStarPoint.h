@@ -9,6 +9,7 @@
 #define ASTARPOINT_H_
 
 #include <cstddef>
+#include "FieldMember.h"
 
 class AStarPoint {
 private:
@@ -16,10 +17,11 @@ private:
 	const FieldMember *pCell;
 	const AStarPoint *pParent;
 	int G;	// стоимость
+	int H;  // эвристика
 
 public:
 
-	AStarPoint(const FieldMember *cell, const AStarPoint* parent = NULL) {
+	AStarPoint(const FieldMember *cell, const AStarPoint* parent = NULL, int HeuristicsValue = 0) {
 		pCell = cell;
 		pParent = parent;
 		if (parent) {
@@ -27,16 +29,18 @@ public:
 		} else {
 			G = 0;
 		}
+		H = HeuristicsValue;
 	}
 
 	AStarPoint(const AStarPoint& orig) {
 		pCell = orig.pCell;
 		pParent = orig.pParent;
 		G = orig.G;
+		H = orig.H;
 	}
 
-	int getPathCost(int HeuristicValue) const {
-		return (G + HeuristicValue);
+	int getPathCost() const {
+		return G + H;
 	}
 
 	int getGeneralCost() const {
@@ -61,6 +65,9 @@ public:
 		return (pCell == x.pCell); // равны, если указывают на один и тот же FieldMember
 	}
 
+	void setHeuristics(int H) {
+		this->H = H;
+	}
 /*	virtual ~AStarPoint() {
 		delete pParent;
 	}*/
