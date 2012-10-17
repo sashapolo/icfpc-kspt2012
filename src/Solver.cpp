@@ -7,15 +7,39 @@
 
 #include "Solver.h"
 
-vector<Path> Solver::solve(const Field* pField) const {
-//		AStar astar(pField, pField->getRobot(), pField->getLift());
-	Dijkstra dj(pField, pField->getRobot());
+string Solver::solve(Field* pField) const {
+	string result;
+	FieldSim fieldSim;
+	sSimResult simRes;
+	Dijkstra *dj = new Dijkstra(pField, pField->getRobot());
 	list<FieldMember*>::const_iterator it = pField->getLambdaCacheIt();
 	for (; it != pField->getLambdaCacheEnd(); it++) {
-		dj.addGoal(*it);
+		dj->addGoal(*it);
 	}
-	vector<Path> result = dj.findAllPaths();
-	//return convertResultToString(result[0]);
+	string t = convertResultToString(dj->findNearestPath());
+	delete dj;
+	Field *oldField = pField;
+
+	while (!t.empty()) {
+		result += t;
+		Field *newField = fieldSim.CalcRobotSteps(oldField, t, &simRes);
+		dj = new Dijkstra(newField, newField->getRobot());
+		it = pField->getLambdaCacheIt();
+		for (; it != pField->getLambdaCacheEnd(); it++) {
+			dj->addGoal(*it);
+		}
+		t = convertResultToString(dj->findNearestPath());
+		delete dj;
+		oldField = newField;
+	}
+	if (oldField->getLambdaCount() == 0) { // если все собрали - идем в лифт
+		dj = new Dijkstra(oldField, oldField->getRobot());
+		dj->addGoal(oldField->getLift());
+		result += convertResultToString(dj->findNearestPath());
+		delete dj;
+	} else {
+		result += "A";
+	}
 	return result;
 }
 

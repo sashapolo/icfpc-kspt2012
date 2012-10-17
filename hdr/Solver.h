@@ -9,14 +9,14 @@
 #define SOLVER_H_
 
 #include "Dijkstra.h"
+#include "FieldSim.h"
 using namespace std;
 
 class Solver {
 private:
-
-public:
 	string convertResultToString(const Path&) const;
-	vector<Path> solve(const Field*) const;
+public:
+	string solve(Field*) const;
 };
 
 

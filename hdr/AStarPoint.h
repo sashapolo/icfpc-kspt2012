@@ -62,7 +62,7 @@ public:
 	}
 
 	bool operator== (const AStarPoint& x) const{
-		return (pCell == x.pCell); // равны, если указывают на один и тот же FieldMember
+		return (pCell->getCoordinate() == x.getCell()->getCoordinate());
 	}
 
 	void setHeuristics(int H) {

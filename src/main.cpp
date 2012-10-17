@@ -57,25 +57,23 @@ int main(int argc, char** argv) {
     Logger.Init("LOG.html","MainLog");
     SetLogger(&Logger);
     
-    Field* field = createField("res/maps/test_field.txt");
-    if (!field) {
+    Field* field1 = createField("res/maps/test_field.txt");
+    if (!field1) {
     	printf("Map load error! (See LOG.html)\n");
     	return 0;
     }
+    Field* field2 = field1;
     
     Solver s;
-    vector<Path> result = s.solve(field);
+    string result = s.solve(field1);
     FieldSim fieldSim;
 	int nStep=0;
 	sSimResult res; //Robot simulation result (end state, steps, lambdas, path)
 
-	DrawField(field,&res.path, nStep++);
-	for (int i = 0; i < result.size(); i++) {
-		Field *newField = fieldSim.CalcRobotSteps(field,s.convertResultToString(result[i]),&res);
-		DrawField(newField,&res.path, nStep++);
-		printf("NumSteps: %d, NumLambdas: %d, State: %s\n",res.stepsTaken,res.lambdaReceived,stateToStr(res.state));
-		field = createField("res/maps/test_field.txt");;
-	}
+	DrawField(field2,&res.path, nStep++);
+	Field *newField = fieldSim.CalcRobotSteps(field2,result,&res);
+	DrawField(newField,&res.path, nStep++);
+	printf("NumSteps: %d, NumLambdas: %d, State: %s\n",res.stepsTaken,res.lambdaReceived,stateToStr(res.state));
 
     /*FieldSim fieldSim;
     int nStep=0;
