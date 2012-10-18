@@ -13,6 +13,9 @@
 
 using namespace std;
 
+/**
+ * Represents field.
+ */
 class Field {
 private:
     vector< vector<FieldMember*> > field;

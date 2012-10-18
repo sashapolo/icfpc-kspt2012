@@ -1,4 +1,4 @@
-/*
+/**
  * AStar.cpp
  *
  *  Created on: Sep 26, 2012
@@ -8,7 +8,7 @@
 #include "AStar.h"
 #include <algorithm>
 
-// Реализация алгоритма А*
+/// Реализация алгоритма А*
 vector<Point> AStar::solve(const Point& s, const Point& f, const Field& field) {
 	AStarPoint finish(field.getXY(f));
 	AStarPoint start(field.getXY(s), NULL, &finish);

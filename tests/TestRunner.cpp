@@ -5,7 +5,9 @@
 #include <cppunit/TestResultCollector.h>
 #include <cppunit/TestRunner.h>
 
-/*int main() {
+#include "FieldTest.h"
+
+int main() {
     // Create the event manager and test controller
     CPPUNIT_NS::TestResult controller;
 
@@ -27,4 +29,4 @@
     outputter.write();
 
     return result.wasSuccessful() ? 0 : 1;
-}*/
+}

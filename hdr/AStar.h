@@ -1,4 +1,4 @@
-/*
+/**
  * AStar.h
  *
  *  Created on: Sep 26, 2012
@@ -16,6 +16,12 @@
 
 using namespace std;
 
+/**
+ * AStar.h
+ *
+ *  Created on: Sep 26, 2012
+ *      Author: alexander
+ */
 class AStar {
 private:
 
@@ -29,6 +35,12 @@ private:
 	void checkPoint(const AStarPoint&, const AStarPoint&);
 	void addNeighboursToOpenedList(const AStarPoint&, const AStarPoint&, const Field&);
 public:
+       /**
+        * AStar.h
+        *
+        *  Created on: Sep 26, 2012
+        *      Author: alexander
+        */
 	vector<Point> solve(const Point&, const Point&, const Field&);
 };
 
