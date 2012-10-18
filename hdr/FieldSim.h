@@ -8,6 +8,8 @@
 #ifndef FIELDSIM_H
 #define	FIELDSIM_H
 
+#include "stdinclude.h"
+
 void DrawField(Field* pField, Path* pPath=NULL, int nStep=0);
 
 enum eEndState
@@ -44,8 +46,8 @@ public:
     FieldSim(const FieldSim& orig);
     virtual ~FieldSim();
     
-    Field* CalcNextState(Field* pField, bool* pRobotDestroyed=NULL);
-    Field* CalcRobotSteps(Field* pField, std::string Steps, sSimResult* pResult, bool bBrakeWhenWrongStep=false);
+    Field* CalcNextState(Field* pField, bool* pRobotDestroyed=NULL) const;
+    Field* CalcRobotSteps(const Field* pField, std::string Steps, sSimResult* pResult, bool bBrakeWhenWrongStep=false) const;
 private:
 
 };

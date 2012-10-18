@@ -57,39 +57,42 @@ int main(int argc, char** argv) {
     Logger.Init("LOG.html","MainLog");
     SetLogger(&Logger);
     
-    Field* field1 = createField("res/maps/test_field.txt");
-    if (!field1) {
-    	printf("Map load error! (See LOG.html)\n");
-    	return 0;
-    }
-    Field* field2 = field1;
-    
-    Solver s;
-    string result = s.solve(field1);
-    FieldSim fieldSim;
+    Field* field = createField("res/maps/test_field.txt");
+	if (!field) {
+		printf("Map load error! (See LOG.html)\n");
+		return 0;
+	}
+	FieldSim fieldSim;
 	int nStep=0;
+	Solver s;
+	string result = s.solve(field);
 	sSimResult res; //Robot simulation result (end state, steps, lambdas, path)
-
-	DrawField(field2,&res.path, nStep++);
-	Field *newField = fieldSim.CalcRobotSteps(field2,result,&res);
+	DrawField(field,&res.path, nStep++);
+	Field *newField = fieldSim.CalcRobotSteps(field,result,&res);
 	DrawField(newField,&res.path, nStep++);
 	printf("NumSteps: %d, NumLambdas: %d, State: %s\n",res.stepsTaken,res.lambdaReceived,stateToStr(res.state));
 
-    /*FieldSim fieldSim;
-    int nStep=0;
-    Field* oldField = field;
-    sSimResult res; //Robot simulation result (end state, steps, lambdas, path)
-    char inStr[128];
 
-    printf("Controls:\n\tU - up\n\tD - down\n\tL - left\n\tR - right\n\tW - wait\n\tA - abort\nEnter - accept\n");
-    DrawField(field,&res.path, nStep++);
-    while(true)
-    {
-        scanf("%s",inStr);
-        Field *newField = fieldSim.CalcRobotSteps(oldField,inStr,&res);
-        DrawField(newField,&res.path, nStep++);
-        printf("NumSteps: %d, NumLambdas: %d, State: %s\n",res.stepsTaken,res.lambdaReceived,stateToStr(res.state));
-        oldField = newField;
-    };*/
+
+//    Field* field = createField("res/maps/test_field.txt");
+//    if (!field) {
+//    	printf("Map load error! (See LOG.html)\n");
+//    	return 0;
+//    }
+//    FieldSim fieldSim;
+//    int nStep=0;
+//    Field* oldField = field;
+//    sSimResult res; //Robot simulation result (end state, steps, lambdas, path)
+//    char inStr[128];
+//    printf("Controls:\n\tU - up\n\tD - down\n\tL - left\n\tR - right\n\tW - wait\n\tA - abort\nEnter - accept\n");
+//    DrawField(field,&res.path, nStep++);
+//    while (true)
+//    {
+//    	scanf("%s",inStr);
+//    	Field *newField = fieldSim.CalcRobotSteps(oldField,inStr,&res);
+//    	DrawField(newField,&res.path, nStep++);
+//    	printf("NumSteps: %d, NumLambdas: %d, State: %s\n",res.stepsTaken,res.lambdaReceived,stateToStr(res.state));
+//    	oldField = newField;
+//    };
     return 0;
 }

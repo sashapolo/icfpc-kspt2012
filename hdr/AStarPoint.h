@@ -8,69 +8,39 @@
 #ifndef ASTARPOINT_H_
 #define ASTARPOINT_H_
 
-#include <cstddef>
-#include "FieldMember.h"
+#include "Field.h"
 
 class AStarPoint {
 private:
-
+	const Field *pField;
 	const FieldMember *pCell;
-	const AStarPoint *pParent;
 	int G;	// стоимость
 	int H;  // эвристика
+	string path;	// путь до этой точки
 
 public:
 
-	AStarPoint(const FieldMember *cell, const AStarPoint* parent = NULL, int HeuristicsValue = 0) {
-		pCell = cell;
-		pParent = parent;
-		if (parent) {
-			G = parent->G + FieldMember::METRIC_NORMAL;
-		} else {
-			G = 0;
-		}
-		H = HeuristicsValue;
-	}
+	AStarPoint(const Field *pField, const FieldMember *cell, int cost = 0, int heuristicsValue = 0, string path = "", string move = "");
+	AStarPoint(const AStarPoint& orig);
 
-	AStarPoint(const AStarPoint& orig) {
-		pCell = orig.pCell;
-		pParent = orig.pParent;
-		G = orig.G;
-		H = orig.H;
-	}
+	bool isGoalReached() const;
 
-	int getPathCost() const {
-		return G + H;
-	}
+	const Field* getField() const;
 
-	int getGeneralCost() const {
-		return G;
-	}
+	string getPath() const;
 
-	// при задании нового родителя необходимо пересчитать метрику G
-	void setParent(const AStarPoint& parent) {
-		pParent = &parent;
-		G = parent.G + FieldMember::METRIC_NORMAL;
-	}
+	int getPathCost() const;
 
-	const AStarPoint* getParent() const {
-		return pParent;
-	}
+	int getGeneralCost() const;
+	void setGeneralCost(int G);
 
-	const FieldMember* getCell() const {
-		return pCell;
-	}
+	void setHeuristics(int H);
 
-	bool operator== (const AStarPoint& x) const{
-		return (pCell->getCoordinate() == x.getCell()->getCoordinate());
-	}
+	const FieldMember* getCell() const;
 
-	void setHeuristics(int H) {
-		this->H = H;
-	}
-/*	virtual ~AStarPoint() {
-		delete pParent;
-	}*/
+	bool operator== (const AStarPoint& x) const;
+	bool operator()(const AStarPoint& a1, const AStarPoint& a2);
+	bool operator<(const AStarPoint& a) const;
 };
 
 #endif /* ASTARPOINT_H_ */

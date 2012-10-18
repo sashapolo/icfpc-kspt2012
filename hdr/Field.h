@@ -39,47 +39,21 @@ public:
      */
     Field(const Field& orig);
 
-    virtual ~Field() {
-    	for (unsigned int i = 0; i < field.size(); i++) {
-    		for (unsigned int j = 0; j < field[i].size(); j++) {
-    			delete field[i][j];
-    		}
-    	}
-    }
+    virtual ~Field();
 
     /**
      * There are caches of Lambdas and Stones to provide some assistance to algorithm.
      */
-    list<FieldMember*>::const_iterator getLambdaCacheIt() const{
-    	return lambdaCache.begin();
-    }
-    list<FieldMember*>::iterator getLambdaCacheIt() {
-    	return lambdaCache.begin();
-    }
-    list<FieldMember*>::const_iterator getLambdaCacheEnd() const{
-    	return lambdaCache.end();
-    }
-    bool lambdaCacheEmpty() const {
-    	return lambdaCache.empty();
-    }
-    list<FieldMember*>::iterator deleteLambdaFromCache(list<FieldMember*>::iterator it) {
-    	return lambdaCache.erase(it);
-    }
+    list<FieldMember*>::const_iterator getLambdaCacheIt() const;
+    list<FieldMember*>::iterator getLambdaCacheIt();
+    list<FieldMember*>::const_iterator getLambdaCacheEnd() const;
+    bool lambdaCacheEmpty() const;
+    list<FieldMember*>::iterator deleteLambdaFromCache(list<FieldMember*>::iterator it);
 
-
-    list<FieldMember*>::const_iterator getStoneCacheIt() const{
-    	return stoneCache.begin();
-    }
-    list<FieldMember*>::iterator getStoneCacheIt() {
-    	return stoneCache.begin();
-    }
-    list<FieldMember*>::iterator getStoneCacheEnd() {
-    	return stoneCache.end();
-    }
-
-    list<FieldMember*>::iterator deleteStoneFromCache(list<FieldMember*>::iterator it) {
-    	return stoneCache.erase(it);
-    }
+    list<FieldMember*>::const_iterator getStoneCacheIt() const;
+    list<FieldMember*>::iterator getStoneCacheIt();
+    list<FieldMember*>::const_iterator getStoneCacheEnd() const;
+    list<FieldMember*>::iterator deleteStoneFromCache(list<FieldMember*>::iterator it);
     
 
     void write(Point xy, CellType type);
@@ -89,20 +63,10 @@ public:
      *
      * param pPoint pointer to the point object representing coordinates of the cell to retrieve
      */
-    const FieldMember* getXY(const Point &point) const {
-        return field.at(point.y).at(point.x);
-    }
-    FieldMember* getXY(const Point &point) {
-        return field.at(point.y).at(point.x);
-    }
+    const FieldMember* getXY(const Point &point) const;
+    FieldMember* getXY(const Point &point);
 
-
-    pair<int, int> getSize() {
-        if (field.size() == 0) {
-        	return make_pair(0,0);
-        }
-        return make_pair(field.size(), field[0].size());
-    }
+    pair<int, int> getSize() const;
 
     /**
      * Swaps contents of the two cells.
@@ -118,47 +82,28 @@ public:
      * @param rPoint
      * @return 
      */
-    CellType getCellType(const Point &point) const {
-        return getXY(point)->getType();
-    }
+    CellType getCellType(const Point &point) const;
 
     /**
      * Writes given field member into position, specified by coordinates contained in field member.
      *
      * @param rFieldMember
      */
-    void setFieldMember(const FieldMember& fieldMember) {
-        int x = fieldMember.getCoordinate().x;
-        int y = fieldMember.getCoordinate().y;
-        *(field.at(y).at(x)) = fieldMember;
-    }
+    void setFieldMember(const FieldMember& fieldMember);
 
-    const FieldMember* getRobot() const {
-    	return pRobot;
-    }
-    FieldMember* getRobot() {
-		return pRobot;
-    }
+    const FieldMember* getRobot() const;
+    FieldMember* getRobot();
 
-    const FieldMember* getLift() const {
-		return pLift;
-	}
+    const FieldMember* getLift() const;
 
-    bool isRobotAlive() const {
-    	return pRobot;
-    }
+    bool isRobotAlive() const;
     
-    int getLambdaCount() {return lambdaCache.size();};
-    int getStoneCount() {return stoneCache.size();};
+    int getLambdaCount() const;
+    int getStoneCount() const;
 
     Field& operator=(const Field&);
-    int getDistance(const Point& from, const Point to) const {
-    	int x = from.x - to.x;
-    	int y = from.y - to.y;
-    	x = (x < 0)? -x : x;
-    	y = (y < 0)? -y : y;
-    	return x + y;
-    }
+
+    int getDistance(const Point& from, const Point to) const;
 };
 
 #endif	/* FIELD_H */

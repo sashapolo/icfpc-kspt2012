@@ -4,9 +4,8 @@
  * 
  * Created on October 1, 2012, 9:05 PM
  */
-#include "stdinclude.h"
+
 #include "FieldSim.h"
-#include "Path.h"
 
 /////////////////////////////////////////////
 void DrawField(Field* pField, Path* pPath,  int nStep)
@@ -95,9 +94,8 @@ FieldSim::FieldSim(const FieldSim& orig) {
 FieldSim::~FieldSim() {
 }
 
-Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed)
+Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed) const
 {
-    Field *NewField = new Field(*pField);
     if(!pField->isRobotAlive())
     {
         LOGERROR("Can't simulate: robot must be alive");
@@ -111,92 +109,92 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed)
         {
             CellType cell=pField->getCellType(Point(x,y));
             
-            NewField->getXY(Point(x,y))->setDefaultMetric();
+            pField->getXY(Point(x,y))->setDefaultMetric();
             if(cell==STONE)
             {
                 if(pField->getCellType(Point(x,y+1))==EMPTY)
                 {
-                    NewField->write(Point(x,y),EMPTY);
-                    NewField->write(Point(x,y+1),STONE);
-                    NewField->getXY(Point(x,y+1))->setMetric(FieldMember::METRIC_NORMAL);
+                    pField->write(Point(x,y),EMPTY);
+                    pField->write(Point(x,y+1),STONE);
+                    pField->getXY(Point(x,y+1))->setMetric(FieldMember::METRIC_NORMAL);
                 }
                 else if((pField->getCellType(Point(x,y+1))==STONE))
                 {
                     if((pField->getCellType(Point(x+1,y))==EMPTY) &&
                         (pField->getCellType(Point(x+1,y+1))==EMPTY))
                     {
-                        NewField->write(Point(x,y),EMPTY);
-                        NewField->write(Point(x+1,y+1),STONE);
-                        NewField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_NORMAL);
+                        pField->write(Point(x,y),EMPTY);
+                        pField->write(Point(x+1,y+1),STONE);
+                        pField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_NORMAL);
                     }
                     else if((pField->getCellType(Point(x-1,y))==EMPTY) &&
                         (pField->getCellType(Point(x-1,y+1))==EMPTY))
                     {
-                        NewField->write(Point(x,y),EMPTY);
-                        NewField->write(Point(x-1,y+1),STONE);
-                        NewField->getXY(Point(x-1,y+1))->setMetric(FieldMember::METRIC_NORMAL);
+                        pField->write(Point(x,y),EMPTY);
+                        pField->write(Point(x-1,y+1),STONE);
+                        pField->getXY(Point(x-1,y+1))->setMetric(FieldMember::METRIC_NORMAL);
                     }
                 }
                 else if((pField->getCellType(Point(x,y+1))==LAMBDA) &&
                         (pField->getCellType(Point(x+1,y))==EMPTY) &&
                         (pField->getCellType(Point(x+1,y+1))==EMPTY))
                 {
-                    NewField->write(Point(x,y),EMPTY);
-                    NewField->write(Point(x+1,y+1),STONE);
-                    NewField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_NORMAL);
+                    pField->write(Point(x,y),EMPTY);
+                    pField->write(Point(x+1,y+1),STONE);
+                    pField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_NORMAL);
                 }
             }
         }
     }
     
-    if((pField->getLambdaCount()==0) && (NewField->getLift()->getType()==CLOSED_LIFT))
+    if((pField->getLambdaCount()==0) && (pField->getLift()->getType()==CLOSED_LIFT))
     {
-        NewField->write(NewField->getLift()->getCoordinate(),OPENED_LIFT);
+        pField->write(pField->getLift()->getCoordinate(),OPENED_LIFT);
     }
     
     
     
     //Calculate stone metric (need simple next step sim)
-    list<FieldMember*>::iterator it=NewField->getStoneCacheIt();
+    list<FieldMember*>::iterator it=pField->getStoneCacheIt();
     int x,y;
-    while(it!=NewField->getStoneCacheEnd())
+    while(it!=pField->getStoneCacheEnd())
     {
         x=(*it)->getCoordinate().x;
         y=(*it)->getCoordinate().y;
         
-        if(NewField->getCellType(Point(x,y+1))==EMPTY)
+        if(pField->getCellType(Point(x,y+1))==EMPTY)
         {
-            NewField->getXY(Point(x,y+1))->setMetric(FieldMember::METRIC_INFINITY);
-            NewField->getXY(Point(x,y+2))->setMetric(FieldMember::METRIC_INFINITY);
+            pField->getXY(Point(x,y+1))->setMetric(FieldMember::METRIC_INFINITY);
+            pField->getXY(Point(x,y+2))->setMetric(FieldMember::METRIC_INFINITY);
         }
-        else if((NewField->getCellType(Point(x,y+1))==STONE))
+        else if((pField->getCellType(Point(x,y+1))==STONE))
         {
-            if((NewField->getCellType(Point(x+1,y))==EMPTY) &&
-                (NewField->getCellType(Point(x+1,y+1))==EMPTY))
+            if((pField->getCellType(Point(x+1,y))==EMPTY) &&
+                (pField->getCellType(Point(x+1,y+1))==EMPTY))
             {
-                NewField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_INFINITY);
-                NewField->getXY(Point(x+1,y+2))->setMetric(FieldMember::METRIC_INFINITY);
+                pField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_INFINITY);
+                pField->getXY(Point(x+1,y+2))->setMetric(FieldMember::METRIC_INFINITY);
             }
-            else if((NewField->getCellType(Point(x-1,y))==EMPTY) &&
-                (NewField->getCellType(Point(x-1,y+1))==EMPTY))
+            else if((pField->getCellType(Point(x-1,y))==EMPTY) &&
+                (pField->getCellType(Point(x-1,y+1))==EMPTY))
             {
-                NewField->getXY(Point(x-1,y+1))->setMetric(FieldMember::METRIC_INFINITY);
-                NewField->getXY(Point(x-1,y+2))->setMetric(FieldMember::METRIC_INFINITY);
+                pField->getXY(Point(x-1,y+1))->setMetric(FieldMember::METRIC_INFINITY);
+                pField->getXY(Point(x-1,y+2))->setMetric(FieldMember::METRIC_INFINITY);
             }
         }
-        else if((NewField->getCellType(Point(x,y+1))==LAMBDA) &&
-                        (NewField->getCellType(Point(x+1,y))==EMPTY) &&
-                        (NewField->getCellType(Point(x+1,y+1))==EMPTY))
+        else if((pField->getCellType(Point(x,y+1))==LAMBDA) &&
+                        (pField->getCellType(Point(x+1,y))==EMPTY) &&
+                        (pField->getCellType(Point(x+1,y+1))==EMPTY))
         {
-            NewField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_INFINITY);
-            NewField->getXY(Point(x+1,y+2))->setMetric(FieldMember::METRIC_INFINITY);
+            pField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_INFINITY);
+            pField->getXY(Point(x+1,y+2))->setMetric(FieldMember::METRIC_INFINITY);
         }
         
         it++;
     }
     
     Point DestroyCrd=pField->getRobot()->getCoordinate()+Point(0,-1); //test to robot destruction
-    if((NewField->getCellType(DestroyCrd)==STONE) && 
+    if((pField->getCellType(DestroyCrd)==STONE) &&
             (pField->getCellType(DestroyCrd)!=STONE)) 
     {
         if(pRobotDestroyed) (*pRobotDestroyed)=true;
@@ -206,15 +204,16 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed)
         if(pRobotDestroyed) (*pRobotDestroyed)=false;
     }
     
-    return NewField;
+    return pField;
 }
 
- Field* FieldSim::CalcRobotSteps(Field* pField, std::string Steps, sSimResult* pResult, bool bBrakeWhenWrongStep)
+ Field* FieldSim::CalcRobotSteps(const Field* pField, std::string Steps, sSimResult* pResult, bool bBrakeWhenWrongStep) const
  {
+	 Field *result = new Field(*pField);
      if(!pField->isRobotAlive()) {
          pResult->state=ES_ERROR;
          LOGERROR("Can't calculate: robot must be alive");
-         return pField;
+         return result;
      };
      
      bool bDestroyed=false;
@@ -233,91 +232,91 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed)
              case 'A': 
                  pResult->state=ES_ABORTED;
                  pResult->stepsTaken++;
-                 return pField;
+                 return result;
              default: 
                  pResult->state=ES_ERROR;
                  LOGERROR("Wrong path symbol: \'%c\'",Steps[i]);
-                 return pField;
+                 return result;
          };
          
-         AbsNextPos=pField->getRobot()->getCoordinate()+NextPos;
+         AbsNextPos=result->getRobot()->getCoordinate()+NextPos;
          pResult->stepsTaken++;
          pResult->state=ES_NONE;
-         switch(pField->getCellType(AbsNextPos)) //step solve
+         switch(result->getCellType(AbsNextPos)) //step solve
          {
              case ROBOT: break;
              case STONE: 
                  if((Steps[i]=='L') || (Steps[i]=='R'))
                  {
-                     if(pField->getCellType(AbsNextPos+NextPos)==EMPTY) \
+                     if(result->getCellType(AbsNextPos+NextPos)==EMPTY) \
                      {
-                         pField->swap(AbsNextPos+NextPos,AbsNextPos);
-                         pField->swap(AbsNextPos,pField->getRobot()->getCoordinate());
+                         result->swap(AbsNextPos+NextPos,AbsNextPos);
+                         result->swap(AbsNextPos,result->getRobot()->getCoordinate());
                          pResult->path.addCell(AbsNextPos);
                      }
                      else 
                      {
                          pResult->state=ES_WRONG_STEP;
-                         pResult->path.addCell(pField->getRobot()->getCoordinate());
+                         pResult->path.addCell(result->getRobot()->getCoordinate());
                          LOGWARNING("Wrong robot step from(%d,%d) to (%d,%d)[*]",
-                                pField->getRobot()->getCoordinate().x,pField->getRobot()->getCoordinate().y,AbsNextPos.x,AbsNextPos.y);
+                                result->getRobot()->getCoordinate().x,result->getRobot()->getCoordinate().y,AbsNextPos.x,AbsNextPos.y);
                          if(bBrakeWhenWrongStep) 
                          {
-                             return pField;
+                             return result;
                          }
                      }
                          
                  } else {
                      pResult->state=ES_WRONG_STEP;
-                     pResult->path.addCell(pField->getRobot()->getCoordinate());
+                     pResult->path.addCell(result->getRobot()->getCoordinate());
                      LOGWARNING("Wrong robot step from(%d,%d) to (%d,%d)[*]",
-                         pField->getRobot()->getCoordinate().x,pField->getRobot()->getCoordinate().y,AbsNextPos.x,AbsNextPos.y);
+                         result->getRobot()->getCoordinate().x,result->getRobot()->getCoordinate().y,AbsNextPos.x,AbsNextPos.y);
                      if(bBrakeWhenWrongStep) 
                      {
-                         return pField;
+                         return result;
                      }
                  }
                  break;
              case EMPTY: 
-                 pField->swap(AbsNextPos,pField->getRobot()->getCoordinate()); 
+                 result->swap(AbsNextPos,result->getRobot()->getCoordinate());
                  pResult->path.addCell(AbsNextPos);
                  break;
              case EARTH: 
-                 //FieldMember tmp=(*pField->getRobot());
-                 pField->write(pField->getRobot()->getCoordinate(),EMPTY);
-                 pField->write(AbsNextPos,ROBOT);
+                 //FieldMember tmp=(*result->getRobot());
+                 result->write(result->getRobot()->getCoordinate(),EMPTY);
+                 result->write(AbsNextPos,ROBOT);
                  pResult->path.addCell(AbsNextPos);
                  break;
              case LAMBDA:
-                 pField->write(pField->getRobot()->getCoordinate(),EMPTY);
-                 pField->write(AbsNextPos,ROBOT);
+                 result->write(result->getRobot()->getCoordinate(),EMPTY);
+                 result->write(AbsNextPos,ROBOT);
                  pResult->path.addCell(AbsNextPos);
                  pResult->lambdaReceived++;
                  pResult->state=ES_EAT_LAMBDA;
                  break;
              case OPENED_LIFT: 
                  pResult->state=ES_FINISHED;
-                 return pField;
+                 return result;
              default:
                  pResult->state=ES_WRONG_STEP;
-                 pResult->path.addCell(pField->getRobot()->getCoordinate());
+                 pResult->path.addCell(result->getRobot()->getCoordinate());
                  LOGWARNING("Wrong robot step from(%d,%d) to (%d,%d)[%c]",
-                         pField->getRobot()->getCoordinate().x,pField->getRobot()->getCoordinate().y,AbsNextPos.x,AbsNextPos.y,
-                         cellTypeToChar(pField->getCellType(AbsNextPos)));
+                         result->getRobot()->getCoordinate().x,result->getRobot()->getCoordinate().y,AbsNextPos.x,AbsNextPos.y,
+                         cellTypeToChar(result->getCellType(AbsNextPos)));
                  if(bBrakeWhenWrongStep) 
                  {
-                     return pField;
+                     return result;
                  }
                  break;
          }
          
-         pField=CalcNextState(pField,&bDestroyed);
+         result = CalcNextState(result,&bDestroyed);
          if(bDestroyed)
          {
              pResult->state=ES_DESTROYED;
-             return pField;
+             return result;
          }
      }
      
-     return pField;
+     return result;
  }

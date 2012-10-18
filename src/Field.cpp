@@ -9,6 +9,58 @@
 
 using namespace std;
 
+Field::~Field() {
+	for (unsigned int i = 0; i < field.size(); i++) {
+		for (unsigned int j = 0; j < field[i].size(); j++) {
+			delete field[i][j];
+		}
+	}
+}
+
+list<FieldMember*>::const_iterator Field::getLambdaCacheIt() const{
+   	return lambdaCache.begin();
+}
+list<FieldMember*>::iterator Field::getLambdaCacheIt() {
+	return lambdaCache.begin();
+}
+list<FieldMember*>::const_iterator Field::getLambdaCacheEnd() const{
+	return lambdaCache.end();
+}
+bool Field::lambdaCacheEmpty() const {
+	return lambdaCache.empty();
+}
+list<FieldMember*>::iterator Field::deleteLambdaFromCache(list<FieldMember*>::iterator it) {
+	return lambdaCache.erase(it);
+}
+
+list<FieldMember*>::const_iterator Field::getStoneCacheIt() const{
+	return stoneCache.begin();
+}
+list<FieldMember*>::iterator Field::getStoneCacheIt() {
+	return stoneCache.begin();
+}
+list<FieldMember*>::const_iterator Field::getStoneCacheEnd() const{
+	return stoneCache.end();
+}
+
+list<FieldMember*>::iterator Field::deleteStoneFromCache(list<FieldMember*>::iterator it) {
+	return stoneCache.erase(it);
+}
+
+const FieldMember* Field::getXY(const Point &point) const {
+    return field.at(point.y).at(point.x);
+}
+
+FieldMember* Field::getXY(const Point &point) {
+    return field.at(point.y).at(point.x);
+}
+
+pair<int, int> Field::getSize() const {
+    if (field.size() == 0) {
+    	return make_pair(0,0);
+    }
+    return make_pair(field.size(), field[0].size());
+}
 // TODO: наверное, этот метод надо оптимизировать, так как создание карты
 // получается путем наращивания векторов,
 // но это будет делаться всего один раз, так что, возможно, это не так уж и накладно
@@ -188,6 +240,49 @@ void Field::swap(const Point &cell1, const Point &cell2) {
     FieldMember t = *tmp2;
     setFieldMember(*tmp1);
     setFieldMember(t);
+}
+
+CellType Field::getCellType(const Point &point) const {
+    return getXY(point)->getType();
+}
+
+
+void Field::setFieldMember(const FieldMember& fieldMember) {
+    int x = fieldMember.getCoordinate().x;
+    int y = fieldMember.getCoordinate().y;
+    *(field.at(y).at(x)) = fieldMember;
+}
+
+const FieldMember* Field::getRobot() const {
+	return pRobot;
+}
+
+FieldMember* Field::getRobot() {
+	return pRobot;
+}
+
+const FieldMember* Field::getLift() const {
+	return pLift;
+}
+
+bool Field::isRobotAlive() const {
+	return pRobot;
+}
+
+int Field::getLambdaCount() const {
+	return lambdaCache.size();
+}
+
+int Field::getStoneCount() const {
+	return stoneCache.size();
+};
+
+int Field::getDistance(const Point& from, const Point to) const {
+	int x = from.x - to.x;
+	int y = from.y - to.y;
+	x = (x < 0)? -x : x;
+	y = (y < 0)? -y : y;
+	return x + y;
 }
 
 Field& Field::operator=(const Field& orig) {

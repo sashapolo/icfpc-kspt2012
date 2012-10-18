@@ -8,52 +8,34 @@
 #ifndef ASTAR_H_
 #define ASTAR_H_
 
-#include <algorithm>
-#include <list>
+#include <queue>
+#include <set>
 #include "Field.h"
+#include "FieldSim.h"
 #include "AStarPoint.h"
-#include "Path.h"
 
 using namespace std;
 
 class AStar {
-private:
-	AStarPoint *goal;
 protected:
 	AStarPoint *start;
-	const Field *field;
+	const FieldSim fieldSim;
 
-	//ToDo: реализовать бинарную кучу для открытого списка
-	list<AStarPoint> openedList; //открытый список отсортирован
-	list<AStarPoint> closedList;
+	priority_queue<AStarPoint> openedList;
+	set<AStarPoint> closedList;
 
-	void addToOpenedList(const AStarPoint&);
 	bool isInClosedList(const AStarPoint&) const;
-	bool isInOpenedList(const AStarPoint&) const;
-	void checkPoint(const AStarPoint&, const AStarPoint&);
-	virtual void addNeighboursToOpenedList(const AStarPoint&);
-	Path constructPath(const AStarPoint*) const;
-private:
-	int calculateHeuristics(const AStarPoint&) const;
+	void checkPoint(Point point, const AStarPoint& current, string move);
+	void addNeighboursToOpenedList(const AStarPoint&);
+	virtual int calculateHeuristics(const AStarPoint&) const;
 
 public:
 
-	AStar(const Field* field, const FieldMember* s, const FieldMember* g = NULL) {
-		this->field = field;
-		start = new AStarPoint(s);
-		if (goal != NULL) {
-			goal = new AStarPoint(g);
-		} else {
-			goal = NULL;
-		}
-	}
+	AStar(const Field* pField, const FieldMember* s);
 
-	const Path solve();
+	const string solve();
 
-	virtual ~AStar() {
-		delete start;
-		delete goal;
-	}
+	virtual ~AStar();
 };
 
 #endif /* ASTAR_H_ */
