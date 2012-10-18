@@ -10,21 +10,23 @@
 
 #include <queue>
 #include <set>
+#include <algorithm>
 #include "Field.h"
 #include "FieldSim.h"
 #include "AStarPoint.h"
 
 using namespace std;
+using namespace AStarNode;
 
 class AStar {
 protected:
 	AStarPoint *start;
 	const FieldSim fieldSim;
 
-	priority_queue<AStarPoint> openedList;
-	set<AStarPoint> closedList;
+	priority_queue<AStarPoint*, vector<AStarPoint*>, AStarPointComparator> openedList;
+	set<const AStarPoint*> closedList;
 
-	bool isInClosedList(const AStarPoint&) const;
+	bool isInClosedList(const AStarPoint*) const;
 	void checkPoint(Point point, const AStarPoint& current, string move);
 	void addNeighboursToOpenedList(const AStarPoint&);
 	virtual int calculateHeuristics(const AStarPoint&) const;
@@ -32,9 +34,7 @@ protected:
 public:
 
 	AStar(const Field* pField, const FieldMember* s);
-
 	const string solve();
-
 	virtual ~AStar();
 };
 

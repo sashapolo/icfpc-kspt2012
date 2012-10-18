@@ -6,12 +6,12 @@
  */
 
 #include "AStar.h"
-// Debug
+
 #include <iostream>
 
 AStar::AStar(const Field* pField, const FieldMember* s): fieldSim() {
 	start = new AStarPoint(pField, s);
-	openedList.push(*start);
+	openedList.push(start);
 }
 
 AStar::~AStar() {
@@ -23,11 +23,15 @@ const string AStar::solve() {
 	const AStarPoint *current = start;
 	while (!openedList.empty() && !current->isGoalReached()) {
 		openedList.pop();
-		if (!isInClosedList(*current)) {
+		if (!isInClosedList(current)) {
+			cout<<"Current position is "<<current->getCell()->getCoordinate().x<<";"<<current->getCell()->getCoordinate().y<<endl;
 			addNeighboursToOpenedList(*current);
-			closedList.insert(*current);
+			closedList.insert(current);
 		}
-		current = &(openedList.top());
+		current = openedList.top();
+	}
+	if (openedList.empty()) {
+		return "";
 	}
 	return current->getPath();
 }
@@ -40,9 +44,6 @@ void AStar::addNeighboursToOpenedList(const AStarPoint& current) {
 	checkPoint(Point(x, y-1), current, "U");
 	checkPoint(Point(x-1, y), current, "L");
 	checkPoint(Point(x+1, y), current, "R");
-	// Debug
-	cout<<"Point: "<<current.getCell()->getCoordinate().x<<";"<<current.getCell()->getCoordinate().y<<endl;
-	cout<<"Field size: "<<current.getField()->getSize().first<<";"<<current.getField()->getSize().second<<endl;
 }
 
 
@@ -51,19 +52,19 @@ void AStar::checkPoint(Point point, const AStarPoint& current, string move) {
 	if (tmp->isPassable()) {
 		sSimResult res;
 		Field* newField = fieldSim.CalcRobotSteps(current.getField(), move, &res);
-		int newCost = current.getGeneralCost() + FieldMember::METRIC_NORMAL;
-		AStarPoint result(newField, newField->getXY(point), newCost, 0, current.getPath(), move);
-		result.setHeuristics(calculateHeuristics(result));
+		int newCost = current.getGeneralCost() + tmp->getMetric();
+		// утечка?
+		AStarPoint *result = new AStarPoint(newField, newField->getXY(point), newCost, 0, current.getPath(), move);
+		result->setHeuristics(calculateHeuristics(*result));
 		openedList.push(result);
-		// Debug
-		cout<<"Point: "<<current.getCell()->getCoordinate().x<<";"<<current.getCell()->getCoordinate().y<<endl;
-		cout<<"Field size: "<<current.getField()->getSize().first<<";"<<current.getField()->getSize().second<<endl;
 	}
 }
 
 
-bool AStar::isInClosedList(const AStarPoint& current) const {
-	return (closedList.find(current) != closedList.end());
+bool AStar::isInClosedList(const AStarPoint* pCurrent) const {
+	set<const AStarPoint*>::const_iterator it = find_if(closedList.begin(), closedList.end(),
+			bind2nd(Comparator<const AStarPoint*>(), pCurrent));
+	return (it != closedList.end());
 }
 
 
@@ -71,7 +72,7 @@ int AStar::calculateHeuristics(const AStarPoint& current) const {
 	list<FieldMember*>::const_iterator it = current.getField()->getLambdaCacheIt();
 	int min = current.getField()->getDistance((*it++)->getCoordinate(), current.getCell()->getCoordinate());
 	for (; it != current.getField()->getLambdaCacheEnd(); it++) {
-		int tmp = current.getField()->getDistance((*it++)->getCoordinate(), current.getCell()->getCoordinate());
+		int tmp = current.getField()->getDistance((*it)->getCoordinate(), current.getCell()->getCoordinate());
 		if (min > tmp) {
 			min = tmp;
 		}

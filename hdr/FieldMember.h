@@ -41,7 +41,7 @@ public:
     	this->metric = metric;
     }
     
-    int getMetric() {
+    int getMetric() const {
         return this->metric;
     }
     
