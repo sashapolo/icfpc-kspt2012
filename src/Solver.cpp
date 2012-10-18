@@ -4,12 +4,12 @@
  *  Created on: Oct 15, 2012
  *      Author: alexander
  */
-
+#include "stdinclude.h"
 #include "Solver.h"
 
 string Solver::solve(Field* pField) const {
 	string result;
-	FieldSim fieldSim;
+	/*FieldSim fieldSim;
 	sSimResult simRes;
 	Dijkstra *dj = new Dijkstra(pField, pField->getRobot());
 	list<FieldMember*>::const_iterator it = pField->getLambdaCacheIt();
@@ -39,7 +39,8 @@ string Solver::solve(Field* pField) const {
 		delete dj;
 	} else {
 		result += "A";
-	}
+	}*/
+        
 	return result;
 }
 

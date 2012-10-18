@@ -185,9 +185,12 @@ void Field::swap(const Point &cell1, const Point &cell2) {
     FieldMember* tmp2 = getXY(cell2);
     tmp2->setCoordinate(cell1);
     
-    FieldMember t = *tmp2;
-    setFieldMember(*tmp1);
-    setFieldMember(t);
+    field[cell1.y][cell1.x]=tmp2;
+    field[cell2.y][cell2.x]=tmp1;
+    
+    //FieldMember t = *tmp2;
+    //setFieldMember(*tmp1);
+    //setFieldMember(t);
 }
 
 Field& Field::operator=(const Field& orig) {

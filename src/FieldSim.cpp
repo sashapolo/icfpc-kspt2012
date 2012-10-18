@@ -118,7 +118,6 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed)
                 {
                     NewField->write(Point(x,y),EMPTY);
                     NewField->write(Point(x,y+1),STONE);
-                    NewField->getXY(Point(x,y+1))->setMetric(FieldMember::METRIC_NORMAL);
                 }
                 else if((pField->getCellType(Point(x,y+1))==STONE))
                 {
@@ -127,14 +126,12 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed)
                     {
                         NewField->write(Point(x,y),EMPTY);
                         NewField->write(Point(x+1,y+1),STONE);
-                        NewField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_NORMAL);
                     }
                     else if((pField->getCellType(Point(x-1,y))==EMPTY) &&
                         (pField->getCellType(Point(x-1,y+1))==EMPTY))
                     {
                         NewField->write(Point(x,y),EMPTY);
                         NewField->write(Point(x-1,y+1),STONE);
-                        NewField->getXY(Point(x-1,y+1))->setMetric(FieldMember::METRIC_NORMAL);
                     }
                 }
                 else if((pField->getCellType(Point(x,y+1))==LAMBDA) &&
@@ -143,7 +140,6 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed)
                 {
                     NewField->write(Point(x,y),EMPTY);
                     NewField->write(Point(x+1,y+1),STONE);
-                    NewField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_NORMAL);
                 }
             }
         }
@@ -166,7 +162,7 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed)
         
         if(NewField->getCellType(Point(x,y+1))==EMPTY)
         {
-            NewField->getXY(Point(x,y+1))->setMetric(FieldMember::METRIC_INFINITY);
+            //NewField->getXY(Point(x,y+1))->setMetric(FieldMember::METRIC_INFINITY);
             NewField->getXY(Point(x,y+2))->setMetric(FieldMember::METRIC_INFINITY);
         }
         else if((NewField->getCellType(Point(x,y+1))==STONE))
@@ -174,13 +170,13 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed)
             if((NewField->getCellType(Point(x+1,y))==EMPTY) &&
                 (NewField->getCellType(Point(x+1,y+1))==EMPTY))
             {
-                NewField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_INFINITY);
+                //NewField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_INFINITY);
                 NewField->getXY(Point(x+1,y+2))->setMetric(FieldMember::METRIC_INFINITY);
             }
             else if((NewField->getCellType(Point(x-1,y))==EMPTY) &&
                 (NewField->getCellType(Point(x-1,y+1))==EMPTY))
             {
-                NewField->getXY(Point(x-1,y+1))->setMetric(FieldMember::METRIC_INFINITY);
+                //NewField->getXY(Point(x-1,y+1))->setMetric(FieldMember::METRIC_INFINITY);
                 NewField->getXY(Point(x-1,y+2))->setMetric(FieldMember::METRIC_INFINITY);
             }
         }
@@ -188,14 +184,18 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed)
                         (NewField->getCellType(Point(x+1,y))==EMPTY) &&
                         (NewField->getCellType(Point(x+1,y+1))==EMPTY))
         {
-            NewField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_INFINITY);
+            //NewField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_INFINITY);
             NewField->getXY(Point(x+1,y+2))->setMetric(FieldMember::METRIC_INFINITY);
         }
         
         it++;
     }
     
+    
     Point DestroyCrd=pField->getRobot()->getCoordinate()+Point(0,-1); //test to robot destruction
+    
+    if(NewField->getCellType(DestroyCrd)==STONE) NewField->getXY(DestroyCrd+Point(0,2))->setMetric(FieldMember::METRIC_INFINITY);
+    
     if((NewField->getCellType(DestroyCrd)==STONE) && 
             (pField->getCellType(DestroyCrd)!=STONE)) 
     {
@@ -208,6 +208,8 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed)
     
     return NewField;
 }
+
+
 
  Field* FieldSim::CalcRobotSteps(Field* pField, std::string Steps, sSimResult* pResult, bool bBrakeWhenWrongStep)
  {
@@ -318,6 +320,5 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed)
              return pField;
          }
      }
-     
      return pField;
  }

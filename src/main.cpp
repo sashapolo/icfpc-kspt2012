@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <iostream>
 #include "stdinclude.h"
-#include "Solver.h"
+
 
 using namespace std;
 
@@ -64,32 +64,32 @@ int main(int argc, char** argv) {
     }
     Field* field2 = field1;
     
-    Solver s;
-    string result = s.solve(field1);
+//    Solver s;
+//    string result = "W";//s.solve(field1);
+//    FieldSim fieldSim;
+//	int nStep=0;
+//	sSimResult res; //Robot simulation result (end state, steps, lambdas, path)
+//
+//	DrawField(field2,&res.path, nStep++);
+//	Field *newField = fieldSim.CalcRobotSteps(field2,result,&res);
+//	DrawField(newField,&res.path, nStep++);
+//	printf("NumSteps: %d, NumLambdas: %d, State: %s\n",res.stepsTaken,res.lambdaReceived,stateToStr(res.state));
+
     FieldSim fieldSim;
-	int nStep=0;
-	sSimResult res; //Robot simulation result (end state, steps, lambdas, path)
-
-	DrawField(field2,&res.path, nStep++);
-	Field *newField = fieldSim.CalcRobotSteps(field2,result,&res);
-	DrawField(newField,&res.path, nStep++);
-	printf("NumSteps: %d, NumLambdas: %d, State: %s\n",res.stepsTaken,res.lambdaReceived,stateToStr(res.state));
-
-    /*FieldSim fieldSim;
     int nStep=0;
-    Field* oldField = field;
+    Field* oldField = field1;
     sSimResult res; //Robot simulation result (end state, steps, lambdas, path)
     char inStr[128];
 
     printf("Controls:\n\tU - up\n\tD - down\n\tL - left\n\tR - right\n\tW - wait\n\tA - abort\nEnter - accept\n");
-    DrawField(field,&res.path, nStep++);
+    DrawField(field1,&res.path, nStep++);
     while(true)
     {
         scanf("%s",inStr);
         Field *newField = fieldSim.CalcRobotSteps(oldField,inStr,&res);
         DrawField(newField,&res.path, nStep++);
-        printf("NumSteps: %d, NumLambdas: %d, State: %s\n",res.stepsTaken,res.lambdaReceived,stateToStr(res.state));
+        printf("NumSteps: %d, NumLambdas: %d, LC: %d, State: %s\n",res.stepsTaken,res.lambdaReceived,newField->getLambdaCount(),stateToStr(res.state));
         oldField = newField;
-    };*/
+    };
     return 0;
 }
