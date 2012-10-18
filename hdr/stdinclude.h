@@ -23,5 +23,7 @@
 
 #include "FieldSim.h"
 
+#include "Solver.h"
+
 #endif	/* STDINCLUDE_H */
 

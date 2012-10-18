@@ -8,11 +8,11 @@
 #ifndef ASTAR_H_
 #define ASTAR_H_
 
+#include <algorithm>
 #include <list>
-#include <iostream>
 #include "Field.h"
-#include "FieldMember.h"
 #include "AStarPoint.h"
+#include "Path.h"
 
 using namespace std;
 
@@ -24,6 +24,10 @@ using namespace std;
  */
 class AStar {
 private:
+	AStarPoint *goal;
+protected:
+	AStarPoint *start;
+	const Field *field;
 
 	//ToDo: реализовать бинарную кучу для открытого списка
 	list<AStarPoint> openedList; //открытый список отсортирован
@@ -33,15 +37,30 @@ private:
 	bool isInClosedList(const AStarPoint&) const;
 	bool isInOpenedList(const AStarPoint&) const;
 	void checkPoint(const AStarPoint&, const AStarPoint&);
-	void addNeighboursToOpenedList(const AStarPoint&, const AStarPoint&, const Field&);
+	virtual void addNeighboursToOpenedList(const AStarPoint&);
+	Path constructPath(const AStarPoint*) const;
+private:
+	int calculateHeuristics(const AStarPoint&) const;
+
 public:
-       /**
-        * AStar.h
-        *
-        *  Created on: Sep 26, 2012
-        *      Author: alexander
-        */
 	vector<Point> solve(const Point&, const Point&, const Field&);
+
+	AStar(const Field* field, const FieldMember* s, const FieldMember* g = NULL) {
+		this->field = field;
+		start = new AStarPoint(s);
+		if (goal != NULL) {
+			goal = new AStarPoint(g);
+		} else {
+			goal = NULL;
+		}
+	}
+
+	const Path solve();
+
+	virtual ~AStar() {
+		delete start;
+		delete goal;
+	}
 };
 
 #endif /* ASTAR_H_ */

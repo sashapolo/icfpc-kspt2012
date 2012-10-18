@@ -8,7 +8,7 @@
 #ifndef FIELDSIM_H
 #define	FIELDSIM_H
 
-void DrawField(Field* pField, Path* pPath=NULL, int nStep=0);
+void DrawField(Field* pField, Path* pPath=0, int nStep=0);
 
 enum eEndState
 {
