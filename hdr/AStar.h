@@ -1,4 +1,4 @@
-/*
+/**
  * AStar.h
  *
  *  Created on: Sep 26, 2012
@@ -11,9 +11,8 @@
 #include <queue>
 #include <set>
 #include <algorithm>
-#include "Field.h"
-#include "FieldSim.h"
 #include "AStarPoint.h"
+#include "FieldSim.h"
 
 using namespace std;
 using namespace AStarNode;
@@ -22,16 +21,19 @@ class AStar {
 protected:
 	AStarPoint *start;
 	const FieldSim fieldSim;
+	const FieldMember *goal;
 
 	priority_queue<AStarPoint*, vector<AStarPoint*>, AStarPointComparator> openedList;
-	set<const AStarPoint*> closedList;
+	set<AStarPoint*> closedList;
 
 	bool isInClosedList(const AStarPoint*) const;
 	void checkPoint(Point point, const AStarPoint& current, string move);
 	void addNeighboursToOpenedList(const AStarPoint&);
 	virtual int calculateHeuristics(const AStarPoint&) const;
+	bool findNewGoal(const Field* pField);
 
 public:
+	vector<Point> solve(const Point&, const Point&, const Field&);
 
 	AStar(const Field* pField, const FieldMember* s);
 	const string solve();

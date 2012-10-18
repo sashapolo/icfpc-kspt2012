@@ -5,6 +5,8 @@
 #include <cppunit/TestResultCollector.h>
 #include <cppunit/TestRunner.h>
 
+#include "FieldTest.h"
+
 //int main() {
 //    // Create the event manager and test controller
 //    CPPUNIT_NS::TestResult controller;

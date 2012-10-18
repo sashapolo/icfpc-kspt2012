@@ -10,7 +10,7 @@
 
 #include "stdinclude.h"
 
-void DrawField(Field* pField, Path* pPath=NULL, int nStep=0);
+void DrawField(Field* pField, Path* pPath=0, int nStep=0);
 
 enum eEndState
 {
@@ -20,7 +20,7 @@ enum eEndState
     ES_FINISHED,   //Робот зашел в лифт
     ES_ABORTED,     //Сигнал аборта
     ES_WRONG_STEP,   //Неправильный ход (в стену и т.п.)
-    ES_ERROR         //Ошибка 
+    ES_ERROR         //Ошибка
 };
 
 struct sSimResult

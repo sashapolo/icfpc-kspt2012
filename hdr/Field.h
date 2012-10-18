@@ -13,6 +13,9 @@
 
 using namespace std;
 
+/**
+ * Represents field.
+ */
 class Field {
 private:
     vector< vector<FieldMember*> > field;
@@ -103,7 +106,7 @@ public:
 
     Field& operator=(const Field&);
 
-    int getDistance(const Point& from, const Point to) const;
+    int getDistance(const Point& from, const Point& to) const;
 };
 
 #endif	/* FIELD_H */

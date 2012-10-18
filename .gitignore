@@ -1,4 +1,5 @@
 # Compiled Object files
+obj/
 *.slo
 *.lo
 *.o
@@ -14,10 +15,6 @@
 # NetBeans project
 build/
 nbproject/
-# It's not good to ignore makefile, but it has includes from nbproject/
-# If we'll preserve it, project will not compile.
-# It's better to create a new project with new makefile on each computer.
-Makefile
 
 # Eclipse project
 Debug/
@@ -26,6 +23,9 @@ Debug/
 .project
 .settings
 /dist/
+
+# Generated documentation
+doc/doxygen/html
 
 # Logger data
 LOG.html

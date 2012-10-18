@@ -11,6 +11,7 @@
 #include "stdinclude.h"
 #include "Solver.h"
 
+
 using namespace std;
 
 Field* createField(const string mapFileName) {
@@ -57,6 +58,7 @@ int main(int argc, char** argv) {
     Logger.Init("LOG.html","MainLog");
     SetLogger(&Logger);
     
+
     Field* field = createField("res/maps/test_field.txt");
 	if (!field) {
 		printf("Map load error! (See LOG.html)\n");

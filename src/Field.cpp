@@ -237,9 +237,12 @@ void Field::swap(const Point &cell1, const Point &cell2) {
     FieldMember* tmp2 = getXY(cell2);
     tmp2->setCoordinate(cell1);
     
-    FieldMember t = *tmp2;
-    setFieldMember(*tmp1);
-    setFieldMember(t);
+    field[cell1.y][cell1.x]=tmp2;
+    field[cell2.y][cell2.x]=tmp1;
+    
+    //FieldMember t = *tmp2;
+    //setFieldMember(*tmp1);
+    //setFieldMember(t);
 }
 
 CellType Field::getCellType(const Point &point) const {
@@ -277,7 +280,7 @@ int Field::getStoneCount() const {
 	return stoneCache.size();
 };
 
-int Field::getDistance(const Point& from, const Point to) const {
+int Field::getDistance(const Point& from, const Point& to) const {
 	int x = from.x - to.x;
 	int y = from.y - to.y;
 	x = (x < 0)? -x : x;

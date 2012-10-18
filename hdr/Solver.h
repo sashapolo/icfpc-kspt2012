@@ -8,8 +8,10 @@
 #ifndef SOLVER_H_
 #define SOLVER_H_
 
-#include "Dijkstra.h"
-#include "FieldSim.h"
+//#include "Dijkstra.h"
+//#include "FieldSim.h"
+//
+#include "AStar.h"
 using namespace std;
 
 class Solver {

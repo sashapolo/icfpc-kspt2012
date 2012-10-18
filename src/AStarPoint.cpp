@@ -25,7 +25,7 @@ AStarPoint::AStarPoint(const AStarPoint& orig) {
 
 bool AStarPoint::isGoalReached() const {
 	//return pField->lambdaCacheEmpty();
-	return (this->pCell->getCoordinate().x == 10 && this->pCell->getCoordinate().y == 3);
+	return H == 0;
 }
 
 const Field* AStarPoint::getField() const {
@@ -46,6 +46,10 @@ int AStarPoint::getGeneralCost() const {
 
 void AStarPoint::setGeneralCost(int G) {
 	this->G = G;
+}
+
+int AStarPoint::getHeuristics() const {
+	return H;
 }
 
 void AStarPoint::setHeuristics(int H) {

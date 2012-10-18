@@ -4,7 +4,6 @@
  *  Created on: Oct 15, 2012
  *      Author: alexander
  */
-
 #include "Solver.h"
 
 string Solver::solve(Field* pField) const {

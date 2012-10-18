@@ -35,6 +35,7 @@ namespace AStarNode {
 		int getGeneralCost() const;
 		void setGeneralCost(int G);
 
+		int getHeuristics() const;
 		void setHeuristics(int H);
 
 		const FieldMember* getCell() const;
@@ -45,14 +46,14 @@ namespace AStarNode {
 	//	bool operator<(const AStarPoint* a) const;
 	};
 
-	struct AStarPointComparator: public binary_function< AStarPoint*,AStarPoint*,bool > {
+	struct AStarPointComparator: public binary_function< AStarPoint*, AStarPoint*, bool > {
 		bool operator()(const AStarPoint* pL, const AStarPoint* pR) const {
 			return (pL->getPathCost() > pR->getPathCost());
 		}
 	};
 
 	template <class T>
-	struct Comparator: public binary_function<T,T,bool> {
+	struct Comparator: public binary_function<T, T, bool> {
 		bool operator()(const T& l, const T& r) const {
 			return (*l == *r);
 		}

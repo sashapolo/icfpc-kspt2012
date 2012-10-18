@@ -116,7 +116,6 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed) const
                 {
                     pField->write(Point(x,y),EMPTY);
                     pField->write(Point(x,y+1),STONE);
-                    pField->getXY(Point(x,y+1))->setMetric(FieldMember::METRIC_NORMAL);
                 }
                 else if((pField->getCellType(Point(x,y+1))==STONE))
                 {
@@ -125,14 +124,12 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed) const
                     {
                         pField->write(Point(x,y),EMPTY);
                         pField->write(Point(x+1,y+1),STONE);
-                        pField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_NORMAL);
                     }
                     else if((pField->getCellType(Point(x-1,y))==EMPTY) &&
                         (pField->getCellType(Point(x-1,y+1))==EMPTY))
                     {
                         pField->write(Point(x,y),EMPTY);
                         pField->write(Point(x-1,y+1),STONE);
-                        pField->getXY(Point(x-1,y+1))->setMetric(FieldMember::METRIC_NORMAL);
                     }
                 }
                 else if((pField->getCellType(Point(x,y+1))==LAMBDA) &&
@@ -141,7 +138,6 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed) const
                 {
                     pField->write(Point(x,y),EMPTY);
                     pField->write(Point(x+1,y+1),STONE);
-                    pField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_NORMAL);
                 }
             }
         }
@@ -151,7 +147,6 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed) const
     {
         pField->write(pField->getLift()->getCoordinate(),OPENED_LIFT);
     }
-    
     
     
     //Calculate stone metric (need simple next step sim)
@@ -164,7 +159,7 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed) const
         
         if(pField->getCellType(Point(x,y+1))==EMPTY)
         {
-            pField->getXY(Point(x,y+1))->setMetric(FieldMember::METRIC_INFINITY);
+            //pField->getXY(Point(x,y+1))->setMetric(FieldMember::METRIC_INFINITY);
             pField->getXY(Point(x,y+2))->setMetric(FieldMember::METRIC_INFINITY);
         }
         else if((pField->getCellType(Point(x,y+1))==STONE))
@@ -172,13 +167,13 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed) const
             if((pField->getCellType(Point(x+1,y))==EMPTY) &&
                 (pField->getCellType(Point(x+1,y+1))==EMPTY))
             {
-                pField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_INFINITY);
+                //pField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_INFINITY);
                 pField->getXY(Point(x+1,y+2))->setMetric(FieldMember::METRIC_INFINITY);
             }
             else if((pField->getCellType(Point(x-1,y))==EMPTY) &&
                 (pField->getCellType(Point(x-1,y+1))==EMPTY))
             {
-                pField->getXY(Point(x-1,y+1))->setMetric(FieldMember::METRIC_INFINITY);
+                //pField->getXY(Point(x-1,y+1))->setMetric(FieldMember::METRIC_INFINITY);
                 pField->getXY(Point(x-1,y+2))->setMetric(FieldMember::METRIC_INFINITY);
             }
         }
@@ -186,14 +181,17 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed) const
                         (pField->getCellType(Point(x+1,y))==EMPTY) &&
                         (pField->getCellType(Point(x+1,y+1))==EMPTY))
         {
-            pField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_INFINITY);
+            //pField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_INFINITY);
             pField->getXY(Point(x+1,y+2))->setMetric(FieldMember::METRIC_INFINITY);
         }
         
         it++;
     }
     
+    
     Point DestroyCrd=pField->getRobot()->getCoordinate()+Point(0,-1); //test to robot destruction
+    if(pField->getCellType(DestroyCrd)==STONE) pField->getXY(DestroyCrd+Point(0,2))->setMetric(FieldMember::METRIC_INFINITY);
+    
     if((pField->getCellType(DestroyCrd)==STONE) &&
             (pField->getCellType(DestroyCrd)!=STONE)) 
     {
@@ -206,6 +204,7 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed) const
     
     return pField;
 }
+
 
  Field* FieldSim::CalcRobotSteps(const Field* pField, std::string Steps, sSimResult* pResult, bool bBrakeWhenWrongStep) const
  {
@@ -317,6 +316,5 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed) const
              return result;
          }
      }
-     
      return result;
  }

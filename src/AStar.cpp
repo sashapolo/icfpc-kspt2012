@@ -1,4 +1,4 @@
-/*
+/**
  * AStar.cpp
  *
  *  Created on: Sep 26, 2012
@@ -10,7 +10,8 @@
 #include <iostream>
 
 AStar::AStar(const Field* pField, const FieldMember* s): fieldSim() {
-	start = new AStarPoint(pField, s);
+	start = new AStarPoint(pField, s, 0, 1);
+	goal = NULL;
 	openedList.push(start);
 }
 
@@ -20,20 +21,23 @@ AStar::~AStar() {
 
 // Реализация алгоритма А*
 const string AStar::solve() {
-	const AStarPoint *current = start;
-	while (!openedList.empty() && !current->isGoalReached()) {
+	if (!findNewGoal(start->getField())) {
+		return "";
+	}
+	AStarPoint *current = start;
+	while (!openedList.empty()) {
+		if (current->isGoalReached()) {
+			AStar astar(current->getField(), current->getCell());
+			return current->getPath() + astar.solve();
+		}
 		openedList.pop();
 		if (!isInClosedList(current)) {
-			cout<<"Current position is "<<current->getCell()->getCoordinate().x<<";"<<current->getCell()->getCoordinate().y<<endl;
 			addNeighboursToOpenedList(*current);
 			closedList.insert(current);
 		}
 		current = openedList.top();
 	}
-	if (openedList.empty()) {
-		return "";
-	}
-	return current->getPath();
+	return "A";
 }
 
 
@@ -56,26 +60,48 @@ void AStar::checkPoint(Point point, const AStarPoint& current, string move) {
 		// утечка?
 		AStarPoint *result = new AStarPoint(newField, newField->getXY(point), newCost, 0, current.getPath(), move);
 		result->setHeuristics(calculateHeuristics(*result));
-		openedList.push(result);
+		if (!isInClosedList(result)) {
+			openedList.push(result);
+		}
 	}
 }
 
 
 bool AStar::isInClosedList(const AStarPoint* pCurrent) const {
-	set<const AStarPoint*>::const_iterator it = find_if(closedList.begin(), closedList.end(),
+	set<AStarPoint*>::const_iterator it = find_if(closedList.begin(), closedList.end(),
 			bind2nd(Comparator<const AStarPoint*>(), pCurrent));
 	return (it != closedList.end());
 }
 
 
+
 int AStar::calculateHeuristics(const AStarPoint& current) const {
-	list<FieldMember*>::const_iterator it = current.getField()->getLambdaCacheIt();
-	int min = current.getField()->getDistance((*it++)->getCoordinate(), current.getCell()->getCoordinate());
-	for (; it != current.getField()->getLambdaCacheEnd(); it++) {
-		int tmp = current.getField()->getDistance((*it)->getCoordinate(), current.getCell()->getCoordinate());
+//	list<FieldMember*>::const_iterator it = current.getField()->getLambdaCacheIt();
+//	int min = current.getField()->getDistance((*it++)->getCoordinate(), current.getCell()->getCoordinate());
+//	for (; it != current.getField()->getLambdaCacheEnd(); it++) {
+//		int tmp = current.getField()->getDistance((*it)->getCoordinate(), current.getCell()->getCoordinate());
+//		if (min > tmp) {
+//			min = tmp;
+//		}
+//	}
+//	return min * 10;
+	return current.getField()->getDistance(current.getCell()->getCoordinate(), goal->getCoordinate()) * 10;
+}
+
+bool AStar::findNewGoal(const Field* pField) {
+	if (pField->lambdaCacheEmpty()) {
+		return false;
+	}
+	list<FieldMember*>::const_iterator it = pField->getLambdaCacheIt();
+	Point start = pField->getRobot()->getCoordinate();
+	goal = *it;
+	int min = pField->getDistance((*it++)->getCoordinate(), start);
+	for (; it != pField->getLambdaCacheEnd(); it++) {
+		int tmp = pField->getDistance((*it)->getCoordinate(), start);
 		if (min > tmp) {
 			min = tmp;
+			goal = *it;
 		}
 	}
-	return min * 10;
+	return true;
 }
