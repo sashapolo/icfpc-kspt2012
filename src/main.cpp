@@ -88,7 +88,7 @@ int main(int argc, char** argv) {
         scanf("%s",inStr);
         Field *newField = fieldSim.CalcRobotSteps(oldField,inStr,&res);
         DrawField(newField,&res.path, nStep++);
-        printf("NumSteps: %d, NumLambdas: %d, LC: %d, State: %s\n",res.stepsTaken,res.lambdaReceived,newField->getLambdaCount(),stateToStr(res.state));
+        printf("Score: %d, NumSteps: %d, NumLambdas: %d, LC: %d, State: %s\n",res.score,res.stepsTaken,res.lambdaReceived,newField->getLambdaCount(),stateToStr(res.state));
         oldField = newField;
     };
     return 0;
