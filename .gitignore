@@ -12,6 +12,10 @@ obj/
 *.la
 *.a
 
+# Compiled Executables
+icfpc_solver
+tester
+
 # NetBeans project
 build/
 nbproject/
@@ -22,10 +26,12 @@ Debug/
 .cproject
 .project
 .settings
-/dist/
 
 # Generated documentation
 doc/doxygen/html
 
 # Logger data
 LOG.html
+
+# Emacs temporary files
+*~

@@ -1,40 +1,51 @@
-LIBS=-lcppunit
+EXE = icfpc_solver
+TESTEXE = tester
 
-CC=g++
-CFLAGS=-I hdr/ -c
+SRC_DIR = src
+HDR_DIR = hdr
+OBJ_DIR = obj
+TST_DIR = tests
 
-LD=g++
-LFLAGS=-o
+CC = g++
+CFLAGS = -I $(HDR_DIR) -Wall
 
-SRC=src/*.cpp
-TSTSRC=tests/*.cpp
-OBJ=*.o
-OBJ_DIR=dist/
+LD = g++
+LFLAGS = -Wall
+LIBS = -lcppunit
 
-TGTOBJ=-o obj/icfpc_solver
-TSTOBJ=-o obj/test_runner
+SRCS = $(foreach sdir, $(SRC_DIR), $(wildcard $(sdir)/*.cpp))
+OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS)) 
+TESTSRCS = $(foreach sdir, $(TST_DIR), $(wildcard $(sdir)/*.cpp))
+TESTOBJS = $(patsubst $(TST_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(TESTSRCS)) 
 
-TGTELF=-o dist/icfpc_solver
-TSTELF=-o dist/test_runner
+DOXYGENCFG = doc/doxygen/doxygen-config
 
-DOXYGENCFG=doc/doxygen/doxygen-config
 
-all: icfpc_solver test_runner
+all: create_object_dir $(EXE) $(TESTEXE) 
 
-icfpc_solver:
-	$(CC) $(CFLAGS) $(SRC) 
-	$(LD) $(LFLAGS) "icfpc_solver" $(OBJ) $(LIBS)
+create_object_dir:
+	@mkdir -p $(OBJ_DIR)
+
+# Main executable
+icfpc_solver: $(OBJS)
+	$(LD) $(LFLAGS) $^ -o $@ 
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # Executable to run the tests
-test_runner:
-#	$(CC) $(CFLAGS) $(TSTOBJ) $(TST)
-#	$(LD) $(TSTELF) $(TSTOBJ) $(LIBS)
-	$(CC) $(LIBS) -I hdr $(TSTELF) $(TSTSRC)
+tester: $(TESTOBJS)
+	$(LD) $(LFLAGS) $(LIBS) $^ -o $@
+
+$(OBJ_DIR)/%.o: $(TST_DIR)/%.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # Generate documentation
 doxygen:
 	doxygen $(DOXYGENCFG)
-
+	
+# Clean the project
 clean:
-	rm -rf *.o
-	rm -rf icfpc_solver
+	@rm -rf $(OBJ_DIR)
+	@rm $(EXE)
+	@rm $(TESTEXE) 

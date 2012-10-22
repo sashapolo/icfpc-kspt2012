@@ -44,17 +44,17 @@ const string AStar::solve() {
 void AStar::addNeighboursToOpenedList(const AStarPoint& current) {
 	int x = current.getCell()->getCoordinate().x;
 	int y = current.getCell()->getCoordinate().y;
-	checkPoint(Point(x, y+1), current, "D");
-	checkPoint(Point(x, y-1), current, "U");
-	checkPoint(Point(x-1, y), current, "L");
-	checkPoint(Point(x+1, y), current, "R");
+	checkPoint(Point(x, y + 1), current, "D");
+	checkPoint(Point(x, y - 1), current, "U");
+	checkPoint(Point(x - 1, y), current, "L");
+	checkPoint(Point(x + 1, y), current, "R");
 }
 
 
 void AStar::checkPoint(Point point, const AStarPoint& current, string move) {
 	const FieldMember *tmp = current.getField()->getXY(point);
 	if (tmp->isPassable()) {
-		sSimResult res;
+        sSimResult res;
 		Field* newField = fieldSim.CalcRobotSteps(current.getField(), move, &res);
 		int newCost = current.getGeneralCost() + tmp->getMetric();
 		// утечка?
