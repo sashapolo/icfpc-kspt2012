@@ -231,6 +231,7 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed) const
              case 'A': 
                  pResult->state=ES_ABORTED;
                  pResult->stepsTaken++;
+                 pResult->score+=pResult->lambdaReceived*25; //?
                  return result;
              default: 
                  pResult->state=ES_ERROR;
@@ -240,6 +241,7 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed) const
          
          AbsNextPos=result->getRobot()->getCoordinate()+NextPos;
          pResult->stepsTaken++;
+         pResult->score--;
          pResult->state=ES_NONE;
          switch(result->getCellType(AbsNextPos)) //step solve
          {
@@ -292,9 +294,11 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed) const
                  pResult->path.addCell(AbsNextPos);
                  pResult->lambdaReceived++;
                  pResult->state=ES_EAT_LAMBDA;
+                 pResult->score+=25;
                  break;
              case OPENED_LIFT: 
                  pResult->state=ES_FINISHED;
+                 pResult->score+=pResult->lambdaReceived*50; //?
                  return result;
              default:
                  pResult->state=ES_WRONG_STEP;

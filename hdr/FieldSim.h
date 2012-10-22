@@ -30,10 +30,12 @@ struct sSimResult
         lambdaReceived=0;
         stepsTaken=0;
         state=ES_NONE;
+        score=0;
     }
           
     int lambdaReceived;
     int stepsTaken;
+    int score;
     eEndState state;
     Path path;
 };
