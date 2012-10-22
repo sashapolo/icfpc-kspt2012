@@ -52,6 +52,29 @@ Field* createField(const string mapFileName) {
 }
 
 
+void drawStepByStep(Field* const pField, const string path) {
+	FieldSim fieldSim;
+	sSimResult res;
+	int nStep = 0;
+	drawField(pField, &res.path, nStep++);
+	string t;
+	t += path[0];
+	Field *newField = fieldSim.calcRobotSteps(pField, t, &res);
+	for (unsigned int i = 1; i < path.size(); i++) {
+		drawField(newField, &res.path, nStep++);
+		string t;
+		t += path[i];
+		newField = fieldSim.calcRobotSteps(newField, t, &res);
+	}
+	printf("Score: %d, NumSteps: %d, NumLambdas: %d, LC: %d, State: %s\n",
+			res.score,
+			res.stepsTaken,
+			res.lambdaReceived,
+			newField->getLambdaCount(),
+			stateToStr(res.state));
+}
+
+
 int main(int argc, char** argv) {
     if (argc != 2) {
     	printf("Usage: solver <map path>\n");
@@ -67,16 +90,10 @@ int main(int argc, char** argv) {
 		printf("Map load error! (See LOG.html)\n");
 		return 0;
 	}
-	FieldSim fieldSim;
-	int nStep=0;
 	Solver s;
 	string result = s.solve(field);
-	sSimResult res; //Robot simulation result (end state, steps, lambdas, path)
-	drawField(field, &res.path, nStep++);
-	Field *newField = fieldSim.calcRobotSteps(field,result,&res);
-	drawField(newField,&res.path, nStep++);
-	printf("Score: %d, NumSteps: %d, NumLambdas: %d, LC: %d, State: %s\n",res.score,res.stepsTaken,res.lambdaReceived,newField->getLambdaCount(),stateToStr(res.state));
 	cout<<result<<'\n';
+	drawStepByStep(field, result);
 
 //    printf("Controls:\n\tU - up\n\tD - down\n\tL - left\n\tR - right\n\tW - wait\n\tA - abort\nEnter - accept\n");
 //    DrawField(field1,&res.path, nStep++);
