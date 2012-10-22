@@ -17,6 +17,7 @@ using namespace std;
 class Solver {
 private:
 	string convertResultToString(const Path&) const;
+	FieldMember* const findNewGoal(Field* const pField) const;
 public:
 	string solve(Field*) const;
 };

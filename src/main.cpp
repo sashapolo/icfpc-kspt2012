@@ -72,11 +72,11 @@ int main(int argc, char** argv) {
 	Solver s;
 	string result = s.solve(field);
 	sSimResult res; //Robot simulation result (end state, steps, lambdas, path)
-	DrawField(field, &res.path, nStep++);
-	Field *newField = fieldSim.CalcRobotSteps(field,result,&res);
-	DrawField(newField,&res.path, nStep++);
+	drawField(field, &res.path, nStep++);
+	Field *newField = fieldSim.calcRobotSteps(field,result,&res);
+	drawField(newField,&res.path, nStep++);
 	printf("Score: %d, NumSteps: %d, NumLambdas: %d, LC: %d, State: %s\n",res.score,res.stepsTaken,res.lambdaReceived,newField->getLambdaCount(),stateToStr(res.state));
-
+	cout<<result<<'\n';
 
 //    printf("Controls:\n\tU - up\n\tD - down\n\tL - left\n\tR - right\n\tW - wait\n\tA - abort\nEnter - accept\n");
 //    DrawField(field1,&res.path, nStep++);

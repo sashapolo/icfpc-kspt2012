@@ -19,24 +19,21 @@ using namespace AStarNode;
 
 class AStar {
 protected:
-	AStarPoint *start;
 	const FieldSim fieldSim;
-	const FieldMember *goal;
+	AStarPoint *const start;
+	FieldMember *const goal;
 
-	priority_queue<AStarPoint*, vector<AStarPoint*>, AStarPointComparator> openedList;
+	priority_queue<AStarPoint*, vector<AStarPoint*>, PointerComparatorMore<AStarPoint*> > openedList;
 	set<AStarPoint*> closedList;
 
-	bool isInClosedList(const AStarPoint*) const;
+	bool isInClosedList(AStarPoint* const) const;
 	void checkPoint(Point point, const AStarPoint& current, string move);
 	void addNeighboursToOpenedList(const AStarPoint&);
 	virtual int calculateHeuristics(const AStarPoint&) const;
-	bool findNewGoal(const Field* pField);
 
 public:
-	vector<Point> solve(const Point&, const Point&, const Field&);
-
-	AStar(const Field* pField, const FieldMember* s);
-	const string solve();
+	AStar(Field* const, FieldMember* const, FieldMember* const);
+	string solve(Field**);
 	virtual ~AStar();
 };
 

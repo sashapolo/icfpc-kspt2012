@@ -8,7 +8,7 @@
 #include "FieldSim.h"
 
 /////////////////////////////////////////////
-void DrawField(Field* pField, Path* pPath,  int nStep)
+void drawField(Field* pField, Path* pPath,  int nStep)
 {
     CellType cell;
     char cellsymb;
@@ -94,7 +94,7 @@ FieldSim::FieldSim(const FieldSim& orig) {
 FieldSim::~FieldSim() {
 }
 
-Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed) const
+Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
 {
     if(!pField->isRobotAlive())
     {
@@ -190,7 +190,9 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed) const
     
     
     Point DestroyCrd=pField->getRobot()->getCoordinate()+Point(0,-1); //test to robot destruction
-    if(pField->getCellType(DestroyCrd)==STONE) pField->getXY(DestroyCrd+Point(0,2))->setMetric(FieldMember::METRIC_INFINITY);
+    if(pField->getCellType(DestroyCrd)==STONE)
+    	pField->getXY(DestroyCrd+Point(0,2))->setMetric(FieldMember::METRIC_INFINITY);
+
     
     if((pField->getCellType(DestroyCrd)==STONE) &&
             (pField->getCellType(DestroyCrd)!=STONE)) 
@@ -206,7 +208,7 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed) const
 }
 
 
- Field* FieldSim::CalcRobotSteps(const Field* pField, std::string Steps, sSimResult* pResult, bool bBrakeWhenWrongStep) const
+ Field* FieldSim::calcRobotSteps(const Field* pField, std::string Steps, sSimResult* pResult, bool bBrakeWhenWrongStep) const
  {
 	 Field *result = new Field(*pField);
      if(!pField->isRobotAlive()) {
@@ -313,7 +315,7 @@ Field* FieldSim::CalcNextState(Field* pField, bool* pRobotDestroyed) const
                  break;
          }
          
-         result = CalcNextState(result,&bDestroyed);
+         result = calcNextState(result,&bDestroyed);
          if(bDestroyed)
          {
              pResult->state=ES_DESTROYED;

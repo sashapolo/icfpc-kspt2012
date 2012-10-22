@@ -66,7 +66,7 @@ public:
      *
      * param pPoint pointer to the point object representing coordinates of the cell to retrieve
      */
-    const FieldMember* getXY(const Point &point) const;
+    FieldMember* const getXY(const Point &point) const;
     FieldMember* getXY(const Point &point);
 
     pair<int, int> getSize() const;
@@ -94,10 +94,10 @@ public:
      */
     void setFieldMember(const FieldMember& fieldMember);
 
-    const FieldMember* getRobot() const;
+    FieldMember* const getRobot() const;
     FieldMember* getRobot();
 
-    const FieldMember* getLift() const;
+    FieldMember* const getLift() const;
 
     bool isRobotAlive() const;
     

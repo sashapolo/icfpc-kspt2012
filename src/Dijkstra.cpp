@@ -7,12 +7,11 @@
 
 #include "Dijkstra.h"
 
-//Dijkstra temporally deprecated
+//Dijkstra is temporally deprecated
 
 //void Dijkstra::addNeighboursToOpenedList(const AStarPoint& current) {
 //	int x = current.getCell()->getCoordinate().x;
 //	int y = current.getCell()->getCoordinate().y;
-//	// ToDo: убрать здесь утечку
 //	AStarPoint *newPoint = new AStarPoint(current);
 //	AStarPoint down(field->getXY(Point(x, y + 1)), newPoint);
 //	checkPoint(down, *newPoint);

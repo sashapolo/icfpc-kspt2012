@@ -8,17 +8,15 @@
 #include "AStarPoint.h"
 using namespace AStarNode;
 
-AStarPoint::AStarPoint(const Field *pField, const FieldMember *cell, int cost, int heuristicsValue, string path, string move) {
-	this->pField = pField;
-	pCell = cell;
+AStarPoint::AStarPoint(Field* const field, FieldMember* const cell,
+		int cost, int heuristicsValue, string path, string move):
+				pField(field), pCell(cell) {
 	G = cost;
 	H = heuristicsValue;
 	this->path = path + move;
 }
 
-AStarPoint::AStarPoint(const AStarPoint& orig) {
-	pField = orig.pField;
-	pCell = orig.pCell;
+AStarPoint::AStarPoint(const AStarPoint& orig): pField(orig.pField), pCell(orig.pCell) {
 	G = orig.G;
 	H = orig.H;
 }
@@ -28,7 +26,7 @@ bool AStarPoint::isGoalReached() const {
 	return H == 0;
 }
 
-const Field* AStarPoint::getField() const {
+Field* const AStarPoint::getField() const {
 	return pField;
 }
 
@@ -56,7 +54,7 @@ void AStarPoint::setHeuristics(int H) {
 	this->H = H;
 }
 
-const FieldMember* AStarPoint::getCell() const {
+FieldMember* const AStarPoint::getCell() const {
 	return pCell;
 }
 
@@ -64,15 +62,6 @@ bool AStarPoint::operator== (const AStarPoint& x) const {
 	return (pCell->getCoordinate() == x.getCell()->getCoordinate());
 }
 
-//bool AStarPoint::operator== (const AStarPoint* x) const {
-//	return (pCell->getCoordinate() == x->getCell()->getCoordinate());
-//}
-//
-//
-//bool AStarPoint::operator()(const AStarPoint& a1, const AStarPoint& a2) {
-//	return (a1.getPathCost() > a2.getPathCost());
-//}
-//
-//bool AStarPoint::operator<(const AStarPoint* a) const {
-//	return (this->getPathCost() < a->getPathCost());
-//}
+bool AStarPoint::operator>(const AStarPoint& x) const {
+	return (this->getPathCost() > x.getPathCost());
+}

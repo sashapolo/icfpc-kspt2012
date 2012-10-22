@@ -10,7 +10,7 @@
 
 #include "stdinclude.h"
 
-void DrawField(Field* pField, Path* pPath=0, int nStep=0);
+void drawField(Field* pField, Path* pPath=0, int nStep=0);
 
 enum eEndState
 {
@@ -48,8 +48,8 @@ public:
     FieldSim(const FieldSim& orig);
     virtual ~FieldSim();
     
-    Field* CalcNextState(Field* pField, bool* pRobotDestroyed=NULL) const;
-    Field* CalcRobotSteps(const Field* pField, std::string Steps, sSimResult* pResult, bool bBrakeWhenWrongStep=false) const;
+    Field* calcNextState(Field* pField, bool* pRobotDestroyed=NULL) const;
+    Field* calcRobotSteps(const Field* pField, std::string Steps, sSimResult* pResult, bool bBrakeWhenWrongStep=false) const;
 private:
 
 };

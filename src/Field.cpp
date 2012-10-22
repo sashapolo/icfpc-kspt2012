@@ -47,7 +47,7 @@ list<FieldMember*>::iterator Field::deleteStoneFromCache(list<FieldMember*>::ite
 	return stoneCache.erase(it);
 }
 
-const FieldMember* Field::getXY(const Point &point) const {
+FieldMember* const Field::getXY(const Point &point) const {
     return field.at(point.y).at(point.x);
 }
 
@@ -256,7 +256,7 @@ void Field::setFieldMember(const FieldMember& fieldMember) {
     *(field.at(y).at(x)) = fieldMember;
 }
 
-const FieldMember* Field::getRobot() const {
+FieldMember* const Field::getRobot() const {
 	return pRobot;
 }
 
@@ -264,7 +264,7 @@ FieldMember* Field::getRobot() {
 	return pRobot;
 }
 
-const FieldMember* Field::getLift() const {
+FieldMember* const Field::getLift() const {
 	return pLift;
 }
 
