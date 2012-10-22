@@ -11,7 +11,6 @@
 #include "stdinclude.h"
 #include "Solver.h"
 
-
 using namespace std;
 
 Field* createField(const string mapFileName) {
@@ -54,12 +53,16 @@ Field* createField(const string mapFileName) {
 
 
 int main(int argc, char** argv) {
-    HTMLLogger Logger;
+    if (argc != 2) {
+    	printf("Usage: solver <map path>\n");
+    	return 1;
+    }
+
+	HTMLLogger Logger;
     Logger.Init("LOG.html","MainLog");
     SetLogger(&Logger);
-    
 
-    Field* field = createField("res/maps/test_field.txt");
+    Field* field = createField(argv[1]);
 	if (!field) {
 		printf("Map load error! (See LOG.html)\n");
 		return 0;
@@ -69,10 +72,10 @@ int main(int argc, char** argv) {
 	Solver s;
 	string result = s.solve(field);
 	sSimResult res; //Robot simulation result (end state, steps, lambdas, path)
-	DrawField(field,&res.path, nStep++);
+	DrawField(field, &res.path, nStep++);
 	Field *newField = fieldSim.CalcRobotSteps(field,result,&res);
 	DrawField(newField,&res.path, nStep++);
-	printf("NumSteps: %d, NumLambdas: %d, State: %s\n",res.stepsTaken,res.lambdaReceived,stateToStr(res.state));
+	printf("Score: %d, NumSteps: %d, NumLambdas: %d, LC: %d, State: %s\n",res.score,res.stepsTaken,res.lambdaReceived,newField->getLambdaCount(),stateToStr(res.state));
 
 
 //    printf("Controls:\n\tU - up\n\tD - down\n\tL - left\n\tR - right\n\tW - wait\n\tA - abort\nEnter - accept\n");

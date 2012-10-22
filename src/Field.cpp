@@ -59,7 +59,7 @@ pair<int, int> Field::getSize() const {
     if (field.size() == 0) {
     	return make_pair(0,0);
     }
-    return make_pair(field.size(), field[0].size());
+    return make_pair(field[0].size(), field.size() - 1);
 }
 // TODO: наверное, этот метод надо оптимизировать, так как создание карты
 // получается путем наращивания векторов,
@@ -74,9 +74,9 @@ Field::Field(const string &ASCIIMap): field(), lambdaCache(), stoneCache() {
      */
 
     int numOfVector = 0,       // Number of field line (Y coordinate)
-        nestedVectorIndex = 0,
+        nestedVectorIndex = 0,	// (X coordinate)
         numOfRobots = 0,
-        numOfLifts = 0; // (X coordinate)
+        numOfLifts = 0;
 
     // Reading the map
     vector<FieldMember*> array;
@@ -153,8 +153,8 @@ Field::Field(const string &ASCIIMap): field(), lambdaCache(), stoneCache() {
 
 Field::Field(const Field& orig): field(orig.field.size(), vector<FieldMember*>(orig.field[0].size())),
 		lambdaCache(), stoneCache() {
-    int ySize = field.size();
-    int xSize = field[0].size();	// так как все массивы одинакового размера
+    int ySize = field.size() - 1;
+    int xSize = field[0].size();
     for (int i = 0; i < ySize; i++) {
     	for (int j = 0; j < xSize; j++) {
     		field[i][j] = new FieldMember(*orig.field[i][j]);

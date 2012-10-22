@@ -7,7 +7,7 @@ OBJ_DIR = obj
 TST_DIR = tests
 
 CC = g++
-CFLAGS = -I $(HDR_DIR) -Wall
+CFLAGS = -I $(HDR_DIR) -Wall -g
 
 LD = g++
 LFLAGS = -Wall
@@ -27,15 +27,15 @@ create_object_dir:
 	@mkdir -p $(OBJ_DIR)
 
 # Main executable
-icfpc_solver: $(OBJS)
-	$(LD) $(LFLAGS) $^ -o $@ 
+$(EXE): $(OBJS)
+	$(LD) $(LFLAGS) $^ -o $(EXE)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Executable to run the tests
-tester: $(TESTOBJS)
-	$(LD) $(LFLAGS) $(LIBS) $^ -o $@
+$(TESTEXE): $(TESTOBJS)
+	$(LD) $(LFLAGS) $(LIBS) $^ -o $(TESTEXE)
 
 $(OBJ_DIR)/%.o: $(TST_DIR)/%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
