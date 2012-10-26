@@ -11,6 +11,11 @@
 #include <vector>
 #include "Point.h"
 
+/**
+ * Путь робота.<br />
+ * Содержит все ходы робота.<br />
+ * Если была команда Wait, то будет повторно записана координата предыдущего шага.
+ */
 class Path {
 	std::vector<Point> path;
 public:
