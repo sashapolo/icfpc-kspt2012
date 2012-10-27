@@ -59,7 +59,7 @@ pair<int, int> Field::getSize() const {
     if (field.size() == 0) {
     	return make_pair(0,0);
     }
-    return make_pair(field[0].size(), field.size() - 1);
+    return make_pair(field[0].size(), field.size());
 }
 // TODO: наверное, этот метод надо оптимизировать, так как создание карты
 // получается путем наращивания векторов,
@@ -72,80 +72,102 @@ Field::Field(const string &ASCIIMap): field(), lambdaCache(), stoneCache() {
      * Further after determining the maximum length
      * all other vectors will be padded with empty cells.
      */
-
-    int numOfVector = 0,       // Number of field line (Y coordinate)
-        nestedVectorIndex = 0,	// (X coordinate)
-        numOfRobots = 0,
-        numOfLifts = 0;
-
-    // Reading the map
-    vector<FieldMember*> array;
+    pRobot=0;
+    pLift=0;
+    // Calculating map size
+    int maxX=0;
+    int maxY=0;
+    int currX=0;
+    int currY=0;
+    bool bEndLine=false;
+    bool bEndCycle=false;
+    int endLine=0;
+    int numSkippedElements=0;
+    int numInsertedElements=0;
+    int numUnknownCharacters=0;
     for(unsigned int i = 0; i < ASCIIMap.length(); i++) {
-        if(ASCIIMap[i] == '\n') {
-            // Jump to the next line
-            numOfVector++;
-            nestedVectorIndex = 0;
-            field.push_back(array);
-            array.clear();
-        } else {
-        	FieldMember* tmp;
-			CellType cellType;
-			Point coor(nestedVectorIndex, numOfVector);
-            switch (ASCIIMap[i]) {
-                case ('R'):
-                	if (++numOfRobots > 1) {
-                		throw FieldParseException();
-                	}
-					cellType = ROBOT;
-                	tmp = new FieldMember(coor, cellType);
-                	this->pRobot = tmp;
-                    break;
-                case ('\\'):
-                    cellType = LAMBDA;
-                    tmp = new FieldMember(coor, cellType);
-                    this->lambdaCache.push_back(tmp);
-                    break;
-                case ('#'):
-                    cellType = WALL;
-                	tmp = new FieldMember(coor, cellType);
-                    break;
-                case (' '):
-                    cellType = EMPTY;
-                	tmp = new FieldMember(coor, cellType);
-                    break;
-                case ('*'):
-                    cellType = STONE;
-                	tmp = new FieldMember(coor, cellType);
-                	this->stoneCache.push_back(tmp);
-                    break;
-                case ('.'):
-					cellType = EARTH;
-					tmp = new FieldMember(coor, cellType);
-					break;
-                case ('L'):
-					if (++numOfLifts > 1) {
-						throw FieldParseException();
-					}
-                    cellType = CLOSED_LIFT;
-                	tmp = new FieldMember(coor, cellType);
-                	this->pLift = tmp;
-                    break;
-                case ('O'):
-					if (++numOfLifts > 1) {
-						throw FieldParseException();
-					}
-                    cellType = OPENED_LIFT;
-                	tmp = new FieldMember(coor, cellType);
-                	this->pLift = tmp;
-                    break;
-                default:
-                	throw FieldParseException();
-                    break;
-            }
-            array.push_back(tmp);
-            nestedVectorIndex++;
+        switch(ASCIIMap[i])
+        {
+            case '\n':
+                if(currX==0) {
+                    if(!bEndLine) {LOGINFO("Map parse: *Skipped after %d line",currY); bEndLine=true; endLine=currY; break;}
+                }
+                else if(bEndLine) {LOGERROR("Map parse: Empty string at %d line",endLine);bEndCycle=true; throw FieldParseException(); break;};
+                if(maxX<currX) maxX=currX;
+                currX=0;
+                currY++;
+                break;
+            case '#':
+            case 'R':
+            case '*':
+            case '\\':
+            case 'L':
+            case '.':
+            case 'O':
+            case ' ':
+                currX++;
+                break; 
+            default:
+                LOGWARNING("Map parse: Unknown character \'%c\' at %d,%d.",ASCIIMap[i],currX,currY);
+                numUnknownCharacters++;
+                continue; 
+        }
+        if(bEndCycle) break;
+    }
+    maxY=currY;
+    
+    LOGINFO("Map parse: Estimated map size: %d,%d",maxX,maxY);
+
+    for(int i=0;i<maxY;i++) 
+    {
+        vector<FieldMember*> tmp;
+        tmp.resize(maxX,0);
+        field.push_back(tmp);
+    };
+    currX=0;
+    currY=0;
+    for(unsigned int i = 0; i < ASCIIMap.length(); i++) {
+        switch(ASCIIMap[i])
+        {
+            case '\n':
+                currX=0;
+                currY++;
+                break;
+            case '#':
+            case 'R':
+            case '*':
+            case '\\':
+            case 'L':
+            case '.':
+            case 'O':
+            case ' ':
+                if((currX<maxX) && (currY<maxY)) {
+                    write(Point(currX,currY),charToCellType(ASCIIMap[i]));
+                }
+                else if(ASCIIMap[i]!=' ') {
+                    numSkippedElements++;
+                }
+                currX++;
+                break;
+            default:
+                continue;
         }
     }
+    
+    for(unsigned int i=0;i<field.size();i++)
+    {
+        for(unsigned int j=0;j<field[i].size();j++)
+        {
+            if(field[i][j]==0) {
+                write(Point(j,i),EMPTY);
+                numInsertedElements++;
+            }
+        }
+    }
+    LOGINFO("Map parse: \n\t\t- Skipped elements: %d\n\t\t- Inserted elements: %d\n\t\t- Wrong characters: %d",
+            numSkippedElements,numInsertedElements,numUnknownCharacters);
+    // Reading the map
+    
     if (!lambdaCache.empty() && pLift->getType() == OPENED_LIFT) {
     	throw FieldParseException();
     }
@@ -153,7 +175,7 @@ Field::Field(const string &ASCIIMap): field(), lambdaCache(), stoneCache() {
 
 Field::Field(const Field& orig): field(orig.field.size(), vector<FieldMember*>(orig.field[0].size())),
 		lambdaCache(), stoneCache() {
-    int ySize = field.size() - 1;
+    int ySize = field.size();
     int xSize = field[0].size();
     for (int i = 0; i < ySize; i++) {
     	for (int j = 0; j < xSize; j++) {
@@ -184,51 +206,60 @@ Field::Field(const Field& orig): field(orig.field.size(), vector<FieldMember*>(o
 
 void Field::write(Point xy, CellType type)
 {
-    CellType prevType=getXY(xy)->getType();
-    if(prevType==type) return;
-    
     FieldMember* pOldMember=field[xy.y][xy.x];
-    delete field[xy.y][xy.x];
     FieldMember* pNewMember=new FieldMember(xy,type);
     field[xy.y][xy.x]=pNewMember;
     
-    list<FieldMember*>::iterator it;
-    if(prevType==LAMBDA)
+    CellType prevType;
+    if(pOldMember)
     {
-        it=getLambdaCacheIt();
-        while(it!=getLambdaCacheEnd())
-        {
-            if((*it)==pOldMember) {(it)=lambdaCache.erase(it); break;}
-            it++;
+        prevType=pOldMember->getType();
+        if(prevType==type) return;
+        
+        list<FieldMember*>::iterator it;
+        if(prevType==LAMBDA){
+            it=getLambdaCacheIt();
+            while(it!=getLambdaCacheEnd())
+            {
+                if((*it)==pOldMember) {(it)=lambdaCache.erase(it); break;}
+                it++;
+            }
         }
-    }
-    else if(prevType==STONE)
-    {
-        it=getStoneCacheIt();
-        while(it!=getStoneCacheEnd())
-        {
-            if((*it)==pOldMember) {(it)=stoneCache.erase(it); break;}
-            it++;
+        else if(prevType==STONE){
+            it=getStoneCacheIt();
+            while(it!=getStoneCacheEnd())
+            {
+                if((*it)==pOldMember) {(it)=stoneCache.erase(it); break;}
+                it++;
+            }
         }
-    }
-    else if(prevType==ROBOT)
-    {
-        pRobot=NULL;
-    }
-    else if((prevType==CLOSED_LIFT) || (prevType==CLOSED_LIFT))
-    {
-        pLift=NULL;
+        else if(prevType==ROBOT) pRobot=NULL;
+        else if((prevType==CLOSED_LIFT) || (prevType==CLOSED_LIFT)) pLift=NULL;
     }
     
     switch(type)
     {
         case STONE: stoneCache.push_back(pNewMember); break;
         case LAMBDA: lambdaCache.push_back(pNewMember); break;
-        case OPENED_LIFT: pLift=pNewMember; break;
-        case CLOSED_LIFT: pLift=pNewMember; break;
-        case ROBOT: pRobot=pNewMember; break;
+        case OPENED_LIFT: 
+            if(pLift) 
+                throw FieldParseException();
+            pLift=pNewMember; 
+            break;
+        case CLOSED_LIFT: 
+            if(pLift) 
+                throw FieldParseException();
+            pLift=pNewMember; 
+            break;
+        case ROBOT: 
+            if(pRobot) 
+                throw FieldParseException();
+            pRobot=pNewMember; 
+            break;
         default: break;
     }
+    
+    delete pOldMember;
 }
 
 void Field::swap(const Point &cell1, const Point &cell2) {
