@@ -12,22 +12,22 @@
 
 class AStarPoint {
 private:
-	Field* const pField;
-	FieldMember* const pCell;
+	const Field* pField;
+	const FieldMember* pCell;
 	int G;	// стоимость
 	int H;  // эвристика
 	string path;	// путь до этой точки
 
 public:
 
-	AStarPoint(Field *const, FieldMember *const,
+	AStarPoint(const Field*, const FieldMember*,
 			int cost = 0, int heuristicsValue = 0,
 			string path = "", string move = "");
 	AStarPoint(const AStarPoint& orig);
 
 	bool isGoalReached() const;
 
-	Field* const getField() const;
+	const Field* getField() const;
 
 	string getPath() const;
 
@@ -39,7 +39,7 @@ public:
 	int getHeuristics() const;
 	void setHeuristics(int H);
 
-	FieldMember* const getCell() const;
+	const FieldMember* getCell() const;
 
 	bool operator==(const AStarPoint& x) const;
 	bool operator>(const AStarPoint& x) const;

@@ -9,10 +9,9 @@
 
 #include <iostream>
 
-AStar::AStar(Field* const pField,
-			FieldMember* const s,
-			FieldMember* const g)
-				: fieldSim(), start(new AStarPoint(pField, s, 0, 1)), goal(g) {
+AStar::AStar(const Field* pField, FieldMember* s, Heuristic* h)
+				: fieldSim(), start(new AStarPoint(pField, s, 0, 1)) {
+	this->h = h;
 	openedList.push(start);
 }
 
@@ -61,7 +60,7 @@ void AStar::checkPoint(Point point, const AStarPoint& current, string move) {
 										newCost,
 										0,
 										current.getPath(), move);
-		result->setHeuristics(calculateHeuristics(*result));
+		result->setHeuristics(h->calculate(*result));
 		if (!isInClosedList(result)) {
 			openedList.push(result);
 		}
@@ -69,15 +68,8 @@ void AStar::checkPoint(Point point, const AStarPoint& current, string move) {
 }
 
 
-bool AStar::isInClosedList(AStarPoint* const pCurrent) const {
+bool AStar::isInClosedList(const AStarPoint* pCurrent) const {
 	set<AStarPoint*>::const_iterator it = find_if(closedList.begin(), closedList.end(),
 			bind2nd(Comparators::PointerComparatorEquals<AStarPoint*>(), pCurrent));
 	return (it != closedList.end());
-}
-
-
-
-int AStar::calculateHeuristics(const AStarPoint& current) const {
-	return current.getField()->getDistance(current.getCell()->getCoordinate(), goal->getCoordinate())
-			* FieldMember::METRIC_NORMAL;
 }

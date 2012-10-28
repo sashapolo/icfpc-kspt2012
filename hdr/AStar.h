@@ -13,27 +13,27 @@
 #include <algorithm>
 #include "AStarPoint.h"
 #include "FieldSim.h"
+#include "Heuristic.h"
 #include "Comparators.h"
 
 using namespace std;
 
 class AStar {
-protected:
+private:
 	const FieldSim fieldSim;
-	AStarPoint *const start;
-	FieldMember *const goal;
+	AStarPoint *start;
+	Heuristic *h;
 
 	priority_queue<AStarPoint*, vector<AStarPoint*>,
 					Comparators::PointerComparatorMore<AStarPoint*> > openedList;
 	set<AStarPoint*> closedList;
 
-	bool isInClosedList(AStarPoint* const) const;
+	bool isInClosedList(const AStarPoint*) const;
 	void checkPoint(Point point, const AStarPoint& current, string move);
 	void addNeighboursToOpenedList(const AStarPoint&);
-	virtual int calculateHeuristics(const AStarPoint&) const;
 
 public:
-	AStar(Field* const, FieldMember* const, FieldMember* const);
+	AStar(const Field*, FieldMember*, Heuristic*);
 	string solve(Field**);
 	virtual ~AStar();
 };
