@@ -13,9 +13,9 @@
 #include <algorithm>
 #include "AStarPoint.h"
 #include "FieldSim.h"
+#include "Comparators.h"
 
 using namespace std;
-using namespace AStarNode;
 
 class AStar {
 protected:
@@ -23,7 +23,8 @@ protected:
 	AStarPoint *const start;
 	FieldMember *const goal;
 
-	priority_queue<AStarPoint*, vector<AStarPoint*>, PointerComparatorMore<AStarPoint*> > openedList;
+	priority_queue<AStarPoint*, vector<AStarPoint*>,
+					Comparators::PointerComparatorMore<AStarPoint*> > openedList;
 	set<AStarPoint*> closedList;
 
 	bool isInClosedList(AStarPoint* const) const;

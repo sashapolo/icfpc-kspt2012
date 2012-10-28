@@ -54,8 +54,10 @@ void FieldMember::setDefaultMetric()
         case OPENED_LIFT:
             this->metric = METRIC_NORMAL;
             break;
-        default:
-            this->metric = METRIC_NORMAL;  // просто так, на всякий случай
-            break;
         }
+}
+
+bool FieldMember::operator==(const FieldMember& other) {
+	return (coordinate == other.coordinate &&
+			cellType == other.cellType);
 }

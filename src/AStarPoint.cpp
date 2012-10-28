@@ -6,7 +6,6 @@
  */
 
 #include "AStarPoint.h"
-using namespace AStarNode;
 
 AStarPoint::AStarPoint(Field* const field, FieldMember* const cell,
 		int cost, int heuristicsValue, string path, string move):

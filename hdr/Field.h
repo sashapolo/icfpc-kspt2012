@@ -105,6 +105,7 @@ public:
     int getStoneCount() const;
 
     Field& operator=(const Field&);
+    bool operator==(const Field&) const;
 
     int getDistance(const Point& from, const Point& to) const;
 };

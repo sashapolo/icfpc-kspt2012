@@ -17,6 +17,7 @@ Field::~Field() {
 	}
 }
 
+
 list<FieldMember*>::const_iterator Field::getLambdaCacheIt() const{
    	return lambdaCache.begin();
 }
@@ -33,6 +34,7 @@ list<FieldMember*>::iterator Field::deleteLambdaFromCache(list<FieldMember*>::it
 	return lambdaCache.erase(it);
 }
 
+
 list<FieldMember*>::const_iterator Field::getStoneCacheIt() const{
 	return stoneCache.begin();
 }
@@ -42,18 +44,18 @@ list<FieldMember*>::iterator Field::getStoneCacheIt() {
 list<FieldMember*>::const_iterator Field::getStoneCacheEnd() const{
 	return stoneCache.end();
 }
-
 list<FieldMember*>::iterator Field::deleteStoneFromCache(list<FieldMember*>::iterator it) {
 	return stoneCache.erase(it);
 }
 
+
 FieldMember* const Field::getXY(const Point &point) const {
     return field.at(point.y).at(point.x);
 }
-
 FieldMember* Field::getXY(const Point &point) {
     return field.at(point.y).at(point.x);
 }
+
 
 pair<int, int> Field::getSize() const {
     if (field.size() == 0) {
@@ -61,6 +63,8 @@ pair<int, int> Field::getSize() const {
     }
     return make_pair(field[0].size(), field.size());
 }
+
+
 // TODO: наверное, этот метод надо оптимизировать, так как создание карты
 // получается путем наращивания векторов,
 // но это будет делаться всего один раз, так что, возможно, это не так уж и накладно
@@ -173,6 +177,7 @@ Field::Field(const string &ASCIIMap): field(), lambdaCache(), stoneCache() {
     }
 }
 
+
 Field::Field(const Field& orig): field(orig.field.size(), vector<FieldMember*>(orig.field[0].size())),
 		lambdaCache(), stoneCache() {
     int ySize = field.size();
@@ -203,6 +208,7 @@ Field::Field(const Field& orig): field(orig.field.size(), vector<FieldMember*>(o
     	}
     }
 }
+
 
 void Field::write(Point xy, CellType type)
 {
@@ -262,6 +268,7 @@ void Field::write(Point xy, CellType type)
     delete pOldMember;
 }
 
+
 void Field::swap(const Point &cell1, const Point &cell2) {
     FieldMember* tmp1 = getXY(cell1);
     tmp1->setCoordinate(cell2);
@@ -270,11 +277,8 @@ void Field::swap(const Point &cell1, const Point &cell2) {
     
     field[cell1.y][cell1.x]=tmp2;
     field[cell2.y][cell2.x]=tmp1;
-    
-    //FieldMember t = *tmp2;
-    //setFieldMember(*tmp1);
-    //setFieldMember(t);
 }
+
 
 CellType Field::getCellType(const Point &point) const {
     return getXY(point)->getType();
@@ -287,29 +291,32 @@ void Field::setFieldMember(const FieldMember& fieldMember) {
     *(field.at(y).at(x)) = fieldMember;
 }
 
+
 FieldMember* const Field::getRobot() const {
 	return pRobot;
 }
-
 FieldMember* Field::getRobot() {
 	return pRobot;
 }
+
 
 FieldMember* const Field::getLift() const {
 	return pLift;
 }
 
+
 bool Field::isRobotAlive() const {
 	return pRobot;
 }
 
+
 int Field::getLambdaCount() const {
 	return lambdaCache.size();
 }
-
 int Field::getStoneCount() const {
 	return stoneCache.size();
-};
+}
+
 
 int Field::getDistance(const Point& from, const Point& to) const {
 	int x = from.x - to.x;
@@ -318,6 +325,7 @@ int Field::getDistance(const Point& from, const Point& to) const {
 	y = (y < 0)? -y : y;
 	return x + y;
 }
+
 
 Field& Field::operator=(const Field& orig) {
 	int ySize = field.size();
@@ -347,4 +355,17 @@ Field& Field::operator=(const Field& orig) {
 		}
 	}
 	return *this;
+}
+
+bool Field::operator ==(const Field& f) const {
+	int xSize = this->field[0].size();
+	int ySize = this->field.size();
+	for (int y = 0; y < ySize; y++) {
+		for (int x = 0; x < xSize; x++) {
+			if (!(field[y][x] == f.field[y][x])) {
+				return false;
+			}
+		}
+	}
+	return true;
 }

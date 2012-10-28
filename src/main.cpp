@@ -95,13 +95,18 @@ int main(int argc, char** argv) {
 	cout<<result<<'\n';
 	drawStepByStep(field, result);
 
+//	Field *oldField = field;
+//	FieldSim fieldSim;
+//	sSimResult res;
+//	int nStep = 0;
+//	char inStr[100];
 //    printf("Controls:\n\tU - up\n\tD - down\n\tL - left\n\tR - right\n\tW - wait\n\tA - abort\nEnter - accept\n");
-//    DrawField(field1,&res.path, nStep++);
+//    drawField(field, &res.path, nStep++);
 //    while(true)
 //    {
 //        scanf("%s",inStr);
-//        Field *newField = fieldSim.CalcRobotSteps(oldField,inStr,&res);
-//        DrawField(newField,&res.path, nStep++);
+//        Field *newField = fieldSim.calcRobotSteps(oldField,inStr,&res);
+//        drawField(newField,&res.path, nStep++);
 //        printf("Score: %d, NumSteps: %d, NumLambdas: %d, LC: %d, State: %s\n",res.score,res.stepsTaken,res.lambdaReceived,newField->getLambdaCount(),stateToStr(res.state));
 //        oldField = newField;
 //    };

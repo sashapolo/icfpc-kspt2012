@@ -7,23 +7,34 @@
 #include "Solver.h"
 
 string Solver::solve(Field* const pField) const {
-	AStar astar(pField, pField->getRobot(), findNewGoal(pField));
+	FieldMember *goal = findNewGoal(pField);
+	AStar astar(pField, pField->getRobot(), goal);
+	Point finish = pField->getLift()->getCoordinate();
 	Field *pNewField = NULL;
 	string result;
+
 	string t = astar.solve(&pNewField);
-	while (pNewField->getRobot() != pNewField->getLift()) {
+	while (pNewField->getRobot()->getCoordinate() != finish) {
 		if (t.empty()) {
-			delete pNewField;
-			return result + "A";
+			if (pNewField->lambdaCacheEmpty()) {
+				//delete pNewField;
+				return result + "A";
+			} else {
+			// TODO возможно, к этим лямбдам будет необходимо вернуться позднее
+				deleteUnreachableLambda(pNewField, goal);
+				goal = findNewGoal(pNewField);
+			}
 		}
 		result += t;
 		AStar astar(pNewField, pNewField->getRobot(), findNewGoal(pNewField));
 		//delete pNewField;
 		t = astar.solve(&pNewField);
 	}
+	result += t;
 	delete pNewField;
 	return result;
 }
+
 
 string Solver::convertResultToString(const Path& coordinates) const {
 	string result;
@@ -43,6 +54,7 @@ string Solver::convertResultToString(const Path& coordinates) const {
 	return result;
 }
 
+
 FieldMember* const Solver::findNewGoal(Field* const pField) const {
 	if (pField->lambdaCacheEmpty()) {
 		return pField->getLift();
@@ -59,4 +71,15 @@ FieldMember* const Solver::findNewGoal(Field* const pField) const {
 		}
 	}
 	return result;
+}
+
+
+void Solver::deleteUnreachableLambda(Field* pField, FieldMember* const pLambda) const {
+	list<FieldMember*>::iterator it = pField->getLambdaCacheIt();
+	for (; it != pField->getLambdaCacheEnd(); it++) {
+		if (*(*it) == *pLambda) {
+			pField->deleteLambdaFromCache(it);
+			return;
+		}
+	}
 }

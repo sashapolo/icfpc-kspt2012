@@ -71,7 +71,7 @@ void AStar::checkPoint(Point point, const AStarPoint& current, string move) {
 
 bool AStar::isInClosedList(AStarPoint* const pCurrent) const {
 	set<AStarPoint*>::const_iterator it = find_if(closedList.begin(), closedList.end(),
-			bind2nd(PointerComparatorEquals<AStarPoint*>(), pCurrent));
+			bind2nd(Comparators::PointerComparatorEquals<AStarPoint*>(), pCurrent));
 	return (it != closedList.end());
 }
 

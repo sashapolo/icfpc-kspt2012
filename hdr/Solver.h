@@ -18,6 +18,7 @@ class Solver {
 private:
 	string convertResultToString(const Path&) const;
 	FieldMember* const findNewGoal(Field* const pField) const;
+	void deleteUnreachableLambda(Field* pField, FieldMember* const pLambda) const;
 public:
 	string solve(Field*) const;
 };

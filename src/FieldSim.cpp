@@ -298,7 +298,9 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
                  pResult->state=ES_EAT_LAMBDA;
                  pResult->score+=25;
                  break;
-             case OPENED_LIFT: 
+             case OPENED_LIFT:
+                 result->write(result->getRobot()->getCoordinate(),EMPTY);
+                 result->write(AbsNextPos,ROBOT);
                  pResult->state=ES_FINISHED;
                  pResult->score+=pResult->lambdaReceived*50; //?
                  return result;
