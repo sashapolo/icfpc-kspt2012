@@ -35,3 +35,6 @@ LOG.html
 
 # Emacs temporary files
 *~
+
+# Dolphin file manager files
+*.directory
