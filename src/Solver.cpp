@@ -7,7 +7,6 @@
 
 #include "Solver.h"
 
-
 string Solver::solve(Field* pField) {
 	const FieldMember *goal = findNewGoal(pField);
 	ManhattanHeuristic *mH = new ManhattanHeuristic(goal->getCoordinate());

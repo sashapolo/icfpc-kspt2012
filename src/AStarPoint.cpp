@@ -7,7 +7,7 @@
 
 #include "AStarPoint.h"
 
-AStarPoint::AStarPoint(Field* const field, FieldMember* const cell,
+AStarPoint::AStarPoint(const Field* field, const FieldMember* cell,
 		int cost, int heuristicsValue, string path, string move):
 				pField(field), pCell(cell) {
 	G = cost;
@@ -25,7 +25,7 @@ bool AStarPoint::isGoalReached() const {
 	return H == 0;
 }
 
-Field* const AStarPoint::getField() const {
+const Field* AStarPoint::getField() const {
 	return pField;
 }
 
@@ -53,7 +53,7 @@ void AStarPoint::setHeuristics(int H) {
 	this->H = H;
 }
 
-FieldMember* const AStarPoint::getCell() const {
+const FieldMember* AStarPoint::getCell() const {
 	return pCell;
 }
 
