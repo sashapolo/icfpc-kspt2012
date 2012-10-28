@@ -8,19 +8,23 @@
 #ifndef SOLVER_H_
 #define SOLVER_H_
 
-//#include "Dijkstra.h"
-//#include "FieldSim.h"
-//
 #include "AStar.h"
-using namespace std;
+#include "ManhattanHeuristic.h"
+#include "SolverSnapshot.h"
 
 class Solver {
 private:
-	string convertResultToString(const Path&) const;
-	FieldMember* const findNewGoal(Field* const pField) const;
-	void deleteUnreachableLambda(Field* pField, FieldMember* const pLambda) const;
+	std::list<SolverSnapshot*> snapshots;
+	std::list<const FieldMember*> markedLambdas;
+
+	const FieldMember* findNewGoal(const Field* pField) const;
+	void markUnreachableLambda(const FieldMember* pLambda);
+	bool isMarked(const FieldMember* lambda) const;
+	void createSnapshot(Field* s, std::string delta, const FieldMember* lambda);
+	SolverSnapshot* loadSnapshot();
 public:
-	string solve(Field*) const;
+	string solve(Field*);
+	virtual ~Solver();
 };
 
 

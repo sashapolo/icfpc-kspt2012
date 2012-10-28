@@ -4,58 +4,54 @@
  *  Created on: Oct 15, 2012
  *      Author: alexander
  */
+
 #include "Solver.h"
 
-string Solver::solve(Field* const pField) const {
-	FieldMember *goal = findNewGoal(pField);
-	AStar astar(pField, pField->getRobot(), goal);
+
+string Solver::solve(Field* pField) {
+	const FieldMember *goal = findNewGoal(pField);
+	ManhattanHeuristic *mH = new ManhattanHeuristic(goal->getCoordinate());
+	AStar astar(pField, pField->getRobot(), mH);
 	Point finish = pField->getLift()->getCoordinate();
 	Field *pNewField = NULL;
 	string result;
 
 	string t = astar.solve(&pNewField);
 	while (pNewField->getRobot()->getCoordinate() != finish) {
+		createSnapshot(pNewField, result, goal);
 		if (t.empty()) {
-			if (pNewField->lambdaCacheEmpty()) {
-				//delete pNewField;
+			if (pNewField->lambdaCacheEmpty()) {  // если остался только лифт
+				delete mH;
 				return result + "A";
 			} else {
 			// TODO возможно, к этим лямбдам будет необходимо вернуться позднее
-				deleteUnreachableLambda(pNewField, goal);
+				markUnreachableLambda(goal);
+			}
+		} else {
+			result += t;
+		}
+		goal = findNewGoal(pNewField);
+		while (goal == NULL) {
+			if (snapshots.empty()) {  // больше некуда откатиться
+				delete mH;
+				return result + "A";
+			} else {  // откат к предыдущей лямбде
+				SolverSnapshot *ss = loadSnapshot();
+				pNewField = ss->snapshot;
+				result = ss->deltaPath;
 				goal = findNewGoal(pNewField);
 			}
 		}
-		result += t;
-		AStar astar(pNewField, pNewField->getRobot(), findNewGoal(pNewField));
-		//delete pNewField;
+		mH->setGoal(goal->getCoordinate());
+		AStar astar(pNewField, pNewField->getRobot(), mH);
 		t = astar.solve(&pNewField);
 	}
-	result += t;
-	delete pNewField;
-	return result;
+	delete mH;
+	return result + t;
 }
 
 
-string Solver::convertResultToString(const Path& coordinates) const {
-	string result;
-	for (int i = coordinates.getSize() - 2; i >= 0; i--) {
-		if (coordinates.getCell(i + 1).x - coordinates.getCell(i).x == 1) {
-			result += 'L';
-		} else if (coordinates.getCell(i + 1).x - coordinates.getCell(i).x == -1) {
-			result += 'R';
-		} else if (coordinates.getCell(i + 1).y - coordinates.getCell(i).y == 1) {
-			result += 'U';
-		} else if (coordinates.getCell(i + 1).y - coordinates.getCell(i).y == -1) {
-			result += 'D';
-		} else {
-			result += 'W';
-		}
-	}
-	return result;
-}
-
-
-FieldMember* const Solver::findNewGoal(Field* const pField) const {
+const FieldMember* Solver::findNewGoal(const Field* pField) const {
 	if (pField->lambdaCacheEmpty()) {
 		return pField->getLift();
 	}
@@ -65,21 +61,43 @@ FieldMember* const Solver::findNewGoal(Field* const pField) const {
 	int min = pField->getDistance((*it)->getCoordinate(), start);
 	for (++it; it != pField->getLambdaCacheEnd(); it++) {
 		int tmp = pField->getDistance((*it)->getCoordinate(), start);
-		if (min > tmp) {
+		if (min > tmp && !isMarked(*it)) {
 			min = tmp;
 			result = *it;
 		}
 	}
+	return isMarked(result)? NULL : result;
+}
+
+
+void Solver::markUnreachableLambda(const FieldMember* pLambda) {
+	markedLambdas.push_back(pLambda);
+}
+
+
+bool Solver::isMarked(const FieldMember* lambda) const {
+	list<const FieldMember*>::const_iterator it = std::find(markedLambdas.begin(),
+													markedLambdas.end(),
+													lambda);
+	return (it != markedLambdas.end());
+}
+
+
+void Solver::createSnapshot(Field* s, std::string delta, const FieldMember* lambda) {
+	SolverSnapshot *result = new SolverSnapshot(s, delta, lambda);
+	snapshots.push_back(result);
+}
+
+
+SolverSnapshot* Solver::loadSnapshot() {
+	markedLambdas.clear();
+	SolverSnapshot* result = snapshots.back();
+	snapshots.pop_back();
+	markedLambdas.push_back(result->collectedLambda);
 	return result;
 }
 
 
-void Solver::deleteUnreachableLambda(Field* pField, FieldMember* const pLambda) const {
-	list<FieldMember*>::iterator it = pField->getLambdaCacheIt();
-	for (; it != pField->getLambdaCacheEnd(); it++) {
-		if (*(*it) == *pLambda) {
-			pField->deleteLambdaFromCache(it);
-			return;
-		}
-	}
+Solver::~Solver() {
+//TODO удалить массив снэпшотов
 }
