@@ -8,17 +8,17 @@
 #ifndef SOLVER_H_
 #define SOLVER_H_
 
-//#include "Dijkstra.h"
-//#include "FieldSim.h"
-//
+
 #include "AStar.h"
+#include "ManhattanHeuristic.h"
+
 using namespace std;
 
 class Solver {
 private:
 	string convertResultToString(const Path&) const;
-	FieldMember* const findNewGoal(Field* const pField) const;
-	void deleteUnreachableLambda(Field* pField, FieldMember* const pLambda) const;
+	FieldMember* findNewGoal(const Field* pField) const;
+	void deleteUnreachableLambda(Field* pField, const FieldMember* pLambda) const;
 public:
 	string solve(Field*) const;
 };

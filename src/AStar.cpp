@@ -9,10 +9,9 @@
 
 #include <iostream>
 
-AStar::AStar(Field* const pField,
-			FieldMember* const s,
-			FieldMember* const g)
-				: fieldSim(), start(new AStarPoint(pField, s, 0, 1)), goal(g) {
+AStar::AStar(const Field* pField, FieldMember* s, Heuristic* h)
+				: fieldSim(), start(new AStarPoint(pField, s, 0, 1)) {
+	this->h = h;
 	openedList.push(start);
 }
 
@@ -22,6 +21,11 @@ AStar::~AStar() {
 
 
 string AStar::solve(Field** pResultField) {
+    /**
+     * Поиск пути.
+     * @param pResultField - todo
+     * @return путь поиска лямбд
+     */
 	AStarPoint *current = start;
 	while (!openedList.empty()) {
 		if (current->isGoalReached()) {
@@ -40,6 +44,10 @@ string AStar::solve(Field** pResultField) {
 
 
 void AStar::addNeighboursToOpenedList(const AStarPoint& current) {
+    /**
+     * Добавление следующего хода в путь.
+     * @param AStarPoint& current - текущая точка
+     */
 	int x = current.getCell()->getCoordinate().x;
 	int y = current.getCell()->getCoordinate().y;
 	checkPoint(Point(x, y + 1), current, "D");
@@ -50,6 +58,12 @@ void AStar::addNeighboursToOpenedList(const AStarPoint& current) {
 
 
 void AStar::checkPoint(Point point, const AStarPoint& current, string move) {
+    /**
+     * todo
+     * @param Point point - точка назначения(???)
+     * @param AStarPoint& current - текущая точка
+     * @param string move - строка последовательности ходов
+     */
 	const FieldMember *tmp = current.getField()->getXY(point);
 	if (tmp->isPassable()) {
         sSimResult res;
@@ -61,7 +75,7 @@ void AStar::checkPoint(Point point, const AStarPoint& current, string move) {
 										newCost,
 										0,
 										current.getPath(), move);
-		result->setHeuristics(calculateHeuristics(*result));
+		result->setHeuristics(h->calculate(*result));
 		if (!isInClosedList(result)) {
 			openedList.push(result);
 		}
@@ -69,15 +83,13 @@ void AStar::checkPoint(Point point, const AStarPoint& current, string move) {
 }
 
 
-bool AStar::isInClosedList(AStarPoint* const pCurrent) const {
+bool AStar::isInClosedList(const AStarPoint* pCurrent) const {
+    /**
+     * Поиск возможности хода.
+     * @param AStarPoint* pCurrent - текущая точка
+     * @return true, если текущая точка не является последней допустимой; false - в протианом случае.
+     */
 	set<AStarPoint*>::const_iterator it = find_if(closedList.begin(), closedList.end(),
 			bind2nd(Comparators::PointerComparatorEquals<AStarPoint*>(), pCurrent));
 	return (it != closedList.end());
-}
-
-
-
-int AStar::calculateHeuristics(const AStarPoint& current) const {
-	return current.getField()->getDistance(current.getCell()->getCoordinate(), goal->getCoordinate())
-			* FieldMember::METRIC_NORMAL;
 }

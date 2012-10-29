@@ -6,9 +6,10 @@
  */
 #include "Solver.h"
 
-string Solver::solve(Field* const pField) const {
+string Solver::solve(Field* pField) const {
 	FieldMember *goal = findNewGoal(pField);
-	AStar astar(pField, pField->getRobot(), goal);
+	ManhattanHeuristic *mH = new ManhattanHeuristic(goal->getCoordinate());
+	AStar astar(pField, pField->getRobot(), mH);
 	Point finish = pField->getLift()->getCoordinate();
 	Field *pNewField = NULL;
 	string result;
@@ -17,7 +18,7 @@ string Solver::solve(Field* const pField) const {
 	while (pNewField->getRobot()->getCoordinate() != finish) {
 		if (t.empty()) {
 			if (pNewField->lambdaCacheEmpty()) {
-				//delete pNewField;
+				delete mH;
 				return result + "A";
 			} else {
 			// TODO возможно, к этим лямбдам будет необходимо вернуться позднее
@@ -26,12 +27,13 @@ string Solver::solve(Field* const pField) const {
 			}
 		}
 		result += t;
-		AStar astar(pNewField, pNewField->getRobot(), findNewGoal(pNewField));
-		//delete pNewField;
+		goal = findNewGoal(pNewField);
+		mH->setGoal(goal->getCoordinate());
+		AStar astar(pNewField, pNewField->getRobot(), mH);
 		t = astar.solve(&pNewField);
 	}
 	result += t;
-	delete pNewField;
+	delete mH;
 	return result;
 }
 
@@ -55,7 +57,7 @@ string Solver::convertResultToString(const Path& coordinates) const {
 }
 
 
-FieldMember* const Solver::findNewGoal(Field* const pField) const {
+FieldMember* Solver::findNewGoal(const Field* pField) const {
 	if (pField->lambdaCacheEmpty()) {
 		return pField->getLift();
 	}
@@ -74,7 +76,7 @@ FieldMember* const Solver::findNewGoal(Field* const pField) const {
 }
 
 
-void Solver::deleteUnreachableLambda(Field* pField, FieldMember* const pLambda) const {
+void Solver::deleteUnreachableLambda(Field* pField, const FieldMember* pLambda) const {
 	list<FieldMember*>::iterator it = pField->getLambdaCacheIt();
 	for (; it != pField->getLambdaCacheEnd(); it++) {
 		if (*(*it) == *pLambda) {
