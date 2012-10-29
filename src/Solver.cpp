@@ -7,7 +7,18 @@
 
 #include "Solver.h"
 
+Solver::Solver(): snapshots(), markedLambdas() {
+}
+
 string Solver::solve(Field* pField) {
+	// флаг, говорящий о том, что откаты происходят несколько раз подряд =>
+	// нужно все собранные на этом шаге лямбды заносить как помеченные
+	bool isSequentialBacktracking = false;
+	string bestResult;
+	int mostLambdasCollected = 0;
+	int currentLambdasCollected = 0;
+	int backtracksCount = 0;
+
 	const FieldMember *goal = findNewGoal(pField);
 	ManhattanHeuristic *mH = new ManhattanHeuristic(goal->getCoordinate());
 	AStar astar(pField, pField->getRobot(), mH);
@@ -15,31 +26,54 @@ string Solver::solve(Field* pField) {
 	Field *pNewField = NULL;
 	string result;
 
+	createSnapshot(pField, result, goal); // сохраняем стартовое состояние
+
 	string t = astar.solve(&pNewField);
 	while (pNewField->getRobot()->getCoordinate() != finish) {
-		createSnapshot(pNewField, result, goal);
 		if (t.empty()) {
-			if (pNewField->lambdaCacheEmpty()) {  // если остался только лифт
-				delete mH;
-				return result + "A";
-			} else {
-			// TODO возможно, к этим лямбдам будет необходимо вернуться позднее
-				markUnreachableLambda(goal);
-			}
+			markUnreachableGoal(goal);
 		} else {
 			result += t;
+			currentLambdasCollected++;
+			markedLambdas.clear();
 		}
 		goal = findNewGoal(pNewField);
-		while (goal == NULL) {
-			if (snapshots.empty()) {  // больше некуда откатиться
-				delete mH;
-				return result + "A";
-			} else {  // откат к предыдущей лямбде
-				SolverSnapshot *ss = loadSnapshot();
-				pNewField = ss->snapshot;
-				result = ss->deltaPath;
-				goal = findNewGoal(pNewField);
+		if (goal != NULL) {
+			createSnapshot(pNewField, result, goal);
+		} else { // если некуда идти - откат
+			while (goal == NULL) {
+				if (snapshots.empty()) {  // больше некуда откатиться
+					delete mH;
+					return bestResult + "A";
+				} else {  // откат к предыдущей лямбде
+					if (backtracksCount == 50) {
+						delete mH;
+						return bestResult + "A";
+					}
+					backtracksCount++;
+					if (!isSequentialBacktracking) {
+						snapshots.pop_back(); // удаляем текущий снэпшот
+						if (snapshots.empty()) {  // больше некуда откатиться
+							delete mH;
+							return bestResult + "A";
+						}
+					}
+					if (mostLambdasCollected == 0) {  // запоминаем лучший результат
+						mostLambdasCollected = currentLambdasCollected;
+						bestResult = result;
+					} else if (currentLambdasCollected > mostLambdasCollected) {
+						mostLambdasCollected = currentLambdasCollected;
+						bestResult = result;
+					}
+					currentLambdasCollected = 0;
+					SolverSnapshot *ss = loadSnapshot(isSequentialBacktracking);
+					pNewField = ss->snapshot;
+					result = ss->deltaPath;
+					goal = findNewGoal(pNewField);
+					isSequentialBacktracking = true;
+				}
 			}
+			isSequentialBacktracking = false;
 		}
 		mH->setGoal(goal->getCoordinate());
 		AStar astar(pNewField, pNewField->getRobot(), mH);
@@ -52,51 +86,66 @@ string Solver::solve(Field* pField) {
 
 const FieldMember* Solver::findNewGoal(const Field* pField) const {
 	if (pField->lambdaCacheEmpty()) {
-		return pField->getLift();
+		return isMarked(pField->getLift()) ? NULL : pField->getLift();
 	}
+
 	list<FieldMember*>::const_iterator it = pField->getLambdaCacheIt();
-	FieldMember *result = *it;
+	FieldMember *result = isMarked(*it) ? NULL : *it;
 	Point start = pField->getRobot()->getCoordinate();
 	int min = pField->getDistance((*it)->getCoordinate(), start);
+
 	for (++it; it != pField->getLambdaCacheEnd(); it++) {
 		int tmp = pField->getDistance((*it)->getCoordinate(), start);
 		if (min > tmp && !isMarked(*it)) {
 			min = tmp;
 			result = *it;
+		} else if (result == NULL && !isMarked(*it)) {
+			min = tmp;
+			result = *it;
 		}
 	}
-	return isMarked(result)? NULL : result;
+	return result;
 }
 
 
-void Solver::markUnreachableLambda(const FieldMember* pLambda) {
-	markedLambdas.push_back(pLambda);
+void Solver::markUnreachableGoal(const FieldMember* pGoal) {
+	markedLambdas.push_back(pGoal);
 }
 
 
 bool Solver::isMarked(const FieldMember* lambda) const {
-	list<const FieldMember*>::const_iterator it = std::find(markedLambdas.begin(),
-													markedLambdas.end(),
-													lambda);
-	return (it != markedLambdas.end());
+	list<const FieldMember*>::const_iterator it = markedLambdas.begin();
+	for (; it != markedLambdas.end(); it++) {
+		if (*(*it) == *lambda) {
+			return true;
+		}
+	}
+	return false;
 }
 
 
 void Solver::createSnapshot(Field* s, std::string delta, const FieldMember* lambda) {
-	SolverSnapshot *result = new SolverSnapshot(s, delta, lambda);
+	SolverSnapshot *result = new SolverSnapshot(new Field(*s), delta, lambda);
 	snapshots.push_back(result);
 }
 
 
-SolverSnapshot* Solver::loadSnapshot() {
-	markedLambdas.clear();
+SolverSnapshot* Solver::loadSnapshot(bool isSequentialBacktracking) {
+	if (!isSequentialBacktracking) {
+		markedLambdas.clear();
+	} else if (markedLambdas.size() == 2) {
+		markedLambdas.pop_front();
+	}
 	SolverSnapshot* result = snapshots.back();
 	snapshots.pop_back();
-	markedLambdas.push_back(result->collectedLambda);
+	markedLambdas.push_back(result->goal);
 	return result;
 }
 
 
 Solver::~Solver() {
-//TODO удалить массив снэпшотов
+	std::list<SolverSnapshot*>::iterator it = snapshots.begin();
+	for (; it != snapshots.end(); it++) {
+		delete *it;
+	}
 }

@@ -12,12 +12,16 @@ class SolverSnapshot {
 public:
 	Field *snapshot;
 	std::string deltaPath;
-	const FieldMember *collectedLambda;
+	const FieldMember *goal;
 
-	SolverSnapshot(Field *s, std::string delta, const FieldMember* lambda) {
+	SolverSnapshot(Field *s, std::string delta, const FieldMember* g) {
 		snapshot = s;
 		deltaPath = delta;
-		collectedLambda = lambda;
+		goal = g;
+	}
+
+	~SolverSnapshot() {
+		delete snapshot;
 	}
 };
 

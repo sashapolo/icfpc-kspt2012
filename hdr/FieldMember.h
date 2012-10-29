@@ -64,7 +64,7 @@ public:
         return this->cellType;
     }
 
-    bool operator==(const FieldMember&);
+    bool operator==(const FieldMember&) const;
 };
 
 #endif	/* FIELDMEMBER_H */

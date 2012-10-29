@@ -39,11 +39,11 @@ public:
 //        y=other.y;
 //        return (*this);
 //    }
-    bool operator == (Point other) {
+    bool operator == (Point other) const {
         if((x==other.x) && (y==other.y)) return true;
         return false;
     }
-    bool operator != (Point other) {
+    bool operator != (Point other) const {
         return !((*this)==other);
     }
 

@@ -18,11 +18,12 @@ private:
 	std::list<const FieldMember*> markedLambdas;
 
 	const FieldMember* findNewGoal(const Field* pField) const;
-	void markUnreachableLambda(const FieldMember* pLambda);
+	void markUnreachableGoal(const FieldMember* pGoal);
 	bool isMarked(const FieldMember* lambda) const;
 	void createSnapshot(Field* s, std::string delta, const FieldMember* lambda);
-	SolverSnapshot* loadSnapshot();
+	SolverSnapshot* loadSnapshot(bool);
 public:
+	Solver();
 	string solve(Field*);
 	virtual ~Solver();
 };
