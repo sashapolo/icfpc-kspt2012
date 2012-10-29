@@ -4,10 +4,10 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 class FieldTest : public CPPUNIT_NS::TestFixture {
+
     CPPUNIT_TEST_SUITE(FieldTest);
 
-    CPPUNIT_TEST(testMethod);
-    CPPUNIT_TEST(testFailedMethod);
+    CPPUNIT_TEST(testConstructor);
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -18,8 +18,9 @@ public:
     void tearDown();
 
 private:
-    void testMethod();
-    void testFailedMethod();
+
+    void testConstructor();
+
 };
 
 #endif	/* FIELDTEST_H */

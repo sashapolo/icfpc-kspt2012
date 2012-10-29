@@ -57,7 +57,7 @@ public:
     list<FieldMember*>::iterator getStoneCacheIt();
     list<FieldMember*>::const_iterator getStoneCacheEnd() const;
     list<FieldMember*>::iterator deleteStoneFromCache(list<FieldMember*>::iterator it);
-    
+
 
     void write(Point xy, CellType type);
 

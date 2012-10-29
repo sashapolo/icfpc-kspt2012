@@ -34,7 +34,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Executable to run the tests
-$(TESTEXE): $(TESTOBJS)
+$(TESTEXE): $(TESTOBJS) $(OBJS)
 	$(LD) $(LFLAGS) $(LIBS) $^ -o $(TESTEXE)
 
 $(OBJ_DIR)/%.o: $(TST_DIR)/%.cpp
@@ -46,6 +46,4 @@ doxygen:
 	
 # Clean the project
 clean:
-	@rm -rf $(OBJ_DIR)
-	@rm $(EXE)
-	@rm $(TESTEXE) 
+	@rm -rf $(OBJ_DIR) $(EXE) $(TESTEXE) 2>/dev/null
