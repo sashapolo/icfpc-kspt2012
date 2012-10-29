@@ -48,7 +48,7 @@ void FieldMemberTest::equalsOperatorSymmetryUneqObjTest() {
     FieldMember fm1(coord1, WALL);
     FieldMember fm2(coord2, STONE);
     // || - both should be false
-    CPPUNIT_ASSERT_ASSERTION_FAIL( (fm1 == fm2) || (fm2 == fm1) );
+    CPPUNIT_ASSERT( !( (fm1 == fm2) || (fm2 == fm1) ) );
 }
 
 void FieldMemberTest::equalsOperatorTransitivityTest() {
@@ -73,7 +73,7 @@ void FieldMemberTest::equalsOperatorTransitivityUneqObjTest() {
     FieldMember fm2(coord2, STONE);
     FieldMember fm3(coord3, LAMBDA);
     // || - all should be true
-    CPPUNIT_ASSERT_ASSERTION_FAIL( (fm1 == fm2) || (fm2 == fm3) || (fm1 == fm3) );
+    CPPUNIT_ASSERT( !( (fm1 == fm2) || (fm2 == fm3) || (fm1 == fm3) ) );
 }
 
 void FieldMemberTest::equalsOperatorConsistencyTest() {
