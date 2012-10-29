@@ -17,6 +17,8 @@ SRCS = $(foreach sdir, $(SRC_DIR), $(wildcard $(sdir)/*.cpp))
 OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS)) 
 TESTSRCS = $(foreach sdir, $(TST_DIR), $(wildcard $(sdir)/*.cpp))
 TESTOBJS = $(patsubst $(TST_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(TESTSRCS)) 
+SRCS_WITHOUT_MAIN = $(shell find src -not -name main.cpp -type f)
+OBJS_WITHOUT_MAIN = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS_WITHOUT_MAIN)) 
 
 DOXYGENCFG = doc/doxygen/doxygen-config
 
@@ -34,8 +36,9 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Executable to run the tests
-$(TESTEXE): $(TESTOBJS)
+$(TESTEXE): $(TESTOBJS) $(OBJS_WITHOUT_MAIN)
 	$(LD) $(LFLAGS) $(LIBS) $^ -o $(TESTEXE)
+
 
 $(OBJ_DIR)/%.o: $(TST_DIR)/%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -46,6 +49,4 @@ doxygen:
 	
 # Clean the project
 clean:
-	@rm -rf $(OBJ_DIR)
-	@rm $(EXE)
-	@rm $(TESTEXE) 
+	@rm -rf $(OBJ_DIR) $(EXE) $(TESTEXE) 2>/dev/null

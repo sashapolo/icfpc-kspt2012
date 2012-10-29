@@ -18,6 +18,11 @@
 
 using namespace std;
 
+/**
+ * А*.<br />
+ * Описывает алгоритм поиска А*.
+ */
+
 class AStar {
 private:
 	const FieldSim fieldSim;
