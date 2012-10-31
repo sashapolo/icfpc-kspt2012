@@ -1,17 +1,26 @@
 #include "HTMLLogger.h"
 
-
+/**
+ * Констрктор.
+ */
 HTMLLogger::HTMLLogger(void)
 {
 	bLogInit=false;
 }
 
-
+/**
+ * Деструктор.
+ */
 HTMLLogger::~HTMLLogger(void)
 {
     Close();
 }
 
+/**
+ * Инициализация.
+ * @param char* FilePath - путь к файлу.
+ * @param char* LogName - имя файла.
+ */
 void HTMLLogger::Init(const char* FilePath, const char* LogName)
 {
 	Close();
@@ -24,6 +33,9 @@ void HTMLLogger::Init(const char* FilePath, const char* LogName)
 	else StartBanner(LogName);
 };
 
+/**
+ * Закрытие.
+ */
 void HTMLLogger::Close()
 {
 	if(bLogInit)
@@ -34,6 +46,10 @@ void HTMLLogger::Close()
 	};
 };
 
+/**
+ * Запись сообщений логгера.
+ * @param LOGGER_MSG& Msg - сообщение логгера.
+ */
 void HTMLLogger::OnMessageOut(LOGGER_MSG& Msg)
 {
 	std::string MsgType;
@@ -48,6 +64,11 @@ void HTMLLogger::OnMessageOut(LOGGER_MSG& Msg)
 	};
 }
 
+/**
+ * Запись данных.
+ * @param char* color - цвет шрифта.
+ * @param char* string - данные для записи.
+ */
 void  HTMLLogger::Write(const char* color, const char* string)
 {
 	if(!bLogInit) return;
@@ -58,6 +79,10 @@ void  HTMLLogger::Write(const char* color, const char* string)
 	LogFile.flush();
 }
 
+/**
+ * Запись заголовка.
+ * @param char *logname - имя лог-файла.
+ */
 void HTMLLogger::StartBanner(const char *logname)
 {
 	if(!bLogInit) return;
@@ -71,6 +96,9 @@ void HTMLLogger::StartBanner(const char *logname)
 	LogFile.flush();
 }
 
+/**
+ * Запись концовки.
+ */
 void HTMLLogger::EndBanner()
 {
 	if(!bLogInit) return;
@@ -79,6 +107,10 @@ void HTMLLogger::EndBanner()
     LogFile<<"</B></pre></body></html>";
 }
 
+/**
+ * Запись времени.
+ * @param time_t time - время.
+ */
 void HTMLLogger::WriteTime(time_t time)
 {
 	if(!bLogInit) return;

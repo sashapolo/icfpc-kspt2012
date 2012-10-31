@@ -13,6 +13,11 @@
 
 using namespace std;
 
+/**
+ * Создание поля.
+ * @param string mapFileName - имя файла карты.
+ * @return результат создания поля.
+ */
 Field* createField(const string mapFileName) {
 	ifstream file;
 	char* file_buf;
@@ -52,6 +57,11 @@ Field* createField(const string mapFileName) {
 }
 
 
+/**
+ * Пошаговая отрисовка.
+ * @param Field* pField - поле.
+ * @param string path - путь робота.
+ */
 void drawStepByStep(Field* const pField, const string path) {
 	FieldSim fieldSim;
 	sSimResult res;
@@ -74,7 +84,12 @@ void drawStepByStep(Field* const pField, const string path) {
 			stateToStr(res.state));
 }
 
-
+/**
+ * Главная функция.
+ * @param int argc - иаргумент командной строки.
+ * @param char** argv - аргумент командной строки.
+ * @return результат запускад.
+ */
 int main(int argc, char** argv) {
     if (argc != 2) {
     	printf("Usage: solver <map path>\n");

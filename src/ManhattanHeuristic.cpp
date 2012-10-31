@@ -7,6 +7,11 @@
 
 #include "ManhattanHeuristic.h"
 
+/**
+ * Подсчет Манхеттанской эвристики.
+ * @param AStarPoint& a - точка.
+ * @return значение.
+ */
 int ManhattanHeuristic::calculate(const AStarPoint& a) {
 	Point start = a.getCell()->getCoordinate();
 	return a.getField()->getDistance(start, *goal) * FieldMember::METRIC_NORMAL;

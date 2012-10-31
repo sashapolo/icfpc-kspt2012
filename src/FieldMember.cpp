@@ -4,6 +4,11 @@
 
 #include "FieldMember.h"
 
+/**
+ * Преобразование типа ячейки в символ.
+ * @param CellType type - тип ячейки.
+ * @return символ.
+ */
 char cellTypeToChar(CellType type) {
     switch(type)
     {
@@ -19,6 +24,11 @@ char cellTypeToChar(CellType type) {
     return 'U';
 };
 
+/**
+ * Преобразование символа в тип ячейки.
+ * @param char c - символ.
+ * @return тип ячейки.
+ */
 CellType charToCellType(char c) {
     switch(c)
     {
@@ -34,11 +44,19 @@ CellType charToCellType(char c) {
     return EMPTY;
 };
 
+/**
+ * Элемент поля.
+ * @param Point& coordinate - координаты точки.
+ * @param CellType cellType - тип ячейки.
+ */
 FieldMember::FieldMember(const Point& coordinate, CellType cellType): coordinate(coordinate) {
     this->cellType = cellType;
     setDefaultMetric();
 }
 
+/**
+ * Присвоение метрики по умолчанию.
+ */
 void FieldMember::setDefaultMetric()
 {
     switch (cellType) {

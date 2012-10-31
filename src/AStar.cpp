@@ -19,13 +19,12 @@ AStar::~AStar() {
 	delete start;
 }
 
-
-string AStar::solve(Field** pResultField) {
     /**
      * Поиск пути.
-     * @param pResultField - todo
-     * @return путь поиска лямбд
+     * @param Field** pResultField - состояние карты после прохождения пути.
+     * @return путь поиска лямбд.
      */
+string AStar::solve(Field** pResultField) {
 	AStarPoint *current = start;
 	while (!openedList.empty()) {
 		if (current->isGoalReached()) {
@@ -42,12 +41,11 @@ string AStar::solve(Field** pResultField) {
 	return "";
 }
 
-
-void AStar::addNeighboursToOpenedList(const AStarPoint& current) {
     /**
-     * Добавление следующего хода в путь.
-     * @param AStarPoint& current - текущая точка
+     * Добавление соседей текущей точки.
+     * @param AStarPoint& current - текущая точка.
      */
+void AStar::addNeighboursToOpenedList(const AStarPoint& current) {
 	int x = current.getCell()->getCoordinate().x;
 	int y = current.getCell()->getCoordinate().y;
 	checkPoint(Point(x, y + 1), current, "D");
@@ -56,14 +54,13 @@ void AStar::addNeighboursToOpenedList(const AStarPoint& current) {
 	checkPoint(Point(x + 1, y), current, "R");
 }
 
-
-void AStar::checkPoint(Point point, const AStarPoint& current, string move) {
     /**
      * todo
-     * @param Point point - точка назначения(???)
-     * @param AStarPoint& current - текущая точка
-     * @param string move - строка последовательности ходов
+     * @param Point point - анализируемая точка.
+     * @param AStarPoint& current - текущая точка.
+     * @param string move - ход робота.
      */
+void AStar::checkPoint(Point point, const AStarPoint& current, string move) {
 	const FieldMember *tmp = current.getField()->getXY(point);
 	if (tmp->isPassable()) {
         sSimResult res;
