@@ -1,0 +1,11 @@
+Для работы программы:
+1. Выполнить: sudo apt-get -y install build-essential xserver-xorg-dev x11proto-xf86vidmode-dev libxxf86vm-dev mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev libxext-dev libxcursor-dev
+2. Распаковать res.zip в Lifter3D/Release/
+
+Для компиляции программы:
+1. Выполнить: sudo apt-get -y install build-essential xserver-xorg-dev x11proto-xf86vidmode-dev libxxf86vm-dev mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev libxext-dev libxcursor-dev
+2. Скачать Irrlicht 1.7.3 (http://irrlicht.sourceforge.net/downloads/)
+3. Запустить make из irrlicht-1.7.3/source/Irrlicht
+4. Добавить irrlicht-1.7.3/lib/Linux/libIrrlicht.a в папку Lifter3D/Sources/lib
+5. Распаковать res.zip в Lifter3D/Sources/
+
