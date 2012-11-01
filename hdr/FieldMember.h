@@ -49,7 +49,7 @@ public:
     void setDefaultMetric();
 
     bool isPassable() const {
-    	return (metric == METRIC_NORMAL);
+    	return (metric != METRIC_INFINITY);
     }
 
     Point getCoordinate() const {

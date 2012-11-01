@@ -19,11 +19,11 @@ AStar::~AStar() {
 	delete start;
 }
 
-    /**
-     * Поиск пути.
-     * @param Field** pResultField - состояние карты после прохождения пути.
-     * @return путь поиска лямбд.
-     */
+/**
+ * Поиск пути.
+ * @param Field** pResultField - состояние карты после прохождения пути.
+ * @return путь поиска лямбд.
+ */
 string AStar::solve(Field** pResultField) {
 	AStarPoint *current = start;
 	while (!openedList.empty()) {
@@ -80,12 +80,12 @@ void AStar::checkPoint(Point point, const AStarPoint& current, string move) {
 }
 
 
+/**
+ * Поиск возможности хода.
+ * @param AStarPoint* pCurrent - текущая точка
+ * @return true, если текущая точка не является последней допустимой; false - в протианом случае.
+ */
 bool AStar::isInClosedList(const AStarPoint* pCurrent) const {
-    /**
-     * Поиск возможности хода.
-     * @param AStarPoint* pCurrent - текущая точка
-     * @return true, если текущая точка не является последней допустимой; false - в протианом случае.
-     */
 	set<AStarPoint*>::const_iterator it = find_if(closedList.begin(), closedList.end(),
 			bind2nd(Comparators::PointerComparatorEquals<AStarPoint*>(), pCurrent));
 	return (it != closedList.end());

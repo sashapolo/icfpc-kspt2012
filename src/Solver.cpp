@@ -7,6 +7,8 @@
 
 #include "Solver.h"
 
+#include <iostream>
+
 Solver::Solver(): snapshots(), markedLambdas() {
 }
 
@@ -46,11 +48,12 @@ string Solver::solve(Field* pField) {
 					delete mH;
 					return bestResult + "A";
 				} else {  // откат к предыдущей лямбде
-					if (backtracksCount == 50) {
+					if (backtracksCount == 20) {
 						delete mH;
 						return bestResult + "A";
 					}
 					backtracksCount++;
+					std::cout<<backtracksCount<<std::endl;
 					if (!isSequentialBacktracking) {
 						snapshots.pop_back(); // удаляем текущий снэпшот
 						if (snapshots.empty()) {  // больше некуда откатиться
