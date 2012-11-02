@@ -151,7 +151,7 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
     
     
     //Calculate stone metric (need simple next step sim)
-    list<FieldMember*>::iterator it=NewField->getStoneCacheIt();
+    std::list<FieldMember*>::iterator it=NewField->getStoneCacheIt();
     int x,y;
     while(it!=NewField->getStoneCacheEnd())
     {
