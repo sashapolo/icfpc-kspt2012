@@ -1,6 +1,8 @@
 #include "stdinclude.h"
 #define UPDATE_TIME 500
 
+#include "Logger.h"
+
 IVideoDriver* driver=0;
 ISceneManager* smgr=0;
 IGUIEnvironment* guienv=0;

@@ -9,13 +9,13 @@
 
 /**
  * todo
- * @param Field* field - ��������.
- * @param FieldMember* cell - ������������ ��������.
- * @param int cost - ������ ����������.
- * @param int heuristicsValue - ������������������.
- * @param string path - ��������.
- * @param string move - ������.
- * @return ���������� ��������.
+ * @param Field* field - поле.
+ * @param FieldMember* cell - клетка поля.
+ * @param int cost - вес точки.
+ * @param int heuristicsValue - евристика.
+ * @param string path - путь.
+ * @param string move - шаг.
+ * @return новый путь.
  */
 AStarPoint::AStarPoint(const Field* field, const FieldMember* cell,
 		int cost, int heuristicsValue, std::string path, std::string move):
@@ -35,8 +35,8 @@ AStarPoint::AStarPoint(const AStarPoint& orig): pField(orig.pField), pCell(orig.
 }
 
 /**
- * ������������������ ���� ����������.
- * @return true, �������� ������������������; false �� ������������������ ������������.
+ * Достигнут ли финиш.
+ * @return true, если достигнут; false в противном случае.
  */
 bool AStarPoint::isGoalReached() const {
 	//return pField->lambdaCacheEmpty();
@@ -44,82 +44,82 @@ bool AStarPoint::isGoalReached() const {
 }
 
 /**
- * ������������������ ��������.
- * @return ��������.
+ * Получение поля.
+ * @return поле.
  */
 const Field* AStarPoint::getField() const {
 	return pField;
 }
 
 /**
- * ������������������ ��������.
- * @return ��������.
+ * Получение пути.
+ * @return путь.
  */
 std::string AStarPoint::getPath() const {
 	return path;
 }
 
 /**
- * ������������������ ������������������ ��������.
- * @return ���������������� ��������.
+ * Получение стоимости пути.
+ * @return стоимоть пути.
  */
 int AStarPoint::getPathCost() const {
 	return G + H;
 }
 
 /**
- * ������������������ �������������������� ������������������ ��������.
- * @return �������������������� ���������������� ��������.
+ * Получение глобальной стоимости пути.
+ * @return глобальную стоимоть пути.
  */
 int AStarPoint::getGeneralCost() const {
 	return G;
 }
 
 /**
- * ������������������ ������������������ ������������������ ��������.
- * @param int G - ������������������.
+ * Получение установка стоимости пути.
+ * @param int G - стоимость.
  */
 void AStarPoint::setGeneralCost(int G) {
 	this->G = G;
 }
 
 /**
- * ������������������ ������������������.
- * @return ������������������.
+ * Получение эвристики.
+ * @return эвристику.
  */
 int AStarPoint::getHeuristics() const {
 	return H;
 }
 
 /**
- * ������������������ ������������������ ������������������.
- * @param int H - ������������������.
+ * Получение установка эвристики.
+ * @param int H - эвристика.
  */
 void AStarPoint::setHeuristics(int H) {
 	this->H = H;
 }
 
 /**
- * ������������������ ������������.
- * @return ������������.
+ * Получение ячейки.
+ * @return ячейку.
  */
 const FieldMember* AStarPoint::getCell() const {
 	return pCell;
 }
 
 /**
- * ������������������ ���� ������������������.
- * @param AStarPoint& x - ������������ ��������.
- * @return true, �������� ������������������; false �� ������������������ ������������.
+ * Сравнение на равенство.
+ * @param AStarPoint& x - ячейка поля.
+ * @return true, если совпадают; false в противном случае.
  */
 bool AStarPoint::operator== (const AStarPoint& x) const {
 	return (pCell->getCoordinate() == x.getCell()->getCoordinate());
 }
 
 /**
- * ������������������.
- * @param AStarPoint& x - ������������ ��������.
- * @return true, �������� ������������; false �� ������������������ ������������.
+ * Сравнение.
+ * @param AStarPoint& x - ячейка поля.
+ * @return true, если больше; false в противном случае.
  */
 bool AStarPoint::operator>(const AStarPoint& x) const {
 	return (this->getPathCost() > x.getPathCost());
