@@ -16,6 +16,9 @@ obj/
 icfpc_solver
 tester
 
+# Irrlicht includes
+irrIncludes/
+
 # NetBeans project
 build/
 nbproject/
