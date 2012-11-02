@@ -109,7 +109,7 @@ int main()
     
     LOGINFO("Started");
     lifterScene.init(driver,smgr);
-    //lifterScene.loadMap(L"res/maps/map6");
+    lifterScene.loadMap(L"res/maps/map7");
     IGUIFileOpenDialog* pDial=guienv->addFileOpenDialog(L"Select map file:");
     
     while(device->run())

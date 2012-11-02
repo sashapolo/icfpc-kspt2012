@@ -149,7 +149,7 @@ void MeshBuffer::setIndices(char* array)
         int y0=y;
         for(int i=0;i<cubecnt;i++)
         {
-            if(array[y0*width+x0]) 
+            if(array[y0*width+x0]==1) 
             {
                 indcnt+=36;
             }
@@ -166,7 +166,7 @@ void MeshBuffer::setIndices(char* array)
         int n_ind=0;
         for(int i=0;i<cubecnt;i++)
         {
-            if(array[y*width+x]) 
+            if(array[y*width+x]==1) 
             {
                 u16 n=i*24;
                 //printf("n= %d\n",n);

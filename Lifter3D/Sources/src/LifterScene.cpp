@@ -12,6 +12,9 @@ LifterScene::LifterScene() {
     
     pWallTex=0;
     pEarthTex=0;
+    
+    pRobotNode=0;
+    pLiftNode=0;
 }
 
 
@@ -26,14 +29,18 @@ void LifterScene::init(IVideoDriver* driver_, ISceneManager* smgr_)
     pWallTex=driver->getTexture(L"res/textures/wall.png");
     pEarthTex=driver->getTexture(L"res/textures/earth.png");
     pEarthBump=driver->getTexture(L"res/textures/earth_n.png");
-    pWallBump=driver->getTexture(L"res/textures/wall_n.tga");
-    pStoneTex=driver->getTexture(L"res/textures/stone.jpg");
+    pWallBump=driver->getTexture(L"res/textures/wall_n.png");
+    pStoneTex=driver->getTexture(L"res/textures/stone.png");
+    pStoneBump=driver->getTexture(L"res/textures/stone_n.png");
     pRobotTex=driver->getTexture(L"res/textures/ufo.png");
-    pFireTex=driver->getTexture(L"res/textures/fireball.bmp");
+    pFireTex=driver->getTexture(L"res/textures/fireball.png");
+    pLiftTex=driver->getTexture(L"res/textures/lift_closed.png");
+    pSunTex=driver->getTexture(L"res/textures/sun.png");
     
     pStoneMesh=smgr->getMesh(L"res/models/stone.3ds");
     pLambdaMesh=smgr->getMesh(L"res/models/lambda.3DS");
     pRobotMesh=smgr->getMesh(L"res/models/ufo.3DS");
+    pCubeMesh=smgr->getMesh(L"res/models/cube.3DS");
 }
 
 bool LifterScene::loadMap(wchar_t* Path)
@@ -46,12 +53,12 @@ bool LifterScene::loadMap(wchar_t* Path)
     pField=createField( mbPath);
     
     if(!pField) return false;
-  
+    //float(pField->getSize().first)/3.f*2.f
     mbWall.init(pField->getSize().first,pField->getSize().second,CELLSIZE,
-            float(pField->getSize().first)/5.f*2.f, float(pField->getSize().second)/5.f*2.f,
+            2, 2,
             driver,smgr);
     mbEarth.init(pField->getSize().first,pField->getSize().second,CELLSIZE,
-            float(pField->getSize().first)/5.f*2.f, float(pField->getSize().second)/5.f*2.f,
+            2, 2,
             driver,smgr);
 
     earth_ind=new char[pField->getSize().first*pField->getSize().second];
@@ -61,7 +68,7 @@ bool LifterScene::loadMap(wchar_t* Path)
     //memset(wall_ind,0,pField->getSize().first*pField->getSize().second);
 
     pWallMeshBufferNode=smgr -> addMeshSceneNode(mbWall.mesh);
-    pWallMeshBufferNode->setMaterialType(video::EMT_PARALLAX_MAP_SOLID);
+    pWallMeshBufferNode->setMaterialType(video::EMT_NORMAL_MAP_SOLID);
     pWallMeshBufferNode->setMaterialFlag(video::EMF_LIGHTING, true);
     pWallMeshBufferNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
     pWallMeshBufferNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
@@ -70,7 +77,7 @@ bool LifterScene::loadMap(wchar_t* Path)
     pWallMeshBufferNode->getMaterial(0).MaterialTypeParam = 0.035f;
 
     pEarthMeshBufferNode=smgr -> addMeshSceneNode(mbEarth.mesh);
-    pEarthMeshBufferNode->setMaterialType(video::EMT_PARALLAX_MAP_SOLID);
+    pEarthMeshBufferNode->setMaterialType(video::EMT_NORMAL_MAP_SOLID);
     pEarthMeshBufferNode->setMaterialFlag(video::EMF_LIGHTING, true);
     pEarthMeshBufferNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
     pEarthMeshBufferNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
@@ -78,7 +85,6 @@ bool LifterScene::loadMap(wchar_t* Path)
     pEarthMeshBufferNode->setMaterialTexture(1,pEarthBump);
     pEarthMeshBufferNode->getMaterial(0).MaterialTypeParam = 0.035f;
 
-    scene::ISceneNode* pNode;
     std::list<FieldMember*>::iterator it=pField->getStoneCacheIt();
     int x,y;
     while(it!=pField->getStoneCacheEnd())
@@ -86,17 +92,7 @@ bool LifterScene::loadMap(wchar_t* Path)
         x=(*it)->getCoordinate().x;
         y=(*it)->getCoordinate().y;
         
-        pNode=smgr -> addMeshSceneNode(pStoneMesh);
-        pNode->setPosition(vector3df(x*CELLSIZE,(pField->getSize().second-y)*CELLSIZE-CELLSIZE*1.5,0));
-        pNode->setScale(vector3df(CELLSIZE,CELLSIZE,CELLSIZE));
-        
-        pNode->setMaterialType(video::EMT_NORMAL_MAP_SOLID);
-        pNode->setMaterialFlag(video::EMF_LIGHTING, true);
-        pNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
-        pNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
-        pNode->setMaterialTexture(0,pStoneTex);
-        
-        StoneArr.push_back(pNode);
+        addActor(Point(x,(pField->getSize().second-1)-y),STONE);
         it++;
     }
     
@@ -106,67 +102,18 @@ bool LifterScene::loadMap(wchar_t* Path)
         x=(*it)->getCoordinate().x;
         y=(*it)->getCoordinate().y;
         
-        pNode=smgr -> addMeshSceneNode(pLambdaMesh);
-        pNode->setPosition(vector3df(x*CELLSIZE,(pField->getSize().second-y)*CELLSIZE-CELLSIZE*1.5,0));
-        pNode->setScale(vector3df(CELLSIZE,CELLSIZE,CELLSIZE));
-        
-        pNode->setMaterialType(video::EMT_SOLID);
-        pNode->setMaterialFlag(video::EMF_LIGHTING, true);
-        pNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
-        pNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
-        
-        scene::ISceneNodeAnimator* anim =
-                        smgr->createRotationAnimator(core::vector3df(0,-0.4f,0));
-                pNode->addAnimator(anim);
-        anim->drop();
-        
-        LambdaArr.push_back(pNode);
+        addActor(Point(x,(pField->getSize().second-1)-y),LAMBDA);
         it++;
     }
     
     x=pField->getRobot()->getCoordinate().x;
     y=pField->getRobot()->getCoordinate().y;
-    pNode=smgr -> addMeshSceneNode(pRobotMesh);
-    pNode->setPosition(vector3df(x*CELLSIZE,(pField->getSize().second-y)*CELLSIZE-CELLSIZE,0));
-    pNode->setScale(vector3df(0.05,0.05,0.05));
-
-    pNode->setMaterialType(video::EMT_NORMAL_MAP_SOLID);
-    pNode->setMaterialFlag(video::EMF_LIGHTING, true);
-    pNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
-    pNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);    
-    pNode->setMaterialTexture(0,pRobotTex);
-    pNode->setMaterialTexture(1,pEarthBump);
+    addActor(Point(x,(pField->getSize().second-1)-y),ROBOT);
     
-    scene::ISceneNodeAnimator* anim =
-                        smgr->createRotationAnimator(core::vector3df(0,0.5f,0));
-                pNode->addAnimator(anim);
-    anim->drop();
+    x=pField->getLift()->getCoordinate().x;
+    y=pField->getLift()->getCoordinate().y;
+    addActor(Point(x,(pField->getSize().second-1)-y),CLOSED_LIFT);
     
-    scene::IParticleSystemSceneNode* ps =
-                smgr->addParticleSystemSceneNode(false, pNode);
-
-    // create and set emitter
-    scene::IParticleEmitter* em = ps->createBoxEmitter(
-            core::aabbox3d<f32>(-3,0,-3,3,1,3),
-            core::vector3df(0.0f,-0.03f,0.0f),
-            80,110,
-            video::SColor(0,255,255,255), video::SColor(0,255,255,255),
-            60,180);
-    em->setMinStartSize(core::dimension2d<f32>(3.0f, 4.0f));
-    em->setMaxStartSize(core::dimension2d<f32>(3.0f, 4.0f));
-
-    ps->setEmitter(em);
-    em->drop();
-    
-    ps->setMaterialFlag(video::EMF_LIGHTING, false);
-    ps->setMaterialFlag(video::EMF_ZWRITE_ENABLE, false);
-    ps->setMaterialTexture(0, pFireTex);
-    ps->setMaterialType(video::EMT_TRANSPARENT_VERTEX_ALPHA);
-
-    // create and set affector
-    scene::IParticleAffector* paf = ps->createFadeOutParticleAffector();
-    ps->addAffector(paf);
-    paf->drop();    
     
     scene::ILightSceneNode* light1 =
             smgr->addLightSceneNode(0, core::vector3df((pField->getSize().first/2)*CELLSIZE,(pField->getSize().second/2)*CELLSIZE,-100),
@@ -174,7 +121,7 @@ bool LifterScene::loadMap(wchar_t* Path)
     scene::IBillboardSceneNode* pSun=smgr->addBillboardSceneNode(light1);
     pSun->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
     pSun->setMaterialFlag(video::EMF_LIGHTING, false);
-    pSun->setMaterialTexture(0,driver->getTexture(L"res/textures/sun.png"));
+    pSun->setMaterialTexture(0,pSunTex);
     
     return (bool)pField;
 }
@@ -199,5 +146,133 @@ void LifterScene::updateIndices()
        }
    }
    mbWall.setIndices(wall_ind);
-    mbEarth.setIndices(earth_ind);
+   mbEarth.setIndices(earth_ind);
+}
+
+void LifterScene::addActor(Point pos, CellType type)
+{
+    scene::ISceneNode* pNode;
+    scene::ISceneNodeAnimator* anim;
+    scene::IParticleSystemSceneNode* ps;
+    scene::IParticleEmitter* em;
+    scene::IParticleAffector* paf;
+    
+    switch(type)
+    {
+        case WALL:
+           wall_ind[pos.y*pField->getSize().first+pos.x]=1; 
+           break;
+        case EARTH:
+           earth_ind[pos.y*pField->getSize().first+pos.x]=1; 
+           break;
+        case STONE:
+            pNode=smgr -> addMeshSceneNode(pStoneMesh);
+            pNode->setPosition(vector3df(pos.x*CELLSIZE,pos.y*CELLSIZE-CELLSIZE*0.5,0));
+            pNode->setScale(vector3df(CELLSIZE,CELLSIZE,CELLSIZE));
+
+            pNode->setMaterialType(video::EMT_NORMAL_MAP_SOLID);
+            pNode->setMaterialFlag(video::EMF_LIGHTING, true);
+            pNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
+            pNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
+            pNode->setMaterialTexture(0,pStoneTex);
+            pNode->setMaterialTexture(1,pStoneBump);
+            
+
+            StoneArr.push_back(pNode);
+            break;
+        case LAMBDA:
+            pNode=smgr -> addMeshSceneNode(pLambdaMesh);
+            pNode->setPosition(vector3df(pos.x*CELLSIZE,pos.y*CELLSIZE-CELLSIZE*0.5,0));
+            pNode->setScale(vector3df(CELLSIZE,CELLSIZE,CELLSIZE));
+
+            pNode->setMaterialType(video::EMT_SOLID);
+            pNode->setMaterialFlag(video::EMF_LIGHTING, true);
+            pNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
+            pNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
+
+            anim = smgr->createRotationAnimator(core::vector3df(0,-0.4f,0));
+                    pNode->addAnimator(anim);
+            anim->drop();
+
+            LambdaArr.push_back(pNode);
+            break;
+        case ROBOT:
+            if(!pRobotNode)
+            {
+                pNode=smgr -> addMeshSceneNode(pRobotMesh);
+                pNode->setScale(vector3df(0.05,0.05,0.05));
+
+                pNode->setMaterialType(video::EMT_NORMAL_MAP_SOLID);
+                pNode->setMaterialFlag(video::EMF_LIGHTING, true);
+                pNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
+                pNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);    
+                pNode->setMaterialTexture(0,pRobotTex);
+                pNode->setMaterialTexture(1,pEarthBump);
+                
+                anim = smgr->createRotationAnimator(core::vector3df(0,0.5f,0));
+                pNode->addAnimator(anim);
+                anim->drop();
+
+                ps = smgr->addParticleSystemSceneNode(false, pNode);
+
+                // create and set emitter
+                em = ps->createBoxEmitter(
+                        core::aabbox3d<f32>(-3,0,-3,3,1,3),
+                        core::vector3df(0.0f,-0.03f,0.0f),
+                        80,110,
+                        video::SColor(0,255,255,255), video::SColor(0,255,255,255),
+                        60,180);
+                em->setMinStartSize(core::dimension2d<f32>(3.0f, 4.0f));
+                em->setMaxStartSize(core::dimension2d<f32>(3.0f, 4.0f));
+
+                ps->setEmitter(em);
+                em->drop();
+
+                ps->setMaterialFlag(video::EMF_LIGHTING, false);
+                ps->setMaterialFlag(video::EMF_ZWRITE_ENABLE, false);
+                ps->setMaterialTexture(0, pFireTex);
+                ps->setMaterialType(video::EMT_TRANSPARENT_VERTEX_ALPHA);
+
+                // create and set affector
+                paf = ps->createFadeOutParticleAffector();
+                ps->addAffector(paf);
+                paf->drop();    
+                pRobotNode=pNode;
+            }
+            pRobotNode->setPosition(vector3df(pos.x*CELLSIZE,pos.y*CELLSIZE,0));
+            break;
+        case CLOSED_LIFT:
+            if(!pLiftNode)
+            {
+                pNode=smgr -> addMeshSceneNode(pCubeMesh);
+                pNode->setScale(vector3df(CELLSIZE,CELLSIZE,CELLSIZE));
+
+                pNode->setMaterialType(video::EMT_SOLID);
+                pNode->setMaterialFlag(video::EMF_LIGHTING, true);
+                pNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
+                pNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);    
+                pNode->setMaterialTexture(0,pLiftTex);
+                
+                pLiftNode=pNode;
+            }
+            pLiftNode->setPosition(vector3df(pos.x*CELLSIZE,pos.y*CELLSIZE-CELLSIZE/2,0));
+            break;
+            
+        case OPENED_LIFT:
+            if(!pLiftNode)
+            {
+                pNode=smgr -> addMeshSceneNode(pCubeMesh);
+                pNode->setScale(vector3df(0.05,0.05,0.05));
+
+                pNode->setMaterialType(video::EMT_SOLID);
+                pNode->setMaterialFlag(video::EMF_LIGHTING, true);
+                pNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
+                pNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);    
+                pNode->setMaterialTexture(0,pLiftTex);
+                
+                pLiftNode=pNode;
+            }
+            pLiftNode->setPosition(vector3df(pos.x*CELLSIZE,pos.y*CELLSIZE-CELLSIZE,0));
+            break;
+    }
 }

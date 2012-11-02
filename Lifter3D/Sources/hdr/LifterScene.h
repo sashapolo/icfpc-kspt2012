@@ -11,7 +11,7 @@ public:
     
     void release() {};
     
-    void writeActor(Point pos, CellType type);
+    void addActor(Point pos, CellType type);
     void moveActor(Point pos);
     void removeActor(Point pos);
     
@@ -25,12 +25,16 @@ private:
     ITexture* pEarthTex;
     ITexture* pEarthBump;
     ITexture* pStoneTex;
+    ITexture* pStoneBump;
     ITexture* pRobotTex;
     ITexture* pFireTex;
+    ITexture* pLiftTex;
+    ITexture* pSunTex;
     
     IMesh* pStoneMesh;
     IMesh* pLambdaMesh;
     IMesh* pRobotMesh;
+    IMesh* pCubeMesh;
     
     
     scene::ISceneNode* pWallMeshBufferNode;
@@ -50,5 +54,6 @@ private:
     std::vector<scene::ISceneNode*> LambdaArr;
     
     scene::ISceneNode* pRobotNode;
+    scene::ISceneNode* pLiftNode;
 };
 
