@@ -18,7 +18,7 @@ CFLAGS = -Wall -g
 LD = g++
 LFLAGS = -Wall
 TEST_LIBS = -lcppunit
-3D_LIBS = -lGL -lXxf86vm -lXext -lX11 -lIrrlicht
+3D_LIBS = -lGL -lXxf86vm -lXext -lX11 
 
 SRCS = $(foreach sdir, $(SRC_DIR), $(wildcard $(sdir)/*.cpp))
 OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
@@ -67,7 +67,7 @@ $(OBJ_DIR)/%.o: $(TST_DIR)/%.cpp
 
 # 3D launcher
 $(3DEXE): $(3D_OBJS) $(3D_DEP_OBJS)
-	$(LD) $(LFLAGS) $(3D_LIBS) $^ -o $@
+	$(LD) $(LFLAGS) $(3D_LIBS) $^ -o $@ -L/usr/local/lib -lIrrlicht
 
 $(3D_OBJ_DIR)/%.o: $(3D_SRC_DIR)/%.cpp
 	$(CC) -I $(3D_HDR_DIR) -I $(HDR_DIR) $(CFLAGS) -c $< -o $@

@@ -76,18 +76,17 @@ int main()
 
     smgr->addCameraSceneNodeFPS( 0, 50.0f, 0.5f );//addCameraSceneNode(0, vector3df(0,0,400), vector3df(5,5,0));
 
-    vector3df lightrot=vector3df(50,50,-50);
-    
+    smgr->setAmbientLight(video::SColorf(0.3f, 0.3f, 0.3f, 1.0f)); 
     
     
     driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
     scene::ISceneNode* skybox=smgr->addSkyBoxSceneNode(
-                driver->getTexture("3D/res/textures/sky/irrlicht2_up.jpg"),
-                driver->getTexture("3D/res/textures/sky/irrlicht2_dn.jpg"),
-                driver->getTexture("3D/res/textures/sky/irrlicht2_lf.jpg"),
-                driver->getTexture("3D/res/textures/sky/irrlicht2_rt.jpg"),
-                driver->getTexture("3D/res/textures/sky/irrlicht2_ft.jpg"),
-                driver->getTexture("3D/res/textures/sky/irrlicht2_bk.jpg"));
+                driver->getTexture("3D/res/textures/sky/posY.jpg"),
+                driver->getTexture("3D/res/textures/sky/negY.jpg"),
+                driver->getTexture("3D/res/textures/sky/negZ.jpg"),
+                driver->getTexture("3D/res/textures/sky/posZ.jpg"),
+                driver->getTexture("3D/res/textures/sky/posX.jpg"),
+                driver->getTexture("3D/res/textures/sky/negX.jpg"));
     driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, true);
 
     IGUISkin* skin = guienv->getSkin();
@@ -123,9 +122,6 @@ int main()
             text->setText(tmp);
             prevUpdateTime.tv_usec=currTime.tv_usec;
         }
-        
-        lightrot.rotateXZBy(0.01);
-        //light1->setPosition(lightrot);
         
         driver->beginScene(true, true, SColor(255,100,101,140));
 

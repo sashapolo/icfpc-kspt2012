@@ -9,7 +9,7 @@ public:
     void init(IVideoDriver* driver_, ISceneManager* smgr_);
     bool loadMap(wchar_t* Path);
     
-    void release() {};
+    void release();
     
     void addActor(Point pos, CellType type);
     void moveActor(Point pos);
@@ -27,6 +27,7 @@ private:
     ITexture* pStoneTex;
     ITexture* pStoneBump;
     ITexture* pRobotTex;
+    ITexture* pRobotBump;
     ITexture* pFireTex;
     ITexture* pLiftTex;
     ITexture* pSunTex;
@@ -55,5 +56,7 @@ private:
     
     scene::ISceneNode* pRobotNode;
     scene::ISceneNode* pLiftNode;
+    
+    scene::ILightSceneNode* light1;
 };
 

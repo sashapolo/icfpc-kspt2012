@@ -43,9 +43,20 @@ void MeshBuffer::init(int width_, int height_, float cellsize_,float texScaleX, 
     
     int x=0;
     int y=0;
-    for(int i=0;i<buffers;i++)
+    int i=0;
+    for(i=0;i<buffers;i++)
     {
         addCube(x,y,(maxcubes>bufcubes)?bufcubes:maxcubes,i);
+    }
+    
+    if (i<mesh->getMeshBufferCount())
+    {
+            // clear the rest
+            for (u32 j=i; j<mesh->getMeshBufferCount(); ++j)
+            {
+                    mesh->getMeshBuffer(j)->drop();
+            }
+            mesh->MeshBuffers.erase(i,mesh->getMeshBufferCount()-i);
     }
     
     mesh->recalculateBoundingBox();
