@@ -7,7 +7,6 @@
 #include "stdinclude.h"
 #include "Field.h"
 
-using namespace std;
 
 Field::~Field() {
 	for (unsigned int i = 0; i < field.size(); i++) {
@@ -18,33 +17,33 @@ Field::~Field() {
 }
 
 
-list<FieldMember*>::const_iterator Field::getLambdaCacheIt() const{
+std::list<FieldMember*>::const_iterator Field::getLambdaCacheIt() const{
    	return lambdaCache.begin();
 }
-list<FieldMember*>::iterator Field::getLambdaCacheIt() {
+std::list<FieldMember*>::iterator Field::getLambdaCacheIt() {
 	return lambdaCache.begin();
 }
-list<FieldMember*>::const_iterator Field::getLambdaCacheEnd() const{
+std::list<FieldMember*>::const_iterator Field::getLambdaCacheEnd() const{
 	return lambdaCache.end();
 }
 bool Field::lambdaCacheEmpty() const {
 	return lambdaCache.empty();
 }
-list<FieldMember*>::iterator Field::deleteLambdaFromCache(list<FieldMember*>::iterator it) {
+std::list<FieldMember*>::iterator Field::deleteLambdaFromCache(std::list<FieldMember*>::iterator it) {
 	return lambdaCache.erase(it);
 }
 
 
-list<FieldMember*>::const_iterator Field::getStoneCacheIt() const{
+std::list<FieldMember*>::const_iterator Field::getStoneCacheIt() const{
 	return stoneCache.begin();
 }
-list<FieldMember*>::iterator Field::getStoneCacheIt() {
+std::list<FieldMember*>::iterator Field::getStoneCacheIt() {
 	return stoneCache.begin();
 }
-list<FieldMember*>::const_iterator Field::getStoneCacheEnd() const{
+std::list<FieldMember*>::const_iterator Field::getStoneCacheEnd() const{
 	return stoneCache.end();
 }
-list<FieldMember*>::iterator Field::deleteStoneFromCache(list<FieldMember*>::iterator it) {
+std::list<FieldMember*>::iterator Field::deleteStoneFromCache(std::list<FieldMember*>::iterator it) {
 	return stoneCache.erase(it);
 }
 
@@ -57,11 +56,11 @@ FieldMember* Field::getXY(const Point &point) {
 }
 
 
-pair<int, int> Field::getSize() const {
+std::pair<int, int> Field::getSize() const {
     if (field.size() == 0) {
-    	return make_pair(0,0);
+    	return std::make_pair(0,0);
     }
-    return make_pair(field[0].size(), field.size());
+    return std::make_pair(field[0].size(), field.size());
 }
 
 
@@ -69,7 +68,7 @@ pair<int, int> Field::getSize() const {
 // получается путем наращивания векторов,
 // но это будет делаться всего один раз, так что, возможно, это не так уж и накладно
 
-Field::Field(const string &ASCIIMap): field(), lambdaCache(), stoneCache() {
+Field::Field(const std::string &ASCIIMap): field(), lambdaCache(), stoneCache() {
     /*
      * Index used when filling vectors while reading the map.
      * At this stage vectors are variable length.
@@ -124,7 +123,7 @@ Field::Field(const string &ASCIIMap): field(), lambdaCache(), stoneCache() {
 
     for(int i=0;i<maxY;i++) 
     {
-        vector<FieldMember*> tmp;
+        std::vector<FieldMember*> tmp;
         tmp.resize(maxX,0);
         field.push_back(tmp);
     };
@@ -178,7 +177,8 @@ Field::Field(const string &ASCIIMap): field(), lambdaCache(), stoneCache() {
 }
 
 
-Field::Field(const Field& orig): field(orig.field.size(), vector<FieldMember*>(orig.field[0].size())),
+Field::Field(const Field& orig): field(orig.field.size(),
+		std::vector<FieldMember*>(orig.field[0].size())),
 		lambdaCache(), stoneCache() {
     int ySize = field.size();
     int xSize = field[0].size();
@@ -222,7 +222,7 @@ void Field::write(Point xy, CellType type)
         prevType=pOldMember->getType();
         if(prevType==type) return;
         
-        list<FieldMember*>::iterator it;
+        std::list<FieldMember*>::iterator it;
         if(prevType==LAMBDA){
             it=getLambdaCacheIt();
             while(it!=getLambdaCacheEnd())

@@ -11,14 +11,13 @@
 #include "stdinclude.h"
 #include "Solver.h"
 
-using namespace std;
 
 /**
  * Создание поля.
  * @param string mapFileName - имя файла карты.
  * @return результат создания поля.
  */
-Field* createField(const string mapFileName) {
+Field* createField(const std::string mapFileName) {
 	ifstream file;
 	char* file_buf;
 	int file_size;
@@ -62,17 +61,17 @@ Field* createField(const string mapFileName) {
  * @param Field* pField - поле.
  * @param string path - путь робота.
  */
-void drawStepByStep(Field* const pField, const string path) {
+void drawStepByStep(Field* const pField, const std::string path) {
 	FieldSim fieldSim;
 	sSimResult res;
 	int nStep = 0;
 	drawField(pField, &res.path, nStep++);
-	string t;
+	std::string t;
 	t += path[0];
 	Field *newField = fieldSim.calcRobotSteps(pField, t, &res);
 	for (unsigned int i = 1; i < path.size(); i++) {
 		drawField(newField, &res.path, nStep++);
-		string t;
+		std::string t;
 		t += path[i];
 		newField = fieldSim.calcRobotSteps(newField, t, &res);
 	}
@@ -105,8 +104,8 @@ int main(int argc, char** argv) {
 		printf("Map load error! (See LOG.html)\n");
 		return 0;
 	}
-	Solver s;
-	string result = s.solve(field);
+	Solver s(field);
+	std::string result = s.solve();
 	cout<<result<<'\n';
 	drawStepByStep(field, result);
 

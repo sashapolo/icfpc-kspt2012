@@ -19,9 +19,11 @@
 class Path {
 	std::vector<Point> path;
 public:
+	Path();
     int getSize() const;
 	Point getCell(int) const;
 	void addCell(const Point&);
+	bool isEmpty() const;
 };
 
 #endif /* PATH_H_ */

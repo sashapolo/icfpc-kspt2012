@@ -22,6 +22,13 @@ namespace Comparators {
 			return (*l == *r);
 		}
 	};
+
+	template <class T>
+	struct PointerComparatorLess: public std::binary_function<T, T, bool> {
+		bool operator()(const T& l, const T& r) const {
+			return (*l < *r);
+		}
+	};
 }
 
 
