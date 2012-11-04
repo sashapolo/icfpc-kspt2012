@@ -11,6 +11,9 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <set>
+#include <list>
+#include <vector>
 
 #include "Logger.h"
 #include "HTMLLogger.h"

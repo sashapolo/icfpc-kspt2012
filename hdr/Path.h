@@ -24,6 +24,8 @@ public:
 	Point getCell(int) const;
 	void addCell(const Point&);
 	bool isEmpty() const;
+	int getDistance() const;
+	void swap(int i, int j);
 };
 
 #endif /* PATH_H_ */

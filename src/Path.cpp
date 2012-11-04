@@ -39,3 +39,17 @@ int Path::getSize() const {
 bool Path::isEmpty() const {
 	return path.empty();
 }
+
+int Path::getDistance() const {
+	int result = 0;
+	for (unsigned int i = 0; i < path.size() - 1; i++) {
+		result += path[i].getDistance(path[i+1]);
+	}
+	return result;
+}
+
+void Path::swap(int i, int j) {
+	Point t = path[i];
+	path[i] = path[j];
+	path[j] = t;
+}

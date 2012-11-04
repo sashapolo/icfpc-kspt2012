@@ -318,15 +318,6 @@ int Field::getStoneCount() const {
 }
 
 
-int Field::getDistance(const Point& from, const Point& to) const {
-	int x = from.x - to.x;
-	int y = from.y - to.y;
-	x = (x < 0)? -x : x;
-	y = (y < 0)? -y : y;
-	return x + y;
-}
-
-
 Field& Field::operator=(const Field& orig) {
 	int ySize = field.size();
 	int xSize = field[0].size();

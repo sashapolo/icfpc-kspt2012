@@ -16,7 +16,11 @@
 #include "Heuristic.h"
 #include "Comparators.h"
 
-using namespace std;
+typedef std::priority_queue<AStarPoint*,
+						    std::vector<AStarPoint*>,
+						    Comparators::PointerComparatorMore<AStarPoint*> >
+		AStarOpenedList;
+typedef std::set<AStarPoint*> AStarClosedList;
 
 /**
  * А*.<br />
@@ -29,17 +33,16 @@ private:
 	AStarPoint *start;
 	Heuristic *h;
 
-	priority_queue<AStarPoint*, vector<AStarPoint*>,
-					Comparators::PointerComparatorMore<AStarPoint*> > openedList;
-	set<AStarPoint*> closedList;
+	AStarOpenedList openedList;
+	AStarClosedList closedList;
 
-	bool isInClosedList(const AStarPoint*) const;
-	void checkPoint(Point point, const AStarPoint& current, string move);
+	bool isInClosedList(AStarPoint*) const;
+	void checkPoint(Point point, const AStarPoint& current, std::string move);
 	void addNeighboursToOpenedList(const AStarPoint&);
 
 public:
 	AStar(const Field*, FieldMember*, Heuristic*);
-	string solve(Field**);
+	std::string solve(Field**);
 	virtual ~AStar();
 };
 

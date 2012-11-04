@@ -7,7 +7,7 @@
 
 #include "NearestNeighbour.h"
 
-NearestNeighbour::NearestNeighbour(const Field *f): tour() {
+NearestNeighbour::NearestNeighbour(const Field *f): path() {
 	pField = f;
 	std::list<FieldMember*>::const_iterator it = pField->getLambdaCacheIt();
 	for (; it != pField->getLambdaCacheEnd(); it++) {
@@ -16,7 +16,7 @@ NearestNeighbour::NearestNeighbour(const Field *f): tour() {
 }
 
 const Path* NearestNeighbour::getTour() const {
-	return &tour;
+	return &path;
 }
 
 
@@ -31,18 +31,18 @@ void NearestNeighbour::createTour(const Point& start) {
 	Point current = start;
 	for (; it != end; it++) {
 		current = findNearestNeighbour(current);
-		tour.addCell(current);
+		path.addCell(current);
 	}
 }
 
 
 Point NearestNeighbour::findNearestNeighbour(const Point& point) {
 	std::list<Point>::const_iterator it = goals.begin();
-	int min = pField->getDistance(point, *it);
+	int min = point.getDistance(*it);
 	Point result = *it;
 
 	for (++it; it != goals.end(); it++) {
-		int tmp = pField->getDistance(point, *it);
+		int tmp = point.getDistance(*it);
 		if (min > tmp) {
 			min = tmp;
 			result = *it;

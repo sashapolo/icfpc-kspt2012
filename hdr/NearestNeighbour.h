@@ -8,13 +8,11 @@
 #ifndef NEARESTNEIGHBOUR_H_
 #define NEARESTNEIGHBOUR_H_
 
-#include "Path.h"
-#include "Field.h"
-
+#include "stdinclude.h"
 
 class NearestNeighbour {
 private:
-	Path tour;
+	Path path;
 	const Field *pField;
 	std::list<Point> goals;
 

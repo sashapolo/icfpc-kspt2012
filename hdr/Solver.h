@@ -27,6 +27,8 @@ private:
 	bool isMarked(const FieldMember* lambda) const;
 	void createSnapshot(Field* s, std::string delta, const FieldMember* lambda);
 	void loadSnapshot(bool);
+	void optimize();
+	void doTwoOpt(int start1, int end1, int start2, int end2);
 public:
 	Solver(Field*);
 	std::string solve();

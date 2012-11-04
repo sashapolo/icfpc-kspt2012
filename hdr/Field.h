@@ -105,8 +105,6 @@ public:
 
     Field& operator=(const Field&);
     bool operator==(const Field&) const;
-
-    int getDistance(const Point& from, const Point& to) const;
 };
 
 #endif	/* FIELD_H */

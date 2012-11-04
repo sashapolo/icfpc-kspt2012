@@ -18,7 +18,7 @@ std::string Solver::solve() {
 	// флаг, говорящий о том, что откаты происходят несколько раз подряд =>
 	// нужно все собранные на этом шаге лямбды заносить как помеченные
 	bool isSequentialBacktracking = false;
-	string bestResult;
+	std::string bestResult;
 	int mostLambdasCollected = 0;
 	int currentLambdasCollected = 0;
 	int backtracksCount = 0;
@@ -28,12 +28,12 @@ std::string Solver::solve() {
 	const FieldMember *goal = getNextGoal();
 	ManhattanHeuristic mH(goal->getCoordinate());
 	AStar astar(pField, pField->getRobot(), &mH);
-	string result;
+	std::string result;
 
 	// сохраняем стартовое состояние
 	createSnapshot(pField, result, goal);
 
-	string t = astar.solve(&pField);
+	std::string t = astar.solve(&pField);
 	while (pField->getRobot()->getCoordinate() != finish) {
 		if (!t.empty()) {
 			createSnapshot(pField, result, goal);
@@ -70,7 +70,7 @@ void Solver::markUnreachableGoal(const FieldMember* pGoal) {
 
 
 bool Solver::isMarked(const FieldMember* lambda) const {
-	list<const FieldMember*>::const_iterator it = markedLambdas.begin();
+	std::list<const FieldMember*>::const_iterator it = markedLambdas.begin();
 	for (; it != markedLambdas.end(); it++) {
 		if (*(*it) == *lambda) {
 			return true;
@@ -103,6 +103,30 @@ void Solver::createOptimalPath() {
 	NearestNeighbour nn(pField);
 	nn.createTour(pField->getRobot()->getCoordinate());
 	optimalPath = *nn.getTour();
+	optimize();
+}
+
+// Оптимизирует путь при помощи эвристики 2-opt
+void Solver::optimize() {
+	// перебираем все возможные ребра в пути
+	for (int i = 0; i < optimalPath.getSize() - 3; i++) {
+		for (int j = i + 3; j < optimalPath.getSize() - 1; j++) {
+			doTwoOpt(i, i+1, j, j+1);
+		}
+	}
+}
+
+
+void Solver::doTwoOpt(int start1, int end1, int start2, int end2) {
+	if (start2 == start1 || start2 == end1 || end2 == start1 || end2 == end1) {
+		return;
+	}
+	int oldDistance = optimalPath.getDistance();
+	optimalPath.swap(end1, start2);
+	int newDistance = optimalPath.getDistance();
+	if (newDistance >= oldDistance) {
+		optimalPath.swap(end1, start2);
+	}
 }
 
 

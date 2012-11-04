@@ -6,9 +6,11 @@
 // Description : Supaplex analog for icfp contest
 //============================================================================
 
+
 #include <cstdlib>
 #include <iostream>
-#include "stdinclude.h"
+#include <fstream>
+
 #include "Solver.h"
 
 
@@ -18,18 +20,18 @@
  * @return результат создания поля.
  */
 Field* createField(const std::string mapFileName) {
-	ifstream file;
+	std::ifstream file;
 	char* file_buf;
 	int file_size;
 
-	file.open(mapFileName.c_str(), ifstream::in);
+	file.open(mapFileName.c_str(), std::ifstream::in);
 
 	if(!file.is_open()) {
 		LOGERROR("Can't load map from \"%s\": can't open file", mapFileName.c_str());
 		return NULL;
 	};
 
-	file.seekg (0, ios::end);
+	file.seekg (0, std::ios::end);
 	file_size = file.tellg();
 	if(file_size==0) {
 		LOGERROR("Can't load map from \"%s\": file is empty", mapFileName.c_str());
@@ -38,7 +40,7 @@ Field* createField(const std::string mapFileName) {
 	}
 
 	file_buf = new char[file_size];
-	file.seekg(0, ios::beg);
+	file.seekg(0, std::ios::beg);
 	file.read(file_buf, file_size);
 	file.close();
 	Field *result;
@@ -106,7 +108,7 @@ int main(int argc, char** argv) {
 	}
 	Solver s(field);
 	std::string result = s.solve();
-	cout<<result<<'\n';
+	std::cout<<result<<'\n';
 	drawStepByStep(field, result);
 
 //	Field *oldField = field;
