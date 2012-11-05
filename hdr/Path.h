@@ -26,6 +26,7 @@ public:
 	bool isEmpty() const;
 	int getDistance() const;
 	void swap(int i, int j);
+	void deleteCell(int);
 };
 
 #endif /* PATH_H_ */

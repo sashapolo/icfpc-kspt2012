@@ -12,6 +12,7 @@
 #include <fstream>
 
 #include "Solver.h"
+#include "Logger.h"
 
 
 /**

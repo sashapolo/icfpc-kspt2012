@@ -7,20 +7,17 @@
 
 #include "Solver.h"
 
-Solver::Solver(Field *f): snapshots(), markedLambdas() {
+Solver::Solver(Field *f): lambdaRoute(), bestLambdaRoute(), snapshots()  {
 	pField = f;
 	currentGoalIndex = 0;
 	createOptimalPath();
+	markedLambdas.reserve(optimalPath.getSize());
+	lambdasCollected = 0;
+	bestLambdasCollected = 0;
 }
 
 
 std::string Solver::solve() {
-	// флаг, говорящий о том, что откаты происходят несколько раз подряд =>
-	// нужно все собранные на этом шаге лямбды заносить как помеченные
-	bool isSequentialBacktracking = false;
-	std::string bestResult;
-	int mostLambdasCollected = 0;
-	int currentLambdasCollected = 0;
 	int backtracksCount = 0;
 
 	// инициализация переменных для А*
@@ -28,74 +25,80 @@ std::string Solver::solve() {
 	const FieldMember *goal = getNextGoal();
 	ManhattanHeuristic mH(goal->getCoordinate());
 	AStar astar(pField, pField->getRobot(), &mH);
-	std::string result;
 
 	// сохраняем стартовое состояние
-	createSnapshot(pField, result, goal);
+	createSnapshot("");
 
 	std::string t = astar.solve(&pField);
 	while (pField->getRobot()->getCoordinate() != finish) {
 		if (!t.empty()) {
-			createSnapshot(pField, result, goal);
-			result += t;
+			lambdasCollected++;
+			lambdaRoute += t;
+			createSnapshot(lambdaRoute);
+			backtracksCount = 0;
 		}
 		goal = getNextGoal();
-		if (goal == NULL || (t.empty() && goal == pField->getLift())) {
-			return result + "A";
+		while (goal == NULL) { // если лямбды из оптимального пути закончились
+			// но лямбды на карте еще есть => откат
+			// если откаты не последовательные, то нужно удалить последний снэпшот
+			if (backtracksCount == 0) {
+				snapshots.pop_back();
+			}
+			if (snapshots.empty()) {  // откатываться некуда
+				return bestLambdaRoute + "A";
+			}
+			backtrack();
+			if (backtracksCount != 0) {
+				snapshots.pop_back();
+			}
+			goal = getNextGoal();
+			backtracksCount++;
+		}
+		if (t.empty() && (goal == pField->getLift())) {
+			return lambdaRoute + "A";
 		}
 		mH.setGoal(goal->getCoordinate());
 		AStar astar(pField, pField->getRobot(), &mH);
 		t = astar.solve(&pField);
 	}
-	return result + t;
+	return lambdaRoute + t;
 }
 
 
 const FieldMember* Solver::getNextGoal() {
 	FieldMember *result;
 	do {
-		if (currentGoalIndex == optimalPath.getSize()) {
+		if (currentGoalIndex >= optimalPath.getSize()) {
 			return pField->lambdaCacheEmpty() ? pField->getLift() : NULL;
 		}
 		result = pField->getXY(optimalPath.getCell(currentGoalIndex));
-		currentGoalIndex++;
+		if (result->getType() != LAMBDA) {
+			lambdasCollected++;
+			optimalPath.deleteCell(currentGoalIndex);
+		} else {
+			currentGoalIndex++;
+		}
 	} while (result->getType() != LAMBDA);
 	return result;
 }
 
 
-void Solver::markUnreachableGoal(const FieldMember* pGoal) {
-	markedLambdas.push_back(pGoal);
-}
-
-
-bool Solver::isMarked(const FieldMember* lambda) const {
-	std::list<const FieldMember*>::const_iterator it = markedLambdas.begin();
-	for (; it != markedLambdas.end(); it++) {
-		if (*(*it) == *lambda) {
-			return true;
-		}
-	}
-	return false;
-}
-
-
-void Solver::createSnapshot(Field* s, std::string delta, const FieldMember* lambda) {
-	SolverSnapshot *result = new SolverSnapshot(new Field(*s), delta, lambda);
+void Solver::createSnapshot(const std::string& deltaPath) {
+	SolverSnapshot *result = new SolverSnapshot(new Field(*pField),
+												currentGoalIndex - 1,
+												deltaPath);
 	snapshots.push_back(result);
 }
 
 
-void Solver::loadSnapshot(bool isSequentialBacktracking) {
-	if (!isSequentialBacktracking) {
-		markedLambdas.clear();
-	} else if (markedLambdas.size() == 2) {
-		markedLambdas.pop_front();
-	}
+void Solver::loadSnapshot() {
 	SolverSnapshot* s = snapshots.back();
-	pField = s->snapshot;
-	markedLambdas.push_back(s->goal);
-	snapshots.pop_back();
+	*pField = *s->snapshot;
+	lambdaRoute = s->delta;
+	lambdasCollected--;
+	currentGoalIndex = s->currentGoalIndex;
+	markedLambdas.push_back(optimalPath.getCell(currentGoalIndex + 1));
+	optimalPath.deleteCell(currentGoalIndex + 1);
 }
 
 
@@ -105,6 +108,7 @@ void Solver::createOptimalPath() {
 	optimalPath = *nn.getTour();
 	optimize();
 }
+
 
 // Оптимизирует путь при помощи эвристики 2-opt
 void Solver::optimize() {
@@ -127,6 +131,15 @@ void Solver::doTwoOpt(int start1, int end1, int start2, int end2) {
 	if (newDistance >= oldDistance) {
 		optimalPath.swap(end1, start2);
 	}
+}
+
+
+void Solver::backtrack() {
+	if (lambdasCollected > bestLambdasCollected) {
+		bestLambdasCollected = lambdasCollected;
+		bestLambdaRoute = lambdaRoute;
+	}
+	loadSnapshot();
 }
 
 

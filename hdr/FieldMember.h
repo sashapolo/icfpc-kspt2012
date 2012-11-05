@@ -25,7 +25,7 @@ private:
 public:
 
     const static int METRIC_NORMAL = 10;
-    const static int METRIC_MEDIUM = 50;        //for bad places (metric - ?)
+    const static int METRIC_MEDIUM = 30;        //for bad places (metric - ?)
     const static int METRIC_INFINITY = INT_MAX;
 
 

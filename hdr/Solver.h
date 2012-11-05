@@ -18,17 +18,20 @@ private:
 	Field *pField;
 	Path optimalPath;
 	int currentGoalIndex;
+	std::string lambdaRoute;
+	std::string bestLambdaRoute;
+	int lambdasCollected;
+	int bestLambdasCollected;
 	std::list<SolverSnapshot*> snapshots;
-	std::list<const FieldMember*> markedLambdas;
+	std::vector<Point> markedLambdas;
 
 	void createOptimalPath();
 	const FieldMember* getNextGoal();
-	void markUnreachableGoal(const FieldMember* pGoal);
-	bool isMarked(const FieldMember* lambda) const;
-	void createSnapshot(Field* s, std::string delta, const FieldMember* lambda);
-	void loadSnapshot(bool);
+	void createSnapshot(const std::string&);
+	void loadSnapshot();
 	void optimize();
 	void doTwoOpt(int start1, int end1, int start2, int end2);
+	void backtrack();
 public:
 	Solver(Field*);
 	std::string solve();

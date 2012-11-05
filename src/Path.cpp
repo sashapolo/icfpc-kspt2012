@@ -53,3 +53,7 @@ void Path::swap(int i, int j) {
 	path[i] = path[j];
 	path[j] = t;
 }
+
+void Path::deleteCell(int index) {
+	path.erase(path.begin() + index);
+}
