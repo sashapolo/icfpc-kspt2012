@@ -8,7 +8,24 @@ ISceneManager* smgr=0;
 IGUIEnvironment* guienv=0;
 LifterScene lifterScene;
 
+dimension2d<u32> window_dim;
+IGUIListBox * logListbox;
+IGUIStaticText* infoText;
+gui::IGUIToolBar* toolBar;
+
+enum GUI_ID
+{
+    GUI_ID_BUTTON_OPEN_MAP,
+    GUI_ID_BUTTON_OPEN_LOG,
+    GUI_ID_BUTTON_PLAY,
+    GUI_ID_FD_MAPSELECT
+    
+};
+
 void SetGUIColor(SColor col);
+void initGUI();
+void updateGUI();
+void onResizeWindow(dimension2d<u32> newDim);
 
 class MyEventReceiver : public IEventReceiver
 {
@@ -16,31 +33,55 @@ public:
     IGUIFileOpenDialog* dialog;
    virtual bool OnEvent(const SEvent& event)
    {
-      if (event.EventType == EET_GUI_EVENT)
-      {
-         s32 id = event.GUIEvent.Caller->getID();
+        if(event.EventType==EET_LOG_TEXT_EVENT)
+        {
+            switch(event.LogEvent.Level)
+            {
+                case ELL_INFORMATION: LogInfo("[Irrlicht] %s",event.LogEvent.Text); break;
+                case ELL_WARNING: LogWarning("[Irrlicht] %s",event.LogEvent.Text); break;
+                case ELL_ERROR: LogError("[Irrlicht] %s",event.LogEvent.Text); break;
+                default:
+                    LogInfo("[Irrlicht] %s",event.LogEvent.Text);
+                    break;
+            }
+        }
+        
+        if (event.EventType == EET_GUI_EVENT)
+        {
+            switch(event.GUIEvent.EventType)
+            {
+                case EGET_FILE_SELECTED:         
+                    dialog = (IGUIFileOpenDialog*)event.GUIEvent.Caller;
+                    if(dialog->getID()==GUI_ID_FD_MAPSELECT)
+                        lifterScene.loadMap((wchar_t*)dialog->getFileName());
+                    return true;
+                
+                default:
+                        break;
+            }
+        }
 
-         switch(event.GUIEvent.EventType)
-         {
+        if (event.EventType == EET_GUI_EVENT)
+        {
+            s32 id = event.GUIEvent.Caller->getID();
 
-            case EGET_BUTTON_CLICKED:
-               switch(id)
-               {
-                  case 20:
-                     //guienv->addFileOpenDialog(L"Select a file, then click OK", true, 0, 10 );
-                     return true;
-               }
-
-            case EGET_FILE_SELECTED:         
-               dialog = (IGUIFileOpenDialog*)event.GUIEvent.Caller;
-               lifterScene.loadMap((wchar_t*)dialog->getFileName());
-               return true;
-            
-
-         default:
-            break;
-         }
-      }
+            switch(event.GUIEvent.EventType)
+            {
+                case EGET_BUTTON_CLICKED:
+                    switch(id)
+                    {
+                    case GUI_ID_BUTTON_OPEN_MAP:
+                        guienv->addFileOpenDialog(L"Select map file:",true,0,GUI_ID_FD_MAPSELECT);
+                        break;
+                    case GUI_ID_BUTTON_OPEN_LOG:
+                        logListbox->setVisible(!logListbox->isVisible ());
+                        updateGUI();
+                        break;
+                    }
+                default:
+                    break;
+            }
+        }
 
 
       return false;
@@ -54,14 +95,14 @@ int main()
     timeval prevUpdateTime;
     wchar_t tmp[1024];
     
-    dimension2d<u32> window_dim=dimension2d<u32>(800,600);
+    window_dim=dimension2d<u32>(800,600);
     IrrlichtDevice *device =
             createDevice( video::EDT_OPENGL, window_dim,32,false,true);
 
     if (!device)
             return 1;
-
-    device->setWindowCaption(L"Irr test");
+    
+    device->setWindowCaption(L"Lifter 3D");
     
     MyEventReceiver receiver;
     device->setEventReceiver(&receiver);
@@ -74,7 +115,7 @@ int main()
     
     driver->setTextureCreationFlag(video::ETCF_ALWAYS_32_BIT, true);
 
-    smgr->addCameraSceneNodeFPS( 0, 50.0f, 0.5f );//addCameraSceneNode(0, vector3df(0,0,400), vector3df(5,5,0));
+    smgr->addCameraSceneNode();
 
     smgr->setAmbientLight(video::SColorf(0.3f, 0.3f, 0.3f, 1.0f)); 
     
@@ -89,37 +130,32 @@ int main()
                 driver->getTexture("3D/res/textures/sky/negX.jpg"));
     driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, true);
 
-    IGUISkin* skin = guienv->getSkin();
-    IGUIFont* font = guienv->getFont("3D/res/fonts/fontlucida.png");
-    if (font)
-            skin->setFont(font);
-
-    skin->setFont(guienv->getBuiltInFont(), EGDF_TOOLTIP);
+    initGUI();
     
-    IGUIListBox * log_listbox = guienv->addListBox(rect<s32>(0, 0, window_dim.Width, 80));
-    IGUIStaticText* text=guienv->addStaticText (L"text",rect<s32>(0,80,window_dim.Width,120));
     //SetGUIColor(SColor(128,0,0,0));
     
     IrrLogger* pLogger=new IrrLogger();
-    pLogger->Init(log_listbox);
+    pLogger->Init(logListbox);
     SetLogger(pLogger);
     
     gettimeofday(&prevUpdateTime,0);
     
     
-    
     LOGINFO("Started");
     lifterScene.init(driver,smgr);
-    lifterScene.loadMap(L"res/maps/map1");
-    IGUIFileOpenDialog* pDial=guienv->addFileOpenDialog(L"Select map file:");
     
     while(device->run())
     {
+        if(window_dim!=driver->getScreenSize ())
+        {
+            onResizeWindow(driver->getScreenSize());
+        }
+        
         gettimeofday(&currTime,0);
         if(abs(currTime.tv_usec-prevUpdateTime.tv_usec)>UPDATE_TIME)
         {
             swprintf(tmp,1024,L"Camera pos: %.2f, %.2f, %.2f\r\nFPS: %d",smgr->getActiveCamera()->getPosition().X,smgr->getActiveCamera()->getPosition().Y,smgr->getActiveCamera()->getPosition().Z,driver->getFPS());
-            text->setText(tmp);
+            infoText->setText(tmp);
             prevUpdateTime.tv_usec=currTime.tv_usec;
         }
         
@@ -135,6 +171,53 @@ int main()
 
     return 0;
 };
+
+void initGUI()
+{
+    IGUISkin* skin = guienv->getSkin();
+    IGUIFont* font = guienv->getFont("3D/res/fonts/fontlucida.png");
+    if (font)
+            skin->setFont(font);
+
+    skin->setFont(guienv->getBuiltInFont(), EGDF_TOOLTIP);
+    
+    toolBar = guienv->addToolBar();
+    rect<s32> barRect=toolBar->getRelativePosition();
+    barRect.LowerRightCorner.Y=75;
+    toolBar->setRelativePosition(barRect);
+    video::ITexture* image = driver->getTexture("3D/res/textures/GUI/map64.png");
+    toolBar->addButton(GUI_ID_BUTTON_OPEN_MAP, 0, L"Open a map",image, 0, false, true);
+    image = driver->getTexture("3D/res/textures/GUI/play64.png");
+    video::ITexture* image2=driver->getTexture("3D/res/textures/GUI/pause64.png");
+    toolBar->addButton(GUI_ID_BUTTON_PLAY, 0, L"Play/Pause",image, image2, true, true);
+    image = driver->getTexture("3D/res/textures/GUI/forward.png");
+    toolBar->addButton(GUI_ID_BUTTON_PLAY, 0, L"Next step",image, 0, false, true);
+    image = driver->getTexture("3D/res/textures/GUI/log64.png");
+    toolBar->addButton(GUI_ID_BUTTON_OPEN_LOG, 0, L"Open/Close log",image, 0, false, true);
+        
+    
+    logListbox = guienv->addListBox(rect<s32>(0, 0, window_dim.Width, 150));
+    logListbox->setVisible(false);
+    infoText=guienv->addStaticText (L"Camera pos: 0.0, 0.0, 0.0\r\nFPS: 0",rect<s32>(0,0,window_dim.Width,40));
+    
+    onResizeWindow(window_dim);
+}
+
+void updateGUI()
+{
+    rect<s32> barRect=toolBar->getRelativePosition();
+    toolBar->move(vector2d<s32>(0,(window_dim.Height-barRect.getSize().Height)-barRect.UpperLeftCorner.Y));
+    
+    logListbox->setRelativePosition(rect<s32>(0, 0, window_dim.Width, 150));
+    int infoOffset=logListbox->isVisible()? 150 : 0;
+    infoText->setRelativePosition(rect<s32>(0,infoOffset,window_dim.Width,infoOffset+40));
+}
+
+void onResizeWindow(dimension2d<u32> newDim)
+{
+    window_dim=newDim;
+    updateGUI();
+}
 
 
 void SetGUIColor(SColor col)

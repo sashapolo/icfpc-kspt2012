@@ -35,7 +35,6 @@ private:
     IMesh* pStoneMesh;
     IMesh* pLambdaMesh;
     IMesh* pRobotMesh;
-    IMesh* pCubeMesh;
     
     
     scene::ISceneNode* pWallMeshBufferNode;
@@ -58,5 +57,7 @@ private:
     scene::ISceneNode* pLiftNode;
     
     scene::ILightSceneNode* light1;
+    
+    scene::ICameraSceneNode* pCamera;
 };
 

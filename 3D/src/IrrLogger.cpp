@@ -3,7 +3,7 @@
 
 IrrLogger::IrrLogger() {
     pListbox=0;
-    alpha=128;
+    alpha=255;
 }
 
 IrrLogger::~IrrLogger() {
@@ -39,6 +39,7 @@ void IrrLogger::OnMessageOut(LOGGER_MSG& Msg)
             wcsncpy(tmp,pBuf+i0,i1-i0);
             tmp[(i1-i0)]='\0';
             addItem(tmp,Msg.MsgType);
+            wprintf(tmp);
             i0=i1+1;
             delete [] tmp;
         }
