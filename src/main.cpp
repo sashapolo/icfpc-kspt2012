@@ -40,9 +40,12 @@ Field* createField(const std::string mapFileName) {
 		return NULL;
 	}
 
-	file_buf = new char[file_size];
+	file_buf = new char[file_size + 1];
 	file.seekg(0, std::ios::beg);
 	file.read(file_buf, file_size);
+	if (file_buf[file_size -1] != '\n') {
+		file_buf[file_size] = '\n';
+	}
 	file.close();
 	Field *result;
 	try {
