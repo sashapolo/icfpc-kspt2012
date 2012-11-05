@@ -12,10 +12,12 @@
 #include "ManhattanHeuristic.h"
 #include "SolverSnapshot.h"
 #include "NearestNeighbour.h"
+#include "TwoOptOpitimizer.h"
 
 class Solver {
 private:
 	Field *pField;
+	Field *bestField;
 	Path optimalPath;
 	int currentGoalIndex;
 	std::string lambdaRoute;
@@ -23,15 +25,13 @@ private:
 	int lambdasCollected;
 	int bestLambdasCollected;
 	std::list<SolverSnapshot*> snapshots;
-	std::vector<Point> markedLambdas;
 
 	void createOptimalPath();
 	const FieldMember* getNextGoal();
 	void createSnapshot(const std::string&);
 	void loadSnapshot();
-	void optimize();
-	void doTwoOpt(int start1, int end1, int start2, int end2);
 	void backtrack();
+	std::string revisitLambdas();
 public:
 	Solver(Field*);
 	std::string solve();

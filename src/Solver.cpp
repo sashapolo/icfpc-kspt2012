@@ -7,13 +7,14 @@
 
 #include "Solver.h"
 
+
 Solver::Solver(Field *f): lambdaRoute(), bestLambdaRoute(), snapshots()  {
 	pField = f;
 	currentGoalIndex = 0;
 	createOptimalPath();
-	markedLambdas.reserve(optimalPath.getSize());
 	lambdasCollected = 0;
 	bestLambdasCollected = 0;
+	bestField = new Field(*pField);
 }
 
 
@@ -45,7 +46,8 @@ std::string Solver::solve() {
 				snapshots.pop_back();
 			}
 			if (snapshots.empty()) {  // откатываться некуда
-				return bestLambdaRoute + "A";
+				// попробуем собрать лямбды, которые раньше были недостижимы
+				return bestLambdaRoute + revisitLambdas();
 			}
 			backtrack();
 			if (backtracksCount != 0) {
@@ -97,7 +99,6 @@ void Solver::loadSnapshot() {
 	lambdaRoute = s->delta;
 	lambdasCollected--;
 	currentGoalIndex = s->currentGoalIndex;
-	markedLambdas.push_back(optimalPath.getCell(currentGoalIndex + 1));
 	optimalPath.deleteCell(currentGoalIndex + 1);
 }
 
@@ -106,31 +107,7 @@ void Solver::createOptimalPath() {
 	NearestNeighbour nn(pField);
 	nn.createTour(pField->getRobot()->getCoordinate());
 	optimalPath = *nn.getTour();
-	optimize();
-}
-
-
-// Оптимизирует путь при помощи эвристики 2-opt
-void Solver::optimize() {
-	// перебираем все возможные ребра в пути
-	for (int i = 0; i < optimalPath.getSize() - 3; i++) {
-		for (int j = i + 3; j < optimalPath.getSize() - 1; j++) {
-			doTwoOpt(i, i+1, j, j+1);
-		}
-	}
-}
-
-
-void Solver::doTwoOpt(int start1, int end1, int start2, int end2) {
-	if (start2 == start1 || start2 == end1 || end2 == start1 || end2 == end1) {
-		return;
-	}
-	int oldDistance = optimalPath.getDistance();
-	optimalPath.swap(end1, start2);
-	int newDistance = optimalPath.getDistance();
-	if (newDistance >= oldDistance) {
-		optimalPath.swap(end1, start2);
-	}
+	TwoOptOpitimizer::optimize(&optimalPath);
 }
 
 
@@ -138,8 +115,37 @@ void Solver::backtrack() {
 	if (lambdasCollected > bestLambdasCollected) {
 		bestLambdasCollected = lambdasCollected;
 		bestLambdaRoute = lambdaRoute;
+		delete bestField;
+		bestField = new Field(*pField);
 	}
 	loadSnapshot();
+}
+
+
+std::string Solver::revisitLambdas() {
+	lambdaRoute = "";
+	Point finish = bestField->getLift()->getCoordinate();
+	std::list<FieldMember*>::const_iterator it = bestField->getLambdaCacheIt();
+	std::list<FieldMember*>::const_iterator end = bestField->getLambdaCacheIt();
+
+	const FieldMember *goal = *(it++);
+	ManhattanHeuristic mH(goal->getCoordinate());
+	AStar astar(bestField, bestField->getRobot(), &mH);
+
+	std::string t = astar.solve(&bestField);
+	while (bestField->getRobot()->getCoordinate() != finish) {
+		if (!t.empty()) {
+			lambdaRoute += t;
+		}
+		if (it == end || (t.empty() && (goal == bestField->getLift()))) {
+			return lambdaRoute + "A";
+		}
+		goal = *(it++);
+		mH.setGoal(goal->getCoordinate());
+		AStar astar(bestField, bestField->getRobot(), &mH);
+		t = astar.solve(&bestField);
+	}
+	return lambdaRoute + t;
 }
 
 
@@ -148,4 +154,5 @@ Solver::~Solver() {
 	for (; it != snapshots.end(); it++) {
 		delete *it;
 	}
+	delete bestField;
 }
