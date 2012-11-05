@@ -43,6 +43,7 @@ public:
 
 	bool operator==(const AStarPoint& x) const;
 	bool operator>(const AStarPoint& x) const;
+	bool operator<(const AStarPoint& x) const;
 };
 
 #endif /* ASTARPOINT_H_ */

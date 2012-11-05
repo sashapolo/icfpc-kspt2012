@@ -124,3 +124,8 @@ bool AStarPoint::operator== (const AStarPoint& x) const {
 bool AStarPoint::operator>(const AStarPoint& x) const {
 	return (this->getPathCost() > x.getPathCost());
 }
+
+
+bool AStarPoint::operator<(const AStarPoint& x) const {
+	return (this->getPathCost() < x.getPathCost());
+}

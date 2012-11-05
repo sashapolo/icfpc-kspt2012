@@ -101,6 +101,14 @@ public:
         this->x = x;
         this->y = y;
     }
+
+    int getDistance(const Point& to) const {
+		int tx = x - to.x;
+		int ty = y - to.y;
+			tx = (tx < 0)? -tx : tx;
+			ty = (ty < 0)? -ty : ty;
+		return tx + ty;
+    }
 };
 
 #endif	/* POINT_H */

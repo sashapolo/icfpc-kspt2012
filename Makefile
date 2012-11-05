@@ -65,6 +65,7 @@ $(TESTEXE): $(TESTOBJS) $(OBJS_WITHOUT_MAIN)
 $(OBJ_DIR)/%.o: $(TST_DIR)/%.cpp
 	$(CC) -I $(HDR_DIR) $(CFLAGS) -c $< -o $@
 
+
 # 3D launcher
 $(3DEXE): $(3D_OBJS) $(3D_DEP_OBJS)
 	$(LD) $(LFLAGS) $(3D_LIBS) $^ -o $@ -L/usr/local/lib -lIrrlicht
@@ -74,10 +75,12 @@ $(3D_OBJ_DIR)/%.o: $(3D_SRC_DIR)/%.cpp
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CC) -I $(HDR_DIR) $(CFLAGS) -c $< -o $@
+
 	
 # Generate documentation
 doxygen:
 	doxygen $(DOXYGENCFG)
+
 	
 # Clean the project
 clean:

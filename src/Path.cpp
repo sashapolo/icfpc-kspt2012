@@ -7,6 +7,10 @@
 
 #include "Path.h"
 
+Path::Path(): path() {
+
+}
+
 Point Path::getCell(int index) const {
         /**
          * Возвращает координаты робота
@@ -30,4 +34,26 @@ int Path::getSize() const {
      * @return длина пути
      */
     return path.size();
+}
+
+bool Path::isEmpty() const {
+	return path.empty();
+}
+
+int Path::getDistance() const {
+	int result = 0;
+	for (unsigned int i = 0; i < path.size() - 1; i++) {
+		result += path[i].getDistance(path[i+1]);
+	}
+	return result;
+}
+
+void Path::swap(int i, int j) {
+	Point t = path[i];
+	path[i] = path[j];
+	path[j] = t;
+}
+
+void Path::deleteCell(int index) {
+	path.erase(path.begin() + index);
 }
