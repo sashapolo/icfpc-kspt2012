@@ -178,23 +178,23 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
             {
                 if(NewField->getCellType(Point(x+1,y))==EMPTY)
                 {
-                    if((NewField->getCellType(Point(x+1,y+1))==EARTH) || (NewField->getCellType(Point(x+1,y+1))==LAMBDA))
+                    if(NewField->getCellType(Point(x+1,y+1))==EARTH)
                         NewField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_MEDIUM);
                 }
                 else if(NewField->getCellType(Point(x+1,y+1))==EMPTY)
                 {
-                    if((NewField->getCellType(Point(x+1,y))==EARTH) || (NewField->getCellType(Point(x+1,y))==LAMBDA))
+                    if(NewField->getCellType(Point(x+1,y))==EARTH)
                         NewField->getXY(Point(x+1,y))->setMetric(FieldMember::METRIC_MEDIUM);
                 }
                 
                 if(NewField->getCellType(Point(x-1,y))==EMPTY)
                 {
-                    if((NewField->getCellType(Point(x-1,y+1))==EARTH) || (NewField->getCellType(Point(x-1,y+1))==LAMBDA))
+                    if(NewField->getCellType(Point(x-1,y+1))==EARTH)
                         NewField->getXY(Point(x-1,y+1))->setMetric(FieldMember::METRIC_MEDIUM);
                 }
                 else if(NewField->getCellType(Point(x-1,y+1))==EMPTY)
                 {
-                    if((NewField->getCellType(Point(x-1,y))==EARTH) || (NewField->getCellType(Point(x-1,y))==LAMBDA))
+                    if(NewField->getCellType(Point(x-1,y))==EARTH)
                         NewField->getXY(Point(x-1,y))->setMetric(FieldMember::METRIC_MEDIUM);
                 }
                 
@@ -204,17 +204,17 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
         {
             if((NewField->getCellType(Point(x+1,y))==EMPTY) && (NewField->getCellType(Point(x+1,y+1))==EMPTY))
                 NewField->getXY(Point(x+1,y+2))->setMetric(FieldMember::METRIC_INFINITY);
-            else if(NewField->getCellType(Point(x+1,y))==EMPTY)
+            else if((NewField->getCellType(Point(x+1,y+1))==EARTH) && (NewField->getCellType(Point(x+1,y))==EMPTY))
             {
                 NewField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_MEDIUM);
             }
-            else if(NewField->getCellType(Point(x+1,y+1))==EMPTY)
+            else if((NewField->getCellType(Point(x+1,y))==EARTH) && (NewField->getCellType(Point(x+1,y+1))==EMPTY))
             {
                 NewField->getXY(Point(x+1,y))->setMetric(FieldMember::METRIC_MEDIUM);
             }
         }
         
-        if((NewField->getCellType(Point(x,y+1))==EARTH) || (NewField->getCellType(Point(x,y+1))==LAMBDA))
+        if(NewField->getCellType(Point(x,y+1))==EARTH)
         {
             NewField->getXY(Point(x,y+1))->setMetric(FieldMember::METRIC_MEDIUM);
         }
