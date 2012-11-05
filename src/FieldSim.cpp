@@ -221,8 +221,14 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
         it++;
     }
     
+    Point RobotCrd=NewField->getRobot()->getCoordinate();       //metric to "movable" stones
+    if((NewField->getCellType(RobotCrd+Point(1,0))==STONE) && (NewField->getCellType(RobotCrd+Point(2,0))==EMPTY))       
+        NewField->getXY(RobotCrd+Point(1,0))->setMetric(FieldMember::METRIC_MEDIUM);
+    if((NewField->getCellType(RobotCrd+Point(-1,0))==STONE) && (NewField->getCellType(RobotCrd+Point(-2,0))==EMPTY)) 
+        NewField->getXY(RobotCrd+Point(-1,0))->setMetric(FieldMember::METRIC_MEDIUM);
     
-    Point DestroyCrd=NewField->getRobot()->getCoordinate()+Point(0,-1); //test to robot destruction
+    
+    Point DestroyCrd=RobotCrd+Point(0,-1); //test to robot destruction
     if(NewField->getCellType(DestroyCrd)==STONE)
     	NewField->getXY(DestroyCrd+Point(0,2))->setMetric(FieldMember::METRIC_INFINITY);
 
