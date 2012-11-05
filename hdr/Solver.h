@@ -26,7 +26,7 @@ private:
 	int bestLambdasCollected;
 	std::list<SolverSnapshot*> snapshots;
 
-	void createOptimalPath();
+	void createOptimalPath(Field *);
 	const FieldMember* getNextGoal();
 	void createSnapshot(const std::string&);
 	void loadSnapshot();

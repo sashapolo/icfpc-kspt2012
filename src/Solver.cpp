@@ -11,7 +11,7 @@
 Solver::Solver(Field *f): lambdaRoute(), bestLambdaRoute(), snapshots()  {
 	pField = f;
 	currentGoalIndex = 0;
-	createOptimalPath();
+	createOptimalPath(pField);
 	lambdasCollected = 0;
 	bestLambdasCollected = 0;
 	bestField = new Field(*pField);
@@ -103,9 +103,9 @@ void Solver::loadSnapshot() {
 }
 
 
-void Solver::createOptimalPath() {
-	NearestNeighbour nn(pField);
-	nn.createTour(pField->getRobot()->getCoordinate());
+void Solver::createOptimalPath(Field *f) {
+	NearestNeighbour nn(f);
+	nn.createTour(f->getRobot()->getCoordinate());
 	optimalPath = *nn.getTour();
 	TwoOptOpitimizer::optimize(&optimalPath);
 }
@@ -124,11 +124,11 @@ void Solver::backtrack() {
 
 std::string Solver::revisitLambdas() {
 	lambdaRoute = "";
-	Point finish = bestField->getLift()->getCoordinate();
-	std::list<FieldMember*>::const_iterator it = bestField->getLambdaCacheIt();
-	std::list<FieldMember*>::const_iterator end = bestField->getLambdaCacheIt();
+	createOptimalPath(bestField);
+	int goalIndex = 0;
 
-	const FieldMember *goal = *(it++);
+	Point finish = bestField->getLift()->getCoordinate();
+	const FieldMember *goal = bestField->getXY(optimalPath.getCell(goalIndex++));
 	ManhattanHeuristic mH(goal->getCoordinate());
 	AStar astar(bestField, bestField->getRobot(), &mH);
 
@@ -137,10 +137,11 @@ std::string Solver::revisitLambdas() {
 		if (!t.empty()) {
 			lambdaRoute += t;
 		}
-		if (it == end || (t.empty() && (goal == bestField->getLift()))) {
+		if (goalIndex == optimalPath.getSize() ||
+		    (t.empty() && (goal == bestField->getLift()))) {
 			return lambdaRoute + "A";
 		}
-		goal = *(it++);
+		goal = bestField->getXY(optimalPath.getCell(goalIndex++));
 		mH.setGoal(goal->getCoordinate());
 		AStar astar(bestField, bestField->getRobot(), &mH);
 		t = astar.solve(&bestField);
