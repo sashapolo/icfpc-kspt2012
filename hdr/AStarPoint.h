@@ -19,7 +19,6 @@ private:
 	std::string path;	// путь до этой точки
 
 public:
-
 	AStarPoint(const Field*, const FieldMember*,
 			int cost = 0, int heuristicsValue = 0,
 			std::string path = "", std::string move = "");
