@@ -46,6 +46,29 @@ void LifterScene::init(IVideoDriver* driver_, ISceneManager* smgr_)
     pStoneMesh=smgr->getMesh(L"3D/res/models/stone.3ds");
     pLambdaMesh=smgr->getMesh(L"3D/res/models/lambda.3DS");
     pRobotMesh=smgr->getMesh(L"3D/res/models/ufo.3DS");
+    
+    light1 = smgr->addLightSceneNode(0, core::vector3df(0,0,-50),
+            video::SColorf(1.0f, 1.0f, 1.0f, 0.0f), 2500);
+    
+    pCamera=smgr->addCameraSceneNodeMaya(0,-150,150,150);
+    pCamera->setFarValue(2000.f);
+    pCamera->setTarget(core::vector3df(0,0,0));
+    smgr->setActiveCamera(pCamera);
+    
+    video::IGPUProgrammingServices* gpu = driver->getGPUProgrammingServices();
+    ShaderBumpCallback* bumpCallback = new ShaderBumpCallback();
+    bumpMaterial = gpu-> addHighLevelShaderMaterialFromFiles(
+            "3D/res/shaders/bump.vert","main",irr::video::EVST_VS_2_0,
+            "3D/res/shaders/bump.frag","main",irr::video::EPST_PS_2_0,
+            bumpCallback,irr::video::EMT_SOLID,1);
+    
+    ShaderParallaxCallback* parallaxCallback = new ShaderParallaxCallback();
+    parallaxCallback->SceneManager=smgr;
+    parallaxMaterial = gpu-> addHighLevelShaderMaterialFromFiles(
+            "3D/res/shaders/parallax.vert","main",irr::video::EVST_VS_2_0,
+            "3D/res/shaders/parallax.frag","main",irr::video::EPST_PS_2_0,
+            parallaxCallback,irr::video::EMT_SOLID,1);
+
 }
 
 void LifterScene::release()
@@ -73,12 +96,6 @@ void LifterScene::release()
         pEarthMeshBufferNode=0;
     }
     
-    if(light1)
-    {
-        light1->remove();
-        light1=0;
-    }
-    
     if(pRobotNode)
     {
         pRobotNode->remove();
@@ -89,12 +106,6 @@ void LifterScene::release()
     {
         pLiftNode->remove();
         pLiftNode=0;
-    }
-    
-    if(pCamera)
-    {
-        pCamera->remove();
-        pCamera=0;
     }
     
     for(int i=0;i<StoneArr.size();i++) StoneArr[i]->remove();
@@ -128,16 +139,17 @@ bool LifterScene::loadMap(wchar_t* Path)
     //memset(wall_ind,0,pField->getSize().first*pField->getSize().second);
 
     pWallMeshBufferNode=smgr -> addMeshSceneNode(mbWall.mesh);
-    pWallMeshBufferNode->setMaterialType(video::EMT_NORMAL_MAP_SOLID);
-    pWallMeshBufferNode->setMaterialFlag(video::EMF_LIGHTING, true);
+    pWallMeshBufferNode->setMaterialType((irr::video::E_MATERIAL_TYPE)parallaxMaterial);//video::EMT_NORMAL_MAP_SOLID);
+    pWallMeshBufferNode->setMaterialFlag(video::EMF_LIGHTING, false);
     pWallMeshBufferNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
     pWallMeshBufferNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
+    pWallMeshBufferNode->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, false);
     pWallMeshBufferNode->setMaterialTexture(0,pWallTex);
     pWallMeshBufferNode->setMaterialTexture(1,pWallBump);
-    pWallMeshBufferNode->getMaterial(0).MaterialTypeParam = 0.045f;
+    //pWallMeshBufferNode->getMaterial(0).MaterialTypeParam = 0.045f;
 
     pEarthMeshBufferNode=smgr -> addMeshSceneNode(mbEarth.mesh);
-    pEarthMeshBufferNode->setMaterialType(video::EMT_PARALLAX_MAP_SOLID);
+    pEarthMeshBufferNode->setMaterialType((irr::video::E_MATERIAL_TYPE)bumpMaterial);//video::EMT_NORMAL_MAP_SOLID);
     pEarthMeshBufferNode->setMaterialFlag(video::EMF_LIGHTING, true);
     pEarthMeshBufferNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
     pEarthMeshBufferNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
@@ -177,21 +189,9 @@ bool LifterScene::loadMap(wchar_t* Path)
     float sx=pField->getSize().first*CELLSIZE;
     float sy=pField->getSize().second*CELLSIZE;
     float gip=sqrt(sx*sx+sy*sy);
-    light1 = smgr->addLightSceneNode(0, core::vector3df((pField->getSize().first/2)*CELLSIZE,(pField->getSize().second/2)*CELLSIZE,-gip),
-            video::SColorf(1.0f, 1.0f, 1.0f, 0.0f), 2500);
     
-    pCamera=smgr->addCameraSceneNodeMaya(0,-150,150,150);
-    pCamera->setFarValue(2000.f);
+    light1->setPosition(core::vector3df((pField->getSize().first/2)*CELLSIZE,(pField->getSize().second/2)*CELLSIZE,-gip));
     pCamera->setTarget(core::vector3df((pField->getSize().first/2)*CELLSIZE,(pField->getSize().second/2)*CELLSIZE,0));
-    //pCamera->setPosition(core::vector3df((pField->getSize().first/2)*CELLSIZE,(pField->getSize().second/2)*CELLSIZE,-gip));
-    //pCamera->setRotation(core::vector3df(0,0,90));
-    smgr->setActiveCamera(pCamera);
-
-//    scene::IBillboardSceneNode* pSun=smgr->addBillboardSceneNode(light1);
-//    pSun->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
-//    pSun->setMaterialFlag(video::EMF_LIGHTING, false);
-//    pSun->setMaterialTexture(0,pSunTex);
-    
     return (bool)pField;
 }
 

@@ -59,5 +59,8 @@ private:
     scene::ILightSceneNode* light1;
     
     scene::ICameraSceneNode* pCamera;
+    
+    s32 bumpMaterial;
+    s32 parallaxMaterial;
 };
 

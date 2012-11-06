@@ -91,8 +91,6 @@ public:
 
 int main()
 {
-    timeval currTime;
-    timeval prevUpdateTime;
     wchar_t tmp[1024];
     
     window_dim=dimension2d<u32>(800,600);
@@ -138,12 +136,11 @@ int main()
     pLogger->Init(logListbox);
     SetLogger(pLogger);
     
-    gettimeofday(&prevUpdateTime,0);
-    
-    
     LOGINFO("Started");
     lifterScene.init(driver,smgr);
     
+    int lastFPS=driver->getFPS();
+    vector3df lastCamPos=smgr->getActiveCamera()->getPosition();
     while(device->run())
     {
         if(window_dim!=driver->getScreenSize ())
@@ -151,12 +148,12 @@ int main()
             onResizeWindow(driver->getScreenSize());
         }
         
-        gettimeofday(&currTime,0);
-        if(abs(currTime.tv_usec-prevUpdateTime.tv_usec)>UPDATE_TIME)
+        if((lastFPS!=driver->getFPS()) || (lastCamPos!=smgr->getActiveCamera()->getPosition()))
         {
-            swprintf(tmp,1024,L"Camera pos: %.2f, %.2f, %.2f\r\nFPS: %d",smgr->getActiveCamera()->getPosition().X,smgr->getActiveCamera()->getPosition().Y,smgr->getActiveCamera()->getPosition().Z,driver->getFPS());
+            lastFPS=driver->getFPS();
+            lastCamPos=smgr->getActiveCamera()->getPosition();
+            swprintf(tmp,1024,L"Camera pos: %.2f, %.2f, %.2f\r\nFPS: %d",lastCamPos.X,lastCamPos.Y,lastCamPos.Z,lastFPS);
             infoText->setText(tmp);
-            prevUpdateTime.tv_usec=currTime.tv_usec;
         }
         
         driver->beginScene(true, true, SColor(255,100,101,140));
