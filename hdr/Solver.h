@@ -12,7 +12,7 @@
 #include "ManhattanHeuristic.h"
 #include "SolverSnapshot.h"
 #include "NearestNeighbour.h"
-#include "TwoOptOpitimizer.h"
+#include "TwoOptOptimizer.h"
 
 class Solver {
 private:

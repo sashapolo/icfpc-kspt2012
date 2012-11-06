@@ -7,7 +7,7 @@
 
 #include "Solver.h"
 
-
+#include <iostream>
 Solver::Solver(Field *f): lambdaRoute(), bestLambdaRoute(), snapshots()  {
 	pField = f;
 	currentGoalIndex = 0;
@@ -20,7 +20,6 @@ Solver::Solver(Field *f): lambdaRoute(), bestLambdaRoute(), snapshots()  {
 
 std::string Solver::solve() {
 	int backtracksCount = 0;
-
 	// инициализация переменных для А*
 	Point finish = pField->getLift()->getCoordinate();
 	const FieldMember *goal = getNextGoal();
@@ -34,6 +33,11 @@ std::string Solver::solve() {
 	while (pField->getRobot()->getCoordinate() != finish) {
 		if (!t.empty()) {
 			lambdasCollected++;
+			if (lambdasCollected >= 35) {
+				SolverSnapshot *s = snapshots.front();
+				delete s;
+				snapshots.pop_front();
+			}
 			lambdaRoute += t;
 			createSnapshot(lambdaRoute);
 			backtracksCount = 0;
@@ -107,7 +111,7 @@ void Solver::createOptimalPath(Field *f) {
 	NearestNeighbour nn(f);
 	nn.createTour(f->getRobot()->getCoordinate());
 	optimalPath = *nn.getTour();
-	TwoOptOpitimizer::optimize(&optimalPath);
+	TwoOptOptimizer::optimize(&optimalPath);
 }
 
 

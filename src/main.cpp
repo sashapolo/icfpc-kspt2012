@@ -50,6 +50,48 @@ Field* createField(std::istream &file) {
 }
 
 
+Field* createField(const std::string mapFileName) {
+std::ifstream file;
+char* file_buf;
+int file_size;
+
+file.open(mapFileName.c_str(), std::ifstream::in);
+
+if(!file.is_open()) {
+LOGERROR("Can't load map from \"%s\": can't open file", mapFileName.c_str());
+return NULL;
+};
+
+file.seekg (0, std::ios::end);
+file_size = file.tellg();
+if(file_size==0) {
+LOGERROR("Can't load map from \"%s\": file is empty", mapFileName.c_str());
+file.close();
+return NULL;
+}
+
+file_buf = new char[file_size + 1];
+file.seekg(0, std::ios::beg);
+file.read(file_buf, file_size);
+if (file_buf[file_size -1] != '\n') {
+file_buf[file_size] = '\n';
+}
+file.close();
+Field *result;
+try {
+result = new Field(file_buf);
+} catch (Field::FieldParseException&) {
+LOGERROR("Can't load map from \"%s\": map is incorrect", mapFileName.c_str());
+file.close();
+delete [] file_buf;
+return NULL;
+}
+delete [] file_buf;
+LOGINFO("Map loaded from \"%s\"", mapFileName.c_str());
+return result;
+}
+
+
 /**
  * Пошаговая отрисовка.
  * @param Field* pField - поле.
@@ -89,6 +131,7 @@ int main(int argc, char** argv) {
     SetLogger(&Logger);
 
     Field* field = createField(std::cin);
+    //Field* field = createField(argv[1]);
 	if (!field) {
 		printf("Map load error! (See LOG.html)\n");
 		return 0;
@@ -96,7 +139,7 @@ int main(int argc, char** argv) {
 	Solver s(field);
 	std::string result = s.solve();
 	std::cout<<result<<'\n';
-//	drawStepByStep(field, result);
+	drawStepByStep(field, result);
     
 //    Field *oldField = field;
 //	FieldSim fieldSim;
