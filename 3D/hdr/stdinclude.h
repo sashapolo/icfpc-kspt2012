@@ -37,5 +37,7 @@ using namespace gui;
 
 #include "ShaderBumpCallback.h"
 #include "ShaderParallaxCallback.h"
+#include "PostBlurCallback.h"
+#include "PostBloomCallback.h"
 
 #include "LifterScene.h"

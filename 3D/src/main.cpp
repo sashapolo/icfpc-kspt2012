@@ -127,8 +127,22 @@ int main()
                 driver->getTexture("3D/res/textures/sky/posX.jpg"),
                 driver->getTexture("3D/res/textures/sky/negX.jpg"));
     driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, true);
+    
 
     initGUI();
+    
+    IPostProcessBlur *Blur1 = new IPostProcessBlur(smgr->getRootSceneNode(), smgr, 666);   
+    Blur1->initiate(window_dim.Width*2,window_dim.Height*2,0.008,smgr);   
+    IPostProcessBlur *Blur2 = new IPostProcessBlur(smgr->getRootSceneNode(), smgr, 666);   
+    Blur2->initiate(window_dim.Width*2,window_dim.Height*2,0.004,smgr);
+    
+    IPostProcessBloom *Bloom = new IPostProcessBloom(smgr->getRootSceneNode(), smgr, 666);   
+    sPostBloomSetup setup;   
+   
+    setup.sampleDist=0.008;   
+    setup.strength=0.2;   
+    setup.multiplier=3;   
+    Bloom->initiate(window_dim.Width*2,window_dim.Height*2,setup,smgr); 
     
     //SetGUIColor(SColor(128,0,0,0));
     
@@ -158,8 +172,20 @@ int main()
         
         driver->beginScene(true, true, SColor(255,100,101,140));
 
+        driver->setRenderTarget(Blur1->rt0, true, true, video::SColor(0,0,0,0));
         smgr->drawAll();
-
+        driver->setRenderTarget(Bloom->rt0, true, true, video::SColor(0,0,0,0)); 
+        Blur1->render();
+        driver->setRenderTarget(0);     
+        Bloom->Material.setTexture(1,Blur1->rt0);
+        Bloom->render();
+//        driver->setRenderTarget(Blur1->rt0, true, true, video::SColor(0,0,0,0));
+//        smgr->drawAll();
+//        driver->setRenderTarget(Blur2->rt0, true, true, video::SColor(0,0,0,0));           
+//        Blur1->render();                                                                                                          
+//        driver->setRenderTarget(0);                                            
+//        Blur2->render();
+    
         guienv->drawAll();
         driver->endScene();
     }
