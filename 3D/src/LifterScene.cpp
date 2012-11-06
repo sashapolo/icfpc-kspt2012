@@ -33,8 +33,14 @@ void LifterScene::init(IVideoDriver* driver_, ISceneManager* smgr_)
     
     pWallTex=driver->getTexture(L"3D/res/textures/wall.png");
     pWallBump=driver->getTexture(L"3D/res/textures/wall_n.tga");
+    pWallGlow=driver->getTexture(L"3D/res/textures/wall_g.png");
+    pWallSpecular=driver->getTexture(L"3D/res/textures/wall_s.png");
+    
     pEarthTex=driver->getTexture(L"3D/res/textures/earth.png");
     pEarthBump=driver->getTexture(L"3D/res/textures/earth_n.tga");
+    pEarthGlow=driver->getTexture(L"3D/res/textures/earth_g.png");
+    pEarthSpecular=driver->getTexture(L"3D/res/textures/earth_s.png");
+    
     pStoneTex=driver->getTexture(L"3D/res/textures/stone.png");
     pStoneBump=driver->getTexture(L"3D/res/textures/stone_n.png");
     pRobotTex=driver->getTexture(L"3D/res/textures/ufo.png");
@@ -67,7 +73,7 @@ void LifterScene::init(IVideoDriver* driver_, ISceneManager* smgr_)
     parallaxMaterial = gpu-> addHighLevelShaderMaterialFromFiles(
             "3D/res/shaders/parallax.vert","main",irr::video::EVST_VS_2_0,
             "3D/res/shaders/parallax.frag","main",irr::video::EPST_PS_2_0,
-            parallaxCallback,irr::video::EMT_SOLID,1);
+            parallaxCallback,irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL,1);
 
 }
 
@@ -146,15 +152,19 @@ bool LifterScene::loadMap(wchar_t* Path)
     pWallMeshBufferNode->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, false);
     pWallMeshBufferNode->setMaterialTexture(0,pWallTex);
     pWallMeshBufferNode->setMaterialTexture(1,pWallBump);
+    pWallMeshBufferNode->setMaterialTexture(2,pWallSpecular);
+    pWallMeshBufferNode->setMaterialTexture(3,pWallGlow);
     //pWallMeshBufferNode->getMaterial(0).MaterialTypeParam = 0.045f;
 
     pEarthMeshBufferNode=smgr -> addMeshSceneNode(mbEarth.mesh);
-    pEarthMeshBufferNode->setMaterialType((irr::video::E_MATERIAL_TYPE)bumpMaterial);//video::EMT_NORMAL_MAP_SOLID);
+    pEarthMeshBufferNode->setMaterialType((irr::video::E_MATERIAL_TYPE)parallaxMaterial);//video::EMT_NORMAL_MAP_SOLID);
     pEarthMeshBufferNode->setMaterialFlag(video::EMF_LIGHTING, true);
     pEarthMeshBufferNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
     pEarthMeshBufferNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
     pEarthMeshBufferNode->setMaterialTexture(0,pEarthTex);
     pEarthMeshBufferNode->setMaterialTexture(1,pEarthBump);
+    pEarthMeshBufferNode->setMaterialTexture(2,pEarthSpecular);
+    pEarthMeshBufferNode->setMaterialTexture(3,pEarthGlow);
     pEarthMeshBufferNode->getMaterial(0).MaterialTypeParam = 0.045f;
 
     std::list<FieldMember*>::iterator it=pField->getStoneCacheIt();

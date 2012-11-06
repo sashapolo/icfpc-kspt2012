@@ -76,25 +76,26 @@ vec2 ParallaxOcclusionMap(vec2 baseTC, float lod, in vec3 viewDirNrm, int numSte
 
 void main()
 {
-
-   vec2 tex=ParallaxOcclusionMap(gl_TexCoord[0],0,normalize(ViewDirection),15,0.04);
-
-   vec3 N = normalize( ( texture2D( bumpHeightMap, tex).xyz * 2.0 ) - 1.0 );
-
    vec3 L = normalize(LightDirection);
    vec3 E = normalize(ViewDirection);
+   
+   vec2 tex=ParallaxOcclusionMap(gl_TexCoord[0],0,E,15,0.03);
+
+
+   vec3 N = normalize( ( texture2D( bumpHeightMap, tex).xyz * 2.0 ) - 1.0 );
    vec3 R = reflect(-L, N);
 
    vec4 Color =  texture2D( colorMap, tex); 
    vec4 vSpecular= texture2D( specularMap, tex); 
    vec4 vGlow=texture2D( glowMap, tex); 
    
-   vec4 Ambient  =  Color * .1;
-   vec4 Diffuse    =  Color * max(dot(N,L),0.0);
-   vec4 Specular =  Color *  pow(max(dot(R,E),0.0),20.0);
+   float fShade=max(dot(N,L),0.0);
+   vec4 Ambient  =  Color * .01;
+   vec4 Diffuse    =  Color * fShade + vGlow*(1.0-fShade);
+   vec4 Specular =  vSpecular *  pow(max(dot(R,E),0.0),30.0);
  
    
-   gl_FragColor = Ambient + Diffuse + Specular + vGlow;
+   gl_FragColor =Ambient + Diffuse + Specular;
    //gl_FragColor.w=1.0f-fZ;
-   //gl_FragColor=vec4(ViewDirection.x,ViewDirection.y,ViewDirection.z,1);
+   //gl_FragColor=vec4(fZ,0,0,1);
 }
