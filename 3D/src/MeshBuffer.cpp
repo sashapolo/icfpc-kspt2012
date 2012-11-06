@@ -66,15 +66,15 @@ void MeshBuffer::init(int width_, int height_, float cellsize_,float texScaleX, 
 
 void MeshBuffer::addCube(int& x_start, int& y_start,int cnt, u32 bufNum)
 {
-    SMeshBuffer *buf = 0;
+    SMeshBufferTangents *buf = 0;
     if (bufNum<mesh->getMeshBufferCount())
     {
-            buf = (SMeshBuffer*)mesh->getMeshBuffer(bufNum);
+            buf = (SMeshBufferTangents*)mesh->getMeshBuffer(bufNum);
     }
     else
     {
             // create new buffer
-            buf = new SMeshBuffer();
+            buf = new SMeshBufferTangents();
             mesh->addMeshBuffer(buf);
             // to simplify things we drop here but continue using buf
             buf->drop();
@@ -103,35 +103,35 @@ void MeshBuffer::addCube(int& x_start, int& y_start,int cnt, u32 bufNum)
             texYpp=texY+texscaleY/float(height);
             
             // front
-            buf->Vertices[i++]=S3DVertexTangents(-size, size, size,0.0f, 0.0f, 1.0f,SColor(255,255,255,255),texX,texYpp,1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f);
-            buf->Vertices[i++]=S3DVertexTangents(size, size, size,0.0f, 0.0f, 1.0f,SColor(255,255,255,255),texXpp,texYpp,1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f);
-            buf->Vertices[i++]=S3DVertexTangents(size, -size, size,0.0f, 0.0f, 1.0f,SColor(255,255,255,255),texXpp,texY,1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f);
-            buf->Vertices[i++]=S3DVertexTangents(-size, -size, size,0.0f, 0.0f, 1.0f,SColor(255,255,255,255),texX,texY,1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f);
+            buf->Vertices[i++]=S3DVertexTangents(-size, size, size,0.0f, 0.0f, 1.0f,SColor(255,255,255,255),texX,texYpp,1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+            buf->Vertices[i++]=S3DVertexTangents(size, size, size,0.0f, 0.0f, 1.0f,SColor(255,255,255,255),texXpp,texYpp,1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+            buf->Vertices[i++]=S3DVertexTangents(size, -size, size,0.0f, 0.0f, 1.0f,SColor(255,255,255,255),texXpp,texY,1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+            buf->Vertices[i++]=S3DVertexTangents(-size, -size, size,0.0f, 0.0f, 1.0f,SColor(255,255,255,255),texX,texY,1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
             // back
-            buf->Vertices[i++]=S3DVertexTangents(size, size, -size,0.0f, 0.0f, -1.0f,SColor(255,255,255,255),texXpp,texYpp,1.0f, 0.0f, 0.0f,0.0f, -1.0f, 0.0f);
-            buf->Vertices[i++]=S3DVertexTangents(-size, size, -size,0.0f, 0.0f, -1.0f,SColor(255,255,255,255),texX,texYpp,1.0f, 0.0f, 0.0f,0.0f, -1.0f, 0.0f);
-            buf->Vertices[i++]=S3DVertexTangents(-size, -size, -size,0.0f, 0.0f, -1.0f,SColor(255,255,255,255),texX,texY,1.0f, 0.0f, 0.0f,0.0f, -1.0f, 0.0f);
-            buf->Vertices[i++]=S3DVertexTangents(size, -size, -size,0.0f, 0.0f, -1.0f,SColor(255,255,255,255),texXpp,texY,1.0f, 0.0f, 0.0f,0.0f, -1.0f, 0.0f);
+            buf->Vertices[i++]=S3DVertexTangents(size, size, -size,0.0f, 0.0f, -1.0f,SColor(255,255,255,255),texXpp,texYpp,1.0f, 0.0f, 0.0f,0.0f, 1.0f, 0.0f);
+            buf->Vertices[i++]=S3DVertexTangents(-size, size, -size,0.0f, 0.0f, -1.0f,SColor(255,255,255,255),texX,texYpp,1.0f, 0.0f, 0.0f,0.0f, 1.0f, 0.0f);
+            buf->Vertices[i++]=S3DVertexTangents(-size, -size, -size,0.0f, 0.0f, -1.0f,SColor(255,255,255,255),texX,texY,1.0f, 0.0f, 0.0f,0.0f, 1.0f, 0.0f);
+            buf->Vertices[i++]=S3DVertexTangents(size, -size, -size,0.0f, 0.0f, -1.0f,SColor(255,255,255,255),texXpp,texY,1.0f, 0.0f, 0.0f,0.0f, 1.0f, 0.0f);
             // top
-            buf->Vertices[i++]=S3DVertexTangents(-size, size, -size,0.0f, 1.0f, 0.0f,SColor(255,255,255,255),texX,texYpp,1.0f, 0.0f, 0.0f,0.0f, 0.0f, 1.0f);
-            buf->Vertices[i++]=S3DVertexTangents(size, size, -size,0.0f, 1.0f, 0.0f,SColor(255,255,255,255),texXpp,texYpp,1.0f, 0.0f, 0.0f,0.0f, 0.0f, 1.0f);
-            buf->Vertices[i++]=S3DVertexTangents(size, size, size,0.0f, 1.0f, 0.0f,SColor(255,255,255,255),texXpp,texY,1.0f, 0.0f, 0.0f,0.0f, 0.0f, 1.0f);
-            buf->Vertices[i++]=S3DVertexTangents(-size, size, size,0.0f, 1.0f, 0.0f,SColor(255,255,255,255),texX,texY,1.0f, 0.0f, 0.0f,0.0f, 0.0f, 1.0f);
+            buf->Vertices[i++]=S3DVertexTangents(-size, size, -size,0.0f, 1.0f, 0.0f,SColor(255,255,255,255),texX,texYpp,1.0f, 0.0f, 0.0f,0.0f, 0.0f, -1.0f);
+            buf->Vertices[i++]=S3DVertexTangents(size, size, -size,0.0f, 1.0f, 0.0f,SColor(255,255,255,255),texXpp,texYpp,1.0f, 0.0f, 0.0f,0.0f, 0.0f, -1.0f);
+            buf->Vertices[i++]=S3DVertexTangents(size, size, size,0.0f, 1.0f, 0.0f,SColor(255,255,255,255),texXpp,texY,1.0f, 0.0f, 0.0f,0.0f, 0.0f, -1.0f);
+            buf->Vertices[i++]=S3DVertexTangents(-size, size, size,0.0f, 1.0f, 0.0f,SColor(255,255,255,255),texX,texY,1.0f, 0.0f, 0.0f,0.0f, 0.0f, -1.0f);
             // bottom
             buf->Vertices[i++]=S3DVertexTangents(size, -size, -size,0.0f, -1.0f, 0.0f,SColor(255,255,255,255),texXpp,texY,1.0f, 0.0f, 0.0f,0.0f, 0.0f, 1.0f);
             buf->Vertices[i++]=S3DVertexTangents(-size, -size, -size,0.0f, -1.0f, 0.0f,SColor(255,255,255,255),texX,texY,1.0f, 0.0f, 0.0f,0.0f, 0.0f, 1.0f);
             buf->Vertices[i++]=S3DVertexTangents(-size, -size, size,0.0f, -1.0f, 0.0f,SColor(255,255,255,255),texX,texYpp,1.0f, 0.0f, 0.0f,0.0f, 0.0f, 1.0f);
             buf->Vertices[i++]=S3DVertexTangents(size, -size, size,0.0f, -1.0f, 0.0f,SColor(255,255,255,255),texXpp,texYpp,1.0f, 0.0f, 0.0f,0.0f, 0.0f, 1.0f);
+             // right
+            buf->Vertices[i++]=S3DVertexTangents(-size, size, -size,1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texX,texYpp,0.0f, 0.0f, -1.0f,0.0f, -1.0f, 0.0f);
+            buf->Vertices[i++]=S3DVertexTangents(-size, size, size,1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texXpp,texYpp,0.0f, 0.0f, -1.0f,0.0f, -1.0f, 0.0f);
+            buf->Vertices[i++]=S3DVertexTangents(-size, -size, size,1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texXpp,texY,0.0f, 0.0f, -1.0f,0.0f, -1.0f, 0.0f);
+            buf->Vertices[i++]=S3DVertexTangents(-size, -size, -size,1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texX,texY,0.0f, 0.0f, -1.0f,0.0f, -1.0f, 0.0f);
             // left
-            buf->Vertices[i++]=S3DVertexTangents(-size, size, -size,-1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texX,texYpp,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
-            buf->Vertices[i++]=S3DVertexTangents(-size, size, size,-1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texXpp,texYpp,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
-            buf->Vertices[i++]=S3DVertexTangents(-size, -size, size,-1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texXpp,texY,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
-            buf->Vertices[i++]=S3DVertexTangents(-size, -size, -size,-1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texX,texY,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
-            // right
-            buf->Vertices[i++]=S3DVertexTangents(size, size, size,1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texX,texYpp,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
-            buf->Vertices[i++]=S3DVertexTangents(size, size, -size,1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texXpp,texYpp,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
-            buf->Vertices[i++]=S3DVertexTangents(size, -size, -size,1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texXpp,texY,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
-            buf->Vertices[i++]=S3DVertexTangents(size, -size, size,1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texX,texY,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
+            buf->Vertices[i++]=S3DVertexTangents(size, size, size,-1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texX,texYpp,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
+            buf->Vertices[i++]=S3DVertexTangents(size, size, -size,-1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texXpp,texYpp,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
+            buf->Vertices[i++]=S3DVertexTangents(size, -size, -size,-1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texXpp,texY,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
+            buf->Vertices[i++]=S3DVertexTangents(size, -size, size,-1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texX,texY,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
             
             for(int i1=i0;i1<i;i1++)
             {

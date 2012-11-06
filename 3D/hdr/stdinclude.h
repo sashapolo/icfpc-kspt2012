@@ -34,4 +34,8 @@ using namespace gui;
 
 #include "Utilities.h"
 #include "MeshBuffer.h"
+
+#include "ShaderBumpCallback.h"
+#include "ShaderParallaxCallback.h"
+
 #include "LifterScene.h"

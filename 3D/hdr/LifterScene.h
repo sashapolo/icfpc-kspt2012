@@ -22,8 +22,14 @@ private:
     
     ITexture* pWallTex;
     ITexture* pWallBump;
+    ITexture* pWallGlow;
+    ITexture* pWallSpecular;
+    
     ITexture* pEarthTex;
     ITexture* pEarthBump;
+    ITexture* pEarthGlow;
+    ITexture* pEarthSpecular;
+    
     ITexture* pStoneTex;
     ITexture* pStoneBump;
     ITexture* pRobotTex;
@@ -59,5 +65,8 @@ private:
     scene::ILightSceneNode* light1;
     
     scene::ICameraSceneNode* pCamera;
+    
+    s32 bumpMaterial;
+    s32 parallaxMaterial;
 };
 
