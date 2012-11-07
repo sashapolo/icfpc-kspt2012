@@ -13,13 +13,25 @@
 
 
 //////////LOGGER EXTERNAL//////////////////////////////
+/**
+ * Текущий логгер.
+ */
 Logger* pCurrentLogger=0;
 
+/**
+ * Установка текущего лога.
+ * @param Logger* pLogger - идентификатор лога.
+ */
 void SetLogger(Logger* pLogger)
 {
     pCurrentLogger=pLogger;
 };
 
+/**
+ * Вывод сообщения с ошибкой в лог.
+ * @param char* Msg - сообщение.
+ * @return false, если это не текущий лог, в противном случае - true.
+ */
 bool LogError(const char* Msg,...)
 {
     if(!pCurrentLogger) return false;
@@ -30,6 +42,11 @@ bool LogError(const char* Msg,...)
     return true;
 };
 
+/**
+ * Вывод сообщения с предупреждением в лог.
+ * @param char* Msg - сообщение.
+ * @return false, если это не текущий лог, в противном случае - true.
+ */
 bool LogWarning(const char* Msg,...)
 {
     if(!pCurrentLogger) return false;
@@ -40,6 +57,11 @@ bool LogWarning(const char* Msg,...)
     return true;
 };
 
+/**
+ * Вывод информационного сообщения в лог.
+ * @param char* Msg - сообщение.
+ * @return false, если это не текущий лог, в противном случае - true.
+ */
 bool LogInfo(const char* Msg,...)
 {
     if(!pCurrentLogger) return false;
@@ -52,6 +74,11 @@ bool LogInfo(const char* Msg,...)
 
 ///////////////////////////////////////////////////////
 
+/**
+ * Конструктор класса Logger.
+ * Задает начальное значение счетчиков предупреждений, ошибок и сообщений.
+ * Также задает максимальное значение счетчика сообщений.
+ */
 Logger::Logger() {
     WarningsCount=0;
     ErrorsCount=0;
@@ -63,9 +90,17 @@ Logger::Logger() {
     memset(&CS2,0,sizeof(CS2));
 }
 
+/**
+ * Деструктор класса Logger.
+ */
 Logger::~Logger() {
 }
 
+/**
+ * Вывод информационного сообщения в лог (аргументы передаются перечислением).
+ * @param UINT MsgType - тип сообщения.
+ * @param char* Txt - сообщение.
+ */
 void Logger::BaseOut(UINT MsgType,const char* Txt,...)
 {
     pthread_mutex_lock(&CS2);
@@ -76,6 +111,12 @@ void Logger::BaseOut(UINT MsgType,const char* Txt,...)
     pthread_mutex_unlock(&CS2);
 }
 
+/**
+ * Вывод информационного сообщения в лог (аргументы передаются массивом va_list).
+ * @param UINT MsgType - тип сообщения.
+ * @param char* Txt - сообщение.
+ * @param va_list args - аргументы.
+ */
 void Logger::BaseOutV(UINT MsgType,const char* Txt,va_list args)
 {
     if (!Txt) return;
@@ -106,11 +147,20 @@ void Logger::BaseOutV(UINT MsgType,const char* Txt,va_list args)
     OnMessageOut(Msg);
 }
 
+/**
+ * Вывод сообщения.
+ * @param LOGGER_MSG& Msg - сообщение.
+ */
 void Logger::OnMessageOut(LOGGER_MSG& Msg)
 {
     printf("%s",Msg.String.c_str());
 }
 
+/**
+ * Чтение первого сообщения.
+ * @param LOGGER_MSG* pMsg - сообщение.
+ * @return false, сообщений нет; true, если pMsg нулевой или сообщение прочитано успешно.
+ */
 bool Logger::ReadFirstMsg(LOGGER_MSG* pMsg)
 {
     if(pMsg==NULL) return true;
@@ -122,6 +172,11 @@ bool Logger::ReadFirstMsg(LOGGER_MSG* pMsg)
     return true;
 }
 
+/**
+ * Чтение последнего сообщения.
+ * @param LOGGER_MSG* pMsg - сообщение.
+ * @return false, сообщений нет; true, если pMsg нулевой или сообщение прочитано успешно.
+ */
 bool Logger::ReadLastMsg(LOGGER_MSG* pMsg)
 {
     if(pMsg==NULL) return true;
@@ -134,6 +189,10 @@ bool Logger::ReadLastMsg(LOGGER_MSG* pMsg)
     return true;
 }
 
+/**
+ * Информационное сообщение.
+ * @param const char* str - строка сообщения.
+ */
 void Logger::Message(const char* str,...)
 {
     pthread_mutex_lock(&CS2);
@@ -144,6 +203,10 @@ void Logger::Message(const char* str,...)
     pthread_mutex_unlock(&CS2);
 }
 
+/**
+ * Сообщение с предупреждением.
+ * @param const char* str - строка сообщения.
+ */
 void Logger::Warning(const char* str,...)
 {
     pthread_mutex_lock(&CS2);
@@ -154,6 +217,10 @@ void Logger::Warning(const char* str,...)
     pthread_mutex_unlock(&CS2);
 }
 
+/**
+ * Сообщение об ошибке.
+ * @param const char* str - строка сообщения.
+ */
 void Logger::Error(const char* str,...)
 {
     pthread_mutex_lock(&CS2);
