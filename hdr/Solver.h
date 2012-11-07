@@ -11,20 +11,30 @@
 #include "AStar.h"
 #include "ManhattanHeuristic.h"
 #include "SolverSnapshot.h"
+#include "NearestNeighbour.h"
+#include "TwoOptOptimizer.h"
 
 class Solver {
 private:
+	Field *pField;
+	Field *bestField;
+	Path optimalPath;
+	int currentGoalIndex;
+	std::string lambdaRoute;
+	std::string bestLambdaRoute;
+	int lambdasCollected;
+	int bestLambdasCollected;
 	std::list<SolverSnapshot*> snapshots;
-	std::list<const FieldMember*> markedLambdas;
 
-	const FieldMember* findNewGoal(const Field* pField) const;
-	void markUnreachableGoal(const FieldMember* pGoal);
-	bool isMarked(const FieldMember* lambda) const;
-	void createSnapshot(Field* s, std::string delta, const FieldMember* lambda);
-	SolverSnapshot* loadSnapshot(bool);
+	void createOptimalPath(Field *);
+	const FieldMember* getNextGoal();
+	void createSnapshot(const std::string&);
+	void loadSnapshot();
+	void backtrack();
+	std::string revisitLambdas();
 public:
-	Solver();
-	string solve(Field*);
+	Solver(Field*);
+	std::string solve();
 	virtual ~Solver();
 };
 

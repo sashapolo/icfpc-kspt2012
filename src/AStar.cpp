@@ -7,7 +7,6 @@
 
 #include "AStar.h"
 
-#include <iostream>
 
 AStar::AStar(const Field* pField, FieldMember* s, Heuristic* h)
 				: fieldSim(), start(new AStarPoint(pField, s, 0, 1)) {
@@ -19,12 +18,12 @@ AStar::~AStar() {
 	delete start;
 }
 
-    /**
-     * Поиск пути.
-     * @param Field** pResultField - состояние карты после прохождения пути.
-     * @return путь поиска лямбд.
-     */
-string AStar::solve(Field** pResultField) {
+/**
+ * Поиск пути.
+ * @param Field** pResultField - состояние карты после прохождения пути.
+ * @return путь поиска лямбд.
+ */
+std::string AStar::solve(Field** pResultField) {
 	AStarPoint *current = start;
 	while (!openedList.empty()) {
 		if (current->isGoalReached()) {
@@ -60,7 +59,7 @@ void AStar::addNeighboursToOpenedList(const AStarPoint& current) {
      * @param AStarPoint& current - текущая точка.
      * @param string move - ход робота.
      */
-void AStar::checkPoint(Point point, const AStarPoint& current, string move) {
+void AStar::checkPoint(Point point, const AStarPoint& current, std::string move) {
 	const FieldMember *tmp = current.getField()->getXY(point);
 	if (tmp->isPassable()) {
         sSimResult res;
@@ -80,13 +79,13 @@ void AStar::checkPoint(Point point, const AStarPoint& current, string move) {
 }
 
 
-bool AStar::isInClosedList(const AStarPoint* pCurrent) const {
-    /**
-     * Поиск возможности хода.
-     * @param AStarPoint* pCurrent - текущая точка
-     * @return true, если текущая точка не является последней допустимой; false - в протианом случае.
-     */
-	set<AStarPoint*>::const_iterator it = find_if(closedList.begin(), closedList.end(),
-			bind2nd(Comparators::PointerComparatorEquals<AStarPoint*>(), pCurrent));
+/**
+ * Поиск возможности хода.
+ * @param AStarPoint* pCurrent - текущая точка
+ * @return true, если текущая точка не является последней допустимой; false - в протианом случае.
+ */
+bool AStar::isInClosedList(AStarPoint* pCurrent) const {
+	AStarClosedList::const_iterator it = find_if(closedList.begin(), closedList.end(),
+			bind2nd(Comparators::PointerComparatorEquals<AStarPoint*>(), pCurrent));;
 	return (it != closedList.end());
 }

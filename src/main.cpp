@@ -6,54 +6,89 @@
 // Description : Supaplex analog for icfp contest
 //============================================================================
 
+
 #include <cstdlib>
 #include <iostream>
-#include "stdinclude.h"
-#include "Solver.h"
 
-using namespace std;
+#include "Solver.h"
+#include "Logger.h"
+
 
 /**
  * Создание поля.
  * @param string mapFileName - имя файла карты.
  * @return результат создания поля.
  */
-Field* createField(const string mapFileName) {
-	ifstream file;
+Field* createField(std::istream &file) {
 	char* file_buf;
 	int file_size;
 
-	file.open(mapFileName.c_str(), ifstream::in);
-
-	if(!file.is_open()) {
-		LOGERROR("Can't load map from \"%s\": can't open file", mapFileName.c_str());
-		return NULL;
-	};
-
-	file.seekg (0, ios::end);
+	file.seekg (0, std::ios::end);
 	file_size = file.tellg();
 	if(file_size==0) {
-		LOGERROR("Can't load map from \"%s\": file is empty", mapFileName.c_str());
-		file.close();
+		LOGERROR("Can't load map : file is empty");
 		return NULL;
 	}
 
-	file_buf = new char[file_size];
-	file.seekg(0, ios::beg);
+	file_buf = new char[file_size + 1];
+	file.seekg(0, std::ios::beg);
 	file.read(file_buf, file_size);
-	file.close();
+	if (file_buf[file_size -1] != '\n') {
+		file_buf[file_size] = '\n';
+	}
 	Field *result;
 	try {
 		result = new Field(file_buf);
 	} catch (Field::FieldParseException&) {
-		LOGERROR("Can't load map from \"%s\": map is incorrect", mapFileName.c_str());
-		file.close();
+		LOGERROR("Can't load map: map is incorrect");
 		delete [] file_buf;
 		return NULL;
 	}
 	delete [] file_buf;
-	LOGINFO("Map loaded from \"%s\"", mapFileName.c_str());
+	LOGINFO("Map loaded");
 	return result;
+}
+
+
+Field* createField(const std::string mapFileName) {
+std::ifstream file;
+char* file_buf;
+int file_size;
+
+file.open(mapFileName.c_str(), std::ifstream::in);
+
+if(!file.is_open()) {
+LOGERROR("Can't load map from \"%s\": can't open file", mapFileName.c_str());
+return NULL;
+};
+
+file.seekg (0, std::ios::end);
+file_size = file.tellg();
+if(file_size==0) {
+LOGERROR("Can't load map from \"%s\": file is empty", mapFileName.c_str());
+file.close();
+return NULL;
+}
+
+file_buf = new char[file_size + 1];
+file.seekg(0, std::ios::beg);
+file.read(file_buf, file_size);
+if (file_buf[file_size -1] != '\n') {
+file_buf[file_size] = '\n';
+}
+file.close();
+Field *result;
+try {
+result = new Field(file_buf);
+} catch (Field::FieldParseException&) {
+LOGERROR("Can't load map from \"%s\": map is incorrect", mapFileName.c_str());
+file.close();
+delete [] file_buf;
+return NULL;
+}
+delete [] file_buf;
+LOGINFO("Map loaded from \"%s\"", mapFileName.c_str());
+return result;
 }
 
 
@@ -62,17 +97,17 @@ Field* createField(const string mapFileName) {
  * @param Field* pField - поле.
  * @param string path - путь робота.
  */
-void drawStepByStep(Field* const pField, const string path) {
+void drawStepByStep(Field* const pField, const std::string path) {
 	FieldSim fieldSim;
 	sSimResult res;
 	int nStep = 0;
 	drawField(pField, &res.path, nStep++);
-	string t;
+	std::string t;
 	t += path[0];
 	Field *newField = fieldSim.calcRobotSteps(pField, t, &res);
 	for (unsigned int i = 1; i < path.size(); i++) {
 		drawField(newField, &res.path, nStep++);
-		string t;
+		std::string t;
 		t += path[i];
 		newField = fieldSim.calcRobotSteps(newField, t, &res);
 	}
@@ -91,26 +126,22 @@ void drawStepByStep(Field* const pField, const string path) {
  * @return результат запускад.
  */
 int main(int argc, char** argv) {
-    if (argc != 2) {
-    	printf("Usage: solver <map path>\n");
-    	return 1;
-    }
-
 	HTMLLogger Logger;
     Logger.Init("LOG.html","MainLog");
     SetLogger(&Logger);
 
-    Field* field = createField(argv[1]);
+    Field* field = createField(std::cin);
+    //Field* field = createField(argv[1]);
 	if (!field) {
 		printf("Map load error! (See LOG.html)\n");
 		return 0;
 	}
-	Solver s;
-	string result = s.solve(field);
-	cout<<result<<'\n';
+	Solver s(field);
+	std::string result = s.solve();
+	std::cout<<result<<'\n';
 	drawStepByStep(field, result);
-
-//	Field *oldField = field;
+    
+//    Field *oldField = field;
 //	FieldSim fieldSim;
 //	sSimResult res;
 //	int nStep = 0;

@@ -1,5 +1,4 @@
 # Compiled Object files
-obj/
 *.slo
 *.lo
 *.o
@@ -15,6 +14,10 @@ obj/
 # Compiled Executables
 icfpc_solver
 tester
+lifter3d
+
+# Irrlicht includes
+irrIncludes/
 
 # NetBeans project
 build/

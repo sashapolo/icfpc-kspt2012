@@ -11,16 +11,15 @@
 
 #include "FieldMember.h"
 
-using namespace std;
 
 /**
  * Represents field.
  */
 class Field {
 private:
-    vector< vector<FieldMember*> > field;
-    list<FieldMember*> lambdaCache;
-    list<FieldMember*> stoneCache;
+	std::vector< std::vector<FieldMember*> > field;
+    std::list<FieldMember*> lambdaCache;
+    std::list<FieldMember*> stoneCache;
     FieldMember* pRobot;
     FieldMember* pLift;
 
@@ -34,7 +33,7 @@ public:
      *
      * param ASCIIMap Map in ASCII. See specification for details.
      */
-    Field(const string &ASCIIMap);
+    Field(const std::string &ASCIIMap);
     /**
      * Copy constructor makes a copy of the object referenced by a given reference.
      *
@@ -47,16 +46,16 @@ public:
     /**
      * There are caches of Lambdas and Stones to provide some assistance to algorithm.
      */
-    list<FieldMember*>::const_iterator getLambdaCacheIt() const;
-    list<FieldMember*>::iterator getLambdaCacheIt();
-    list<FieldMember*>::const_iterator getLambdaCacheEnd() const;
+    std::list<FieldMember*>::const_iterator getLambdaCacheIt() const;
+    std::list<FieldMember*>::iterator getLambdaCacheIt();
+    std::list<FieldMember*>::const_iterator getLambdaCacheEnd() const;
     bool lambdaCacheEmpty() const;
-    list<FieldMember*>::iterator deleteLambdaFromCache(list<FieldMember*>::iterator it);
+    std::list<FieldMember*>::iterator deleteLambdaFromCache(std::list<FieldMember*>::iterator it);
 
-    list<FieldMember*>::const_iterator getStoneCacheIt() const;
-    list<FieldMember*>::iterator getStoneCacheIt();
-    list<FieldMember*>::const_iterator getStoneCacheEnd() const;
-    list<FieldMember*>::iterator deleteStoneFromCache(list<FieldMember*>::iterator it);
+    std::list<FieldMember*>::const_iterator getStoneCacheIt() const;
+    std::list<FieldMember*>::iterator getStoneCacheIt();
+    std::list<FieldMember*>::const_iterator getStoneCacheEnd() const;
+    std::list<FieldMember*>::iterator deleteStoneFromCache(std::list<FieldMember*>::iterator it);
 
 
     void write(Point xy, CellType type);
@@ -69,7 +68,7 @@ public:
     FieldMember* const getXY(const Point &point) const;
     FieldMember* getXY(const Point &point);
 
-    pair<int, int> getSize() const;
+    std::pair<int, int> getSize() const;
 
     /**
      * Swaps contents of the two cells.
@@ -106,8 +105,6 @@ public:
 
     Field& operator=(const Field&);
     bool operator==(const Field&) const;
-
-    int getDistance(const Point& from, const Point& to) const;
 };
 
 #endif	/* FIELD_H */

@@ -25,7 +25,7 @@ private:
 public:
 
     const static int METRIC_NORMAL = 10;
-    const static int METRIC_MEDIUM = 50;        //for bad places (metric - ?)
+    const static int METRIC_MEDIUM = 30;        //for bad places (metric - ?)
     const static int METRIC_INFINITY = INT_MAX;
 
 
@@ -49,7 +49,7 @@ public:
     void setDefaultMetric();
 
     bool isPassable() const {
-    	return (metric == METRIC_NORMAL);
+    	return (metric != METRIC_INFINITY);
     }
 
     Point getCoordinate() const {

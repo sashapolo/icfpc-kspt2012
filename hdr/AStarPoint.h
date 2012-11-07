@@ -16,20 +16,19 @@ private:
 	const FieldMember* pCell;
 	int G;	// стоимость
 	int H;  // эвристика
-	string path;	// путь до этой точки
+	std::string path;	// путь до этой точки
 
 public:
-
 	AStarPoint(const Field*, const FieldMember*,
 			int cost = 0, int heuristicsValue = 0,
-			string path = "", string move = "");
+			std::string path = "", std::string move = "");
 	AStarPoint(const AStarPoint& orig);
 
 	bool isGoalReached() const;
 
 	const Field* getField() const;
 
-	string getPath() const;
+	std::string getPath() const;
 
 	int getPathCost() const;
 
@@ -43,6 +42,7 @@ public:
 
 	bool operator==(const AStarPoint& x) const;
 	bool operator>(const AStarPoint& x) const;
+	bool operator<(const AStarPoint& x) const;
 };
 
 #endif /* ASTARPOINT_H_ */

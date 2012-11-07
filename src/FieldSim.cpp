@@ -151,7 +151,7 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
     
     
     //Calculate stone metric (need simple next step sim)
-    list<FieldMember*>::iterator it=NewField->getStoneCacheIt();
+    std::list<FieldMember*>::iterator it=NewField->getStoneCacheIt();
     int x,y;
     while(it!=NewField->getStoneCacheEnd())
     {
@@ -178,23 +178,23 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
             {
                 if(NewField->getCellType(Point(x+1,y))==EMPTY)
                 {
-                    if((NewField->getCellType(Point(x+1,y+1))==EARTH) || (NewField->getCellType(Point(x+1,y+1))==LAMBDA))
+                    if(NewField->getCellType(Point(x+1,y+1))==EARTH)
                         NewField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_MEDIUM);
                 }
                 else if(NewField->getCellType(Point(x+1,y+1))==EMPTY)
                 {
-                    if((NewField->getCellType(Point(x+1,y))==EARTH) || (NewField->getCellType(Point(x+1,y))==LAMBDA))
+                    if(NewField->getCellType(Point(x+1,y))==EARTH)
                         NewField->getXY(Point(x+1,y))->setMetric(FieldMember::METRIC_MEDIUM);
                 }
                 
                 if(NewField->getCellType(Point(x-1,y))==EMPTY)
                 {
-                    if((NewField->getCellType(Point(x-1,y+1))==EARTH) || (NewField->getCellType(Point(x-1,y+1))==LAMBDA))
+                    if(NewField->getCellType(Point(x-1,y+1))==EARTH)
                         NewField->getXY(Point(x-1,y+1))->setMetric(FieldMember::METRIC_MEDIUM);
                 }
                 else if(NewField->getCellType(Point(x-1,y+1))==EMPTY)
                 {
-                    if((NewField->getCellType(Point(x-1,y))==EARTH) || (NewField->getCellType(Point(x-1,y))==LAMBDA))
+                    if(NewField->getCellType(Point(x-1,y))==EARTH)
                         NewField->getXY(Point(x-1,y))->setMetric(FieldMember::METRIC_MEDIUM);
                 }
                 
@@ -204,25 +204,31 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
         {
             if((NewField->getCellType(Point(x+1,y))==EMPTY) && (NewField->getCellType(Point(x+1,y+1))==EMPTY))
                 NewField->getXY(Point(x+1,y+2))->setMetric(FieldMember::METRIC_INFINITY);
-            else if(NewField->getCellType(Point(x+1,y))==EMPTY)
+            else if((NewField->getCellType(Point(x+1,y+1))==EARTH) && (NewField->getCellType(Point(x+1,y))==EMPTY))
             {
                 NewField->getXY(Point(x+1,y+1))->setMetric(FieldMember::METRIC_MEDIUM);
             }
-            else if(NewField->getCellType(Point(x+1,y+1))==EMPTY)
+            else if((NewField->getCellType(Point(x+1,y))==EARTH) && (NewField->getCellType(Point(x+1,y+1))==EMPTY))
             {
                 NewField->getXY(Point(x+1,y))->setMetric(FieldMember::METRIC_MEDIUM);
             }
         }
         
-        if((NewField->getCellType(Point(x,y+1))==EARTH) || (NewField->getCellType(Point(x,y+1))==LAMBDA))
+        if(NewField->getCellType(Point(x,y+1))==EARTH)
         {
             NewField->getXY(Point(x,y+1))->setMetric(FieldMember::METRIC_MEDIUM);
         }
         it++;
     }
     
+    Point RobotCrd=NewField->getRobot()->getCoordinate();       //metric to "movable" stones
+    if((NewField->getCellType(RobotCrd+Point(1,0))==STONE) && (NewField->getCellType(RobotCrd+Point(2,0))==EMPTY))       
+        NewField->getXY(RobotCrd+Point(1,0))->setMetric(FieldMember::METRIC_MEDIUM);
+    if((NewField->getCellType(RobotCrd+Point(-1,0))==STONE) && (NewField->getCellType(RobotCrd+Point(-2,0))==EMPTY)) 
+        NewField->getXY(RobotCrd+Point(-1,0))->setMetric(FieldMember::METRIC_MEDIUM);
     
-    Point DestroyCrd=NewField->getRobot()->getCoordinate()+Point(0,-1); //test to robot destruction
+    
+    Point DestroyCrd=RobotCrd+Point(0,-1); //test to robot destruction
     if(NewField->getCellType(DestroyCrd)==STONE)
     	NewField->getXY(DestroyCrd+Point(0,2))->setMetric(FieldMember::METRIC_INFINITY);
 

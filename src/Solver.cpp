@@ -7,139 +7,150 @@
 
 #include "Solver.h"
 
-Solver::Solver(): snapshots(), markedLambdas() {
+#include <iostream>
+Solver::Solver(Field *f): lambdaRoute(), bestLambdaRoute(), snapshots()  {
+	pField = f;
+	currentGoalIndex = 0;
+	createOptimalPath(pField);
+	lambdasCollected = 0;
+	bestLambdasCollected = 0;
+	bestField = new Field(*pField);
 }
 
-string Solver::solve(Field* pField) {
-	// флаг, говорящий о том, что откаты происходят несколько раз подряд =>
-	// нужно все собранные на этом шаге лямбды заносить как помеченные
-	bool isSequentialBacktracking = false;
-	string bestResult;
-	int mostLambdasCollected = 0;
-	int currentLambdasCollected = 0;
+
+std::string Solver::solve() {
 	int backtracksCount = 0;
-
-	const FieldMember *goal = findNewGoal(pField);
-	ManhattanHeuristic *mH = new ManhattanHeuristic(goal->getCoordinate());
-	AStar astar(pField, pField->getRobot(), mH);
+	// инициализация переменных для А*
 	Point finish = pField->getLift()->getCoordinate();
-	Field *pNewField = NULL;
-	string result;
+	const FieldMember *goal = getNextGoal();
+	ManhattanHeuristic mH(goal->getCoordinate());
+	AStar astar(pField, pField->getRobot(), &mH);
 
-	createSnapshot(pField, result, goal); // сохраняем стартовое состояние
+	// сохраняем стартовое состояние
+	createSnapshot("");
 
-	string t = astar.solve(&pNewField);
-	while (pNewField->getRobot()->getCoordinate() != finish) {
-		if (t.empty()) {
-			markUnreachableGoal(goal);
-		} else {
-			result += t;
-			currentLambdasCollected++;
-			markedLambdas.clear();
-		}
-		goal = findNewGoal(pNewField);
-		if (goal != NULL) {
-			createSnapshot(pNewField, result, goal);
-		} else { // если некуда идти - откат
-			while (goal == NULL) {
-				if (snapshots.empty()) {  // больше некуда откатиться
-					delete mH;
-					return bestResult + "A";
-				} else {  // откат к предыдущей лямбде
-					if (backtracksCount == 50) {
-						delete mH;
-						return bestResult + "A";
-					}
-					backtracksCount++;
-					if (!isSequentialBacktracking) {
-						snapshots.pop_back(); // удаляем текущий снэпшот
-						if (snapshots.empty()) {  // больше некуда откатиться
-							delete mH;
-							return bestResult + "A";
-						}
-					}
-					if (mostLambdasCollected == 0) {  // запоминаем лучший результат
-						mostLambdasCollected = currentLambdasCollected;
-						bestResult = result;
-					} else if (currentLambdasCollected > mostLambdasCollected) {
-						mostLambdasCollected = currentLambdasCollected;
-						bestResult = result;
-					}
-					currentLambdasCollected = 0;
-					SolverSnapshot *ss = loadSnapshot(isSequentialBacktracking);
-					pNewField = ss->snapshot;
-					result = ss->deltaPath;
-					goal = findNewGoal(pNewField);
-					isSequentialBacktracking = true;
-				}
+	std::string t = astar.solve(&pField);
+	while (pField->getRobot()->getCoordinate() != finish) {
+		if (!t.empty()) {
+			lambdasCollected++;
+			if (lambdasCollected >= 35) {
+				SolverSnapshot *s = snapshots.front();
+				delete s;
+				snapshots.pop_front();
 			}
-			isSequentialBacktracking = false;
+			lambdaRoute += t;
+			createSnapshot(lambdaRoute);
+			backtracksCount = 0;
 		}
-		mH->setGoal(goal->getCoordinate());
-		AStar astar(pNewField, pNewField->getRobot(), mH);
-		t = astar.solve(&pNewField);
+		goal = getNextGoal();
+		while (goal == NULL) { // если лямбды из оптимального пути закончились
+			// но лямбды на карте еще есть => откат
+			// если откаты не последовательные, то нужно удалить последний снэпшот
+			if (backtracksCount == 0) {
+				snapshots.pop_back();
+			}
+			if (snapshots.empty()) {  // откатываться некуда
+				// попробуем собрать лямбды, которые раньше были недостижимы
+				return bestLambdaRoute + revisitLambdas();
+			}
+			backtrack();
+			if (backtracksCount != 0) {
+				snapshots.pop_back();
+			}
+			goal = getNextGoal();
+			backtracksCount++;
+		}
+		if (t.empty() && (goal == pField->getLift())) {
+			return lambdaRoute + "A";
+		}
+		mH.setGoal(goal->getCoordinate());
+		AStar astar(pField, pField->getRobot(), &mH);
+		t = astar.solve(&pField);
 	}
-	delete mH;
-	return result + t;
+	return lambdaRoute + t;
 }
 
 
-const FieldMember* Solver::findNewGoal(const Field* pField) const {
-	if (pField->lambdaCacheEmpty()) {
-		return isMarked(pField->getLift()) ? NULL : pField->getLift();
-	}
-
-	list<FieldMember*>::const_iterator it = pField->getLambdaCacheIt();
-	FieldMember *result = isMarked(*it) ? NULL : *it;
-	Point start = pField->getRobot()->getCoordinate();
-	int min = pField->getDistance((*it)->getCoordinate(), start);
-
-	for (++it; it != pField->getLambdaCacheEnd(); it++) {
-		int tmp = pField->getDistance((*it)->getCoordinate(), start);
-		if (min > tmp && !isMarked(*it)) {
-			min = tmp;
-			result = *it;
-		} else if (result == NULL && !isMarked(*it)) {
-			min = tmp;
-			result = *it;
+const FieldMember* Solver::getNextGoal() {
+	FieldMember *result;
+	do {
+		if (currentGoalIndex >= optimalPath.getSize()) {
+			return pField->lambdaCacheEmpty() ? pField->getLift() : NULL;
 		}
-	}
+		result = pField->getXY(optimalPath.getCell(currentGoalIndex));
+		if (result->getType() != LAMBDA) {
+			lambdasCollected++;
+			optimalPath.deleteCell(currentGoalIndex);
+		} else {
+			currentGoalIndex++;
+		}
+	} while (result->getType() != LAMBDA);
 	return result;
 }
 
 
-void Solver::markUnreachableGoal(const FieldMember* pGoal) {
-	markedLambdas.push_back(pGoal);
-}
-
-
-bool Solver::isMarked(const FieldMember* lambda) const {
-	list<const FieldMember*>::const_iterator it = markedLambdas.begin();
-	for (; it != markedLambdas.end(); it++) {
-		if (*(*it) == *lambda) {
-			return true;
-		}
-	}
-	return false;
-}
-
-
-void Solver::createSnapshot(Field* s, std::string delta, const FieldMember* lambda) {
-	SolverSnapshot *result = new SolverSnapshot(new Field(*s), delta, lambda);
+void Solver::createSnapshot(const std::string& deltaPath) {
+	SolverSnapshot *result = new SolverSnapshot(new Field(*pField),
+												currentGoalIndex - 1,
+												deltaPath);
 	snapshots.push_back(result);
 }
 
 
-SolverSnapshot* Solver::loadSnapshot(bool isSequentialBacktracking) {
-	if (!isSequentialBacktracking) {
-		markedLambdas.clear();
-	} else if (markedLambdas.size() == 2) {
-		markedLambdas.pop_front();
+void Solver::loadSnapshot() {
+	SolverSnapshot* s = snapshots.back();
+	*pField = *s->snapshot;
+	lambdaRoute = s->delta;
+	lambdasCollected--;
+	currentGoalIndex = s->currentGoalIndex;
+	optimalPath.deleteCell(currentGoalIndex + 1);
+}
+
+
+void Solver::createOptimalPath(Field *f) {
+	NearestNeighbour nn(f);
+	nn.createTour(f->getRobot()->getCoordinate());
+	optimalPath = *nn.getTour();
+	TwoOptOptimizer::optimize(&optimalPath);
+}
+
+
+void Solver::backtrack() {
+	if (lambdasCollected > bestLambdasCollected) {
+		bestLambdasCollected = lambdasCollected;
+		bestLambdaRoute = lambdaRoute;
+		delete bestField;
+		bestField = new Field(*pField);
 	}
-	SolverSnapshot* result = snapshots.back();
-	snapshots.pop_back();
-	markedLambdas.push_back(result->goal);
-	return result;
+	loadSnapshot();
+}
+
+
+std::string Solver::revisitLambdas() {
+	lambdaRoute = "";
+	createOptimalPath(bestField);
+	int goalIndex = 0;
+
+	Point finish = bestField->getLift()->getCoordinate();
+	const FieldMember *goal = bestField->getXY(optimalPath.getCell(goalIndex++));
+	ManhattanHeuristic mH(goal->getCoordinate());
+	AStar astar(bestField, bestField->getRobot(), &mH);
+
+	std::string t = astar.solve(&bestField);
+	while (bestField->getRobot()->getCoordinate() != finish) {
+		if (!t.empty()) {
+			lambdaRoute += t;
+		}
+		if (goalIndex == optimalPath.getSize() ||
+		    (t.empty() && (goal == bestField->getLift()))) {
+			return lambdaRoute + "A";
+		}
+		goal = bestField->getXY(optimalPath.getCell(goalIndex++));
+		mH.setGoal(goal->getCoordinate());
+		AStar astar(bestField, bestField->getRobot(), &mH);
+		t = astar.solve(&bestField);
+	}
+	return lambdaRoute + t;
 }
 
 
@@ -148,4 +159,5 @@ Solver::~Solver() {
 	for (; it != snapshots.end(); it++) {
 		delete *it;
 	}
+	delete bestField;
 }

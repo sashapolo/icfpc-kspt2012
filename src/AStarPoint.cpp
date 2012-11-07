@@ -18,7 +18,7 @@
  * @return новый путь.
  */
 AStarPoint::AStarPoint(const Field* field, const FieldMember* cell,
-		int cost, int heuristicsValue, string path, string move):
+		int cost, int heuristicsValue, std::string path, std::string move):
 				pField(field), pCell(cell) {
 	G = cost;
 	H = heuristicsValue;
@@ -55,7 +55,7 @@ const Field* AStarPoint::getField() const {
  * Получение пути.
  * @return путь.
  */
-string AStarPoint::getPath() const {
+std::string AStarPoint::getPath() const {
 	return path;
 }
 
@@ -123,4 +123,9 @@ bool AStarPoint::operator== (const AStarPoint& x) const {
  */
 bool AStarPoint::operator>(const AStarPoint& x) const {
 	return (this->getPathCost() > x.getPathCost());
+}
+
+
+bool AStarPoint::operator<(const AStarPoint& x) const {
+	return (this->getPathCost() < x.getPathCost());
 }

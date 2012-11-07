@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <string.h>
 #include "Logger.h"
 
 
@@ -57,6 +58,9 @@ Logger::Logger() {
     MessagesCount=0;
 
     MaxMessageCnt=512;
+    
+    memset(&CS1,0,sizeof(CS1));
+    memset(&CS2,0,sizeof(CS2));
 }
 
 Logger::~Logger() {

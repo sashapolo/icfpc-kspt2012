@@ -14,5 +14,5 @@
  */
 int ManhattanHeuristic::calculate(const AStarPoint& a) {
 	Point start = a.getCell()->getCoordinate();
-	return a.getField()->getDistance(start, *goal) * FieldMember::METRIC_NORMAL;
+	return start.getDistance(*goal) * FieldMember::METRIC_NORMAL;
 }
