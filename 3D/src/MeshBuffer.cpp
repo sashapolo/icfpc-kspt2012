@@ -43,7 +43,7 @@ void MeshBuffer::init(int width_, int height_, float cellsize_,float texScaleX, 
     
     int x=0;
     int y=0;
-    int i=0;
+    u32 i=0;
     for(i=0;i<buffers;i++)
     {
         addCube(x,y,(maxcubes>bufcubes)?bufcubes:maxcubes,i);
@@ -148,8 +148,7 @@ void MeshBuffer::setIndices(char* array)
 {
     int x=0;
     int y=0;
-    int cube_base=0;
-    for(int z=0;z<mesh->getMeshBufferCount();z++)
+    for(u32 z=0;z<mesh->getMeshBufferCount();z++)
     {
         SMeshBuffer *buf=(SMeshBuffer*)mesh->getMeshBuffer(z);
         int vertcnt=buf->getVertexCount();

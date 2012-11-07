@@ -10,6 +10,7 @@ public:
     bool loadMap(wchar_t* Path);
     
     void release();
+    void clear();
     
     void addActor(Point pos, CellType type);
     void moveActor(Point pos);

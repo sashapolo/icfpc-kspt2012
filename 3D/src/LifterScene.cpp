@@ -79,6 +79,11 @@ void LifterScene::init(IVideoDriver* driver_, ISceneManager* smgr_)
 
 void LifterScene::release()
 {
+    clear();
+}
+
+void LifterScene::clear()
+{
     if(earth_ind) 
     {
         delete [] earth_ind;
@@ -114,15 +119,15 @@ void LifterScene::release()
         pLiftNode=0;
     }
     
-    for(int i=0;i<StoneArr.size();i++) StoneArr[i]->remove();
+    for(unsigned int i=0;i<StoneArr.size();i++) StoneArr[i]->remove();
     StoneArr.clear();
-    for(int i=0;i<LambdaArr.size();i++) LambdaArr[i]->remove();
+    for(unsigned int i=0;i<LambdaArr.size();i++) LambdaArr[i]->remove();
     LambdaArr.clear();
 }
 
 bool LifterScene::loadMap(wchar_t* Path)
 {
-    release();
+    clear();
     int len=wcslen(Path)+1;
     char* mbPath=new char[len];
     for(int i=0;i<len-1;i++) mbPath[i]=(char)Path[i];
@@ -130,7 +135,6 @@ bool LifterScene::loadMap(wchar_t* Path)
     pField=createField( mbPath);
     
     if(!pField) return false;
-    //float(pField->getSize().first)/3.f*2.f
     mbWall.init(pField->getSize().first,pField->getSize().second,CELLSIZE,
             float(pField->getSize().first)/18.f*2.f, float(pField->getSize().second)/18.f*2.f,
             driver,smgr);
@@ -142,8 +146,7 @@ bool LifterScene::loadMap(wchar_t* Path)
     wall_ind=new char[pField->getSize().first*pField->getSize().second];
 
     updateIndices();
-    //memset(wall_ind,0,pField->getSize().first*pField->getSize().second);
-
+    
     pWallMeshBufferNode=smgr -> addMeshSceneNode(mbWall.mesh);
     pWallMeshBufferNode->setMaterialType((irr::video::E_MATERIAL_TYPE)parallaxMaterial);//video::EMT_NORMAL_MAP_SOLID);
     pWallMeshBufferNode->setMaterialFlag(video::EMF_LIGHTING, false);
@@ -154,7 +157,6 @@ bool LifterScene::loadMap(wchar_t* Path)
     pWallMeshBufferNode->setMaterialTexture(1,pWallBump);
     pWallMeshBufferNode->setMaterialTexture(2,pWallSpecular);
     pWallMeshBufferNode->setMaterialTexture(3,pWallGlow);
-    //pWallMeshBufferNode->getMaterial(0).MaterialTypeParam = 0.045f;
 
     pEarthMeshBufferNode=smgr -> addMeshSceneNode(mbEarth.mesh);
     pEarthMeshBufferNode->setMaterialType((irr::video::E_MATERIAL_TYPE)parallaxMaterial);//video::EMT_NORMAL_MAP_SOLID);
@@ -165,7 +167,6 @@ bool LifterScene::loadMap(wchar_t* Path)
     pEarthMeshBufferNode->setMaterialTexture(1,pEarthBump);
     pEarthMeshBufferNode->setMaterialTexture(2,pEarthSpecular);
     pEarthMeshBufferNode->setMaterialTexture(3,pEarthGlow);
-    pEarthMeshBufferNode->getMaterial(0).MaterialTypeParam = 0.045f;
 
     std::list<FieldMember*>::iterator it=pField->getStoneCacheIt();
     int x,y;
@@ -355,6 +356,8 @@ void LifterScene::addActor(Point pos, CellType type)
                 pLiftNode=pNode;
             }
             pLiftNode->setPosition(vector3df(pos.x*CELLSIZE,pos.y*CELLSIZE,0));
+            break;
+        default:
             break;
     }
 }

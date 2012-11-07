@@ -119,7 +119,7 @@ int main()
     
     
     driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
-    scene::ISceneNode* skybox=smgr->addSkyBoxSceneNode(
+    smgr->addSkyBoxSceneNode(
                 driver->getTexture("3D/res/textures/sky/posY.jpg"),
                 driver->getTexture("3D/res/textures/sky/negY.jpg"),
                 driver->getTexture("3D/res/textures/sky/negZ.jpg"),
