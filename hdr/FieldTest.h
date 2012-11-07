@@ -3,6 +3,9 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
+/**
+ * Инкапсулирует тесты для класса Field.
+ */
 class FieldTest : public CPPUNIT_NS::TestFixture {
 
     CPPUNIT_TEST_SUITE(FieldTest);

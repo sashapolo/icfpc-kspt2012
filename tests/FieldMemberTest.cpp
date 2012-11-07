@@ -18,23 +18,23 @@ void FieldMemberTest::setUp() {
 void FieldMemberTest::tearDown() {
 }
 
-void FieldMemberTest::equalsOperatorTest() {
-    equalsOperatorReflexivityTest();
-    equalsOperatorSymmetryTest();
+void FieldMemberTest::testEqualsOperator() {
+    testEqualsOperatorReflexivity();
+    testEqualsOperatorSymmetry();
 }
 
-void FieldMemberTest::equalsOperatorReflexivityTest() {
+void FieldMemberTest::testEqualsOperatorReflexivity() {
     Point coord(1, 1);
     FieldMember fm(coord, WALL);
     CPPUNIT_ASSERT(fm == fm);
 }
 
-void FieldMemberTest::equalsOperatorSymmetryTest() {
-    equalsOperatorSymmetryEqObjTest();
-    equalsOperatorSymmetryUneqObjTest();
+void FieldMemberTest::testEqualsOperatorSymmetry() {
+    testEqualsOperatorSymmetryEqObj();
+    testEqualsOperatorSymmetryUneqObj();
 }
 
-void FieldMemberTest::equalsOperatorSymmetryEqObjTest() {
+void FieldMemberTest::testEqualsOperatorSymmetryEqObj() {
     Point coord(1, 1);
     FieldMember fm1(coord, WALL);
     FieldMember fm2(coord, WALL);
@@ -42,7 +42,7 @@ void FieldMemberTest::equalsOperatorSymmetryEqObjTest() {
     CPPUNIT_ASSERT( (fm1 == fm2) && ((fm2 == fm1)) );
 }
 
-void FieldMemberTest::equalsOperatorSymmetryUneqObjTest() {
+void FieldMemberTest::testEqualsOperatorSymmetryUneqObj() {
     Point coord1(1, 1);
     Point coord2(2, 2);
     FieldMember fm1(coord1, WALL);
@@ -51,12 +51,12 @@ void FieldMemberTest::equalsOperatorSymmetryUneqObjTest() {
     CPPUNIT_ASSERT( !( (fm1 == fm2) || (fm2 == fm1) ) );
 }
 
-void FieldMemberTest::equalsOperatorTransitivityTest() {
-    equalsOperatorTransitivityEqObjTest();
-    equalsOperatorTransitivityUneqObjTest();
+void FieldMemberTest::testEqualsOperatorTransitivity() {
+    testEqualsOperatorTransitivityEqObj();
+    testEqualsOperatorTransitivityUneqObj();
 }
 
-void FieldMemberTest::equalsOperatorTransitivityEqObjTest() {
+void FieldMemberTest::testEqualsOperatorTransitivityEqObj() {
     Point coord(1, 1);
     FieldMember fm1(coord, WALL);
     FieldMember fm2(coord, WALL);
@@ -65,7 +65,7 @@ void FieldMemberTest::equalsOperatorTransitivityEqObjTest() {
     CPPUNIT_ASSERT( (fm1 == fm2) && (fm2 == fm3) && (fm1 == fm3) );
 }
 
-void FieldMemberTest::equalsOperatorTransitivityUneqObjTest() {
+void FieldMemberTest::testEqualsOperatorTransitivityUneqObj() {
     Point coord1(1, 1);
     Point coord2(2, 2);
     Point coord3(3, 3);
@@ -76,7 +76,7 @@ void FieldMemberTest::equalsOperatorTransitivityUneqObjTest() {
     CPPUNIT_ASSERT( !( (fm1 == fm2) || (fm2 == fm3) || (fm1 == fm3) ) );
 }
 
-void FieldMemberTest::equalsOperatorConsistencyTest() {
+void FieldMemberTest::testEqualsOperatorConsistency() {
     Point coord(1, 1);
     FieldMember fm1(coord, WALL);
     FieldMember fm2(coord, WALL);
