@@ -179,12 +179,6 @@ int main()
         driver->setRenderTarget(0);     
         Bloom->Material.setTexture(1,Blur1->rt0);
         Bloom->render();
-//        driver->setRenderTarget(Blur1->rt0, true, true, video::SColor(0,0,0,0));
-//        smgr->drawAll();
-//        driver->setRenderTarget(Blur2->rt0, true, true, video::SColor(0,0,0,0));           
-//        Blur1->render();                                                                                                          
-//        driver->setRenderTarget(0);                                            
-//        Blur2->render();
     
         guienv->drawAll();
         driver->endScene();

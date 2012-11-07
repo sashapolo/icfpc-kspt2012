@@ -24,29 +24,32 @@ MeshBuffer::~MeshBuffer() {
     mesh->drop();
 }
 
-void MeshBuffer::init(int width_, int height_, float cellsize_,float texScaleX, float texScaleY, IVideoDriver *driver, ISceneManager* smgr)
+void MeshBuffer::create(int width_, int height_, float cellsize_,float texScaleX, float texScaleY,char* array, IVideoDriver *driver, ISceneManager* smgr)
 {
     width=width_;
     height=height_;
     cellsize=cellsize_;
-    vb_width=width+1;
-    vb_height=height+1;
     texscaleX=texScaleX;
     texscaleY=texScaleY;
     
+    maxPrimitives = driver -> getMaximalPrimitiveCount();
+    const u32 bufcubes = maxPrimitives / (24);
+    maxBuffers = (width*height) / bufcubes;
+    if(maxBuffers==0) maxBuffers=1;
+    maxCubes = ((width*height)>bufcubes)?bufcubes:(width*height);
     
-    const u32 maxprim = driver -> getMaximalPrimitiveCount();
-    const u32 bufcubes = maxprim / (24);
-    u32 buffers = (width*height) / bufcubes;
-    if(buffers==0) buffers=1;
-    const u32 maxcubes = (width*height);
-    
+    update(array);
+}
+
+void MeshBuffer::update(char* array)
+{
     int x=0;
     int y=0;
     u32 i=0;
-    for(i=0;i<buffers;i++)
+    int nCubes=1;
+    for(i=0;(i<maxBuffers) && (nCubes!=0);i++)
     {
-        addCube(x,y,(maxcubes>bufcubes)?bufcubes:maxcubes,i);
+        nCubes=addCubes(x,y,maxCubes,i,array);
     }
     
     if (i<mesh->getMeshBufferCount())
@@ -60,13 +63,22 @@ void MeshBuffer::init(int width_, int height_, float cellsize_,float texScaleX, 
     }
     
     mesh->recalculateBoundingBox();
-    
-    //mesh=smgr->getMeshManipulator()->createMeshWithTangents(mesh);
 }
 
-void MeshBuffer::addCube(int& x_start, int& y_start,int cnt, u32 bufNum)
+int MeshBuffer::addCubes(int& x_start, int& y_start,int max_cnt, u32 bufNum,char* array)
 {
+    int i=0;
+    int n_ind=0;
+    int curr_cnt=0;
+    int bFirst=0;
+    int x,y;
+    float size=cellsize/2;
+    float texX=0;
+    float texY=0;
+    float texXpp=0;
+    float texYpp=0;
     SMeshBufferTangents *buf = 0;
+    
     if (bufNum<mesh->getMeshBufferCount())
     {
             buf = (SMeshBufferTangents*)mesh->getMeshBuffer(bufNum);
@@ -80,21 +92,37 @@ void MeshBuffer::addCube(int& x_start, int& y_start,int cnt, u32 bufNum)
             buf->drop();
     }
     
-    buf->Vertices.set_used(cnt*24);
+    int cnt=0;
+    int verts=0;
+    int inds=0;
+    for(y=y_start;y<height;y++)
+    {
+        for(x=!(bFirst++)?x_start:0;(x<width) && (cnt<=max_cnt);x++)
+        {
+            if(array[y*width+x]!=0) 
+            {
+                cnt++;
+                sMeshBufferAdjarency adj=getAdjarency(x,y,array);
+                verts+=8+(adj.top?0:4)+(adj.bottom?0:4)+(adj.left?0:4)+(adj.right?0:4);
+                inds+=12+(adj.top?0:6)+(adj.bottom?0:6)+(adj.left?0:6)+(adj.right?0:6);
+            }
+
+        }
+    };
     
-    int i=0;
-    int curr_cnt=0;
-    int bFirst=0;
-    int x,y;
-    float size=cellsize/2;
-    float texX=0;
-    float texY=0;
-    float texXpp=0;
-    float texYpp=0;
+    buf->Vertices.set_used(verts);
+    buf->Indices.set_used(inds);
+    
+    bFirst=0;
     for(y=y_start;(y<height) && (curr_cnt<cnt);y++)
     {
-        for(x=!(bFirst++)?x_start:0;(x<width) && (curr_cnt<cnt);x++,curr_cnt++)
+        for(x=!(bFirst++)?x_start:0;(x<width) && (curr_cnt<cnt);x++)
         {
+            if(array[y*width+x]==0) continue;
+            curr_cnt++;
+            
+            sMeshBufferAdjarency adj=getAdjarency(x,y,array);
+            
             int i0=i;
             // front
             texX=(float(x)/float(width))*texscaleX;
@@ -112,26 +140,44 @@ void MeshBuffer::addCube(int& x_start, int& y_start,int cnt, u32 bufNum)
             buf->Vertices[i++]=S3DVertexTangents(-size, size, -size,0.0f, 0.0f, -1.0f,SColor(255,255,255,255),texX,texYpp,1.0f, 0.0f, 0.0f,0.0f, 1.0f, 0.0f);
             buf->Vertices[i++]=S3DVertexTangents(-size, -size, -size,0.0f, 0.0f, -1.0f,SColor(255,255,255,255),texX,texY,1.0f, 0.0f, 0.0f,0.0f, 1.0f, 0.0f);
             buf->Vertices[i++]=S3DVertexTangents(size, -size, -size,0.0f, 0.0f, -1.0f,SColor(255,255,255,255),texXpp,texY,1.0f, 0.0f, 0.0f,0.0f, 1.0f, 0.0f);
+            
+            for(int j=0;j<12;j++)  buf->Indices[n_ind++]=i0+cube_indices[j];
             // top
-            buf->Vertices[i++]=S3DVertexTangents(-size, size, -size,0.0f, 1.0f, 0.0f,SColor(255,255,255,255),texX,texYpp,1.0f, 0.0f, 0.0f,0.0f, 0.0f, -1.0f);
-            buf->Vertices[i++]=S3DVertexTangents(size, size, -size,0.0f, 1.0f, 0.0f,SColor(255,255,255,255),texXpp,texYpp,1.0f, 0.0f, 0.0f,0.0f, 0.0f, -1.0f);
-            buf->Vertices[i++]=S3DVertexTangents(size, size, size,0.0f, 1.0f, 0.0f,SColor(255,255,255,255),texXpp,texY,1.0f, 0.0f, 0.0f,0.0f, 0.0f, -1.0f);
-            buf->Vertices[i++]=S3DVertexTangents(-size, size, size,0.0f, 1.0f, 0.0f,SColor(255,255,255,255),texX,texY,1.0f, 0.0f, 0.0f,0.0f, 0.0f, -1.0f);
+            if(!adj.bottom) {
+                int i1=i;
+                buf->Vertices[i++]=S3DVertexTangents(-size, size, -size,0.0f, 1.0f, 0.0f,SColor(255,255,255,255),texX,texYpp,1.0f, 0.0f, 0.0f,0.0f, 0.0f, -1.0f);
+                buf->Vertices[i++]=S3DVertexTangents(size, size, -size,0.0f, 1.0f, 0.0f,SColor(255,255,255,255),texXpp,texYpp,1.0f, 0.0f, 0.0f,0.0f, 0.0f, -1.0f);
+                buf->Vertices[i++]=S3DVertexTangents(size, size, size,0.0f, 1.0f, 0.0f,SColor(255,255,255,255),texXpp,texY,1.0f, 0.0f, 0.0f,0.0f, 0.0f, -1.0f);
+                buf->Vertices[i++]=S3DVertexTangents(-size, size, size,0.0f, 1.0f, 0.0f,SColor(255,255,255,255),texX,texY,1.0f, 0.0f, 0.0f,0.0f, 0.0f, -1.0f);
+                for(int j=0;j<6;j++)  buf->Indices[n_ind++]=i1+cube_indices[j];
+            }
             // bottom
-            buf->Vertices[i++]=S3DVertexTangents(size, -size, -size,0.0f, -1.0f, 0.0f,SColor(255,255,255,255),texXpp,texY,1.0f, 0.0f, 0.0f,0.0f, 0.0f, 1.0f);
-            buf->Vertices[i++]=S3DVertexTangents(-size, -size, -size,0.0f, -1.0f, 0.0f,SColor(255,255,255,255),texX,texY,1.0f, 0.0f, 0.0f,0.0f, 0.0f, 1.0f);
-            buf->Vertices[i++]=S3DVertexTangents(-size, -size, size,0.0f, -1.0f, 0.0f,SColor(255,255,255,255),texX,texYpp,1.0f, 0.0f, 0.0f,0.0f, 0.0f, 1.0f);
-            buf->Vertices[i++]=S3DVertexTangents(size, -size, size,0.0f, -1.0f, 0.0f,SColor(255,255,255,255),texXpp,texYpp,1.0f, 0.0f, 0.0f,0.0f, 0.0f, 1.0f);
+            if(!adj.top) {
+                int i1=i;
+                buf->Vertices[i++]=S3DVertexTangents(size, -size, -size,0.0f, -1.0f, 0.0f,SColor(255,255,255,255),texXpp,texY,1.0f, 0.0f, 0.0f,0.0f, 0.0f, 1.0f);
+                buf->Vertices[i++]=S3DVertexTangents(-size, -size, -size,0.0f, -1.0f, 0.0f,SColor(255,255,255,255),texX,texY,1.0f, 0.0f, 0.0f,0.0f, 0.0f, 1.0f);
+                buf->Vertices[i++]=S3DVertexTangents(-size, -size, size,0.0f, -1.0f, 0.0f,SColor(255,255,255,255),texX,texYpp,1.0f, 0.0f, 0.0f,0.0f, 0.0f, 1.0f);
+                buf->Vertices[i++]=S3DVertexTangents(size, -size, size,0.0f, -1.0f, 0.0f,SColor(255,255,255,255),texXpp,texYpp,1.0f, 0.0f, 0.0f,0.0f, 0.0f, 1.0f);
+                for(int j=0;j<6;j++)  buf->Indices[n_ind++]=i1+cube_indices[j];
+            }
              // right
-            buf->Vertices[i++]=S3DVertexTangents(-size, size, -size,1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texX,texYpp,0.0f, 0.0f, -1.0f,0.0f, -1.0f, 0.0f);
-            buf->Vertices[i++]=S3DVertexTangents(-size, size, size,1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texXpp,texYpp,0.0f, 0.0f, -1.0f,0.0f, -1.0f, 0.0f);
-            buf->Vertices[i++]=S3DVertexTangents(-size, -size, size,1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texXpp,texY,0.0f, 0.0f, -1.0f,0.0f, -1.0f, 0.0f);
-            buf->Vertices[i++]=S3DVertexTangents(-size, -size, -size,1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texX,texY,0.0f, 0.0f, -1.0f,0.0f, -1.0f, 0.0f);
+            if(!adj.left) {
+                int i1=i;
+                buf->Vertices[i++]=S3DVertexTangents(-size, size, -size,1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texX,texYpp,0.0f, 0.0f, -1.0f,0.0f, -1.0f, 0.0f);
+                buf->Vertices[i++]=S3DVertexTangents(-size, size, size,1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texXpp,texYpp,0.0f, 0.0f, -1.0f,0.0f, -1.0f, 0.0f);
+                buf->Vertices[i++]=S3DVertexTangents(-size, -size, size,1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texXpp,texY,0.0f, 0.0f, -1.0f,0.0f, -1.0f, 0.0f);
+                buf->Vertices[i++]=S3DVertexTangents(-size, -size, -size,1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texX,texY,0.0f, 0.0f, -1.0f,0.0f, -1.0f, 0.0f);
+                for(int j=0;j<6;j++)  buf->Indices[n_ind++]=i1+cube_indices[j];
+            }   
             // left
-            buf->Vertices[i++]=S3DVertexTangents(size, size, size,-1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texX,texYpp,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
-            buf->Vertices[i++]=S3DVertexTangents(size, size, -size,-1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texXpp,texYpp,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
-            buf->Vertices[i++]=S3DVertexTangents(size, -size, -size,-1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texXpp,texY,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
-            buf->Vertices[i++]=S3DVertexTangents(size, -size, size,-1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texX,texY,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
+            if(!adj.right) {
+                int i1=i;
+                buf->Vertices[i++]=S3DVertexTangents(size, size, size,-1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texX,texYpp,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
+                buf->Vertices[i++]=S3DVertexTangents(size, size, -size,-1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texXpp,texYpp,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
+                buf->Vertices[i++]=S3DVertexTangents(size, -size, -size,-1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texXpp,texY,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
+                buf->Vertices[i++]=S3DVertexTangents(size, -size, size,-1.0f, 0.0f, 0.0f,SColor(255,255,255,255),texX,texY,0.0f, 0.0f, 1.0f,0.0f, -1.0f, 0.0f);
+                for(int j=0;j<6;j++)  buf->Indices[n_ind++]=i1+cube_indices[j];
+            }
             
             for(int i1=i0;i1<i;i1++)
             {
@@ -139,62 +185,26 @@ void MeshBuffer::addCube(int& x_start, int& y_start,int cnt, u32 bufNum)
             }
         }
     }
+    
     x_start=x;
     y_start=y-1;
     buf->recalculateBoundingBox();
+    return curr_cnt;
 }
 
-void MeshBuffer::setIndices(char* array)
+sMeshBufferAdjarency MeshBuffer::getAdjarency(int x, int y,char* array)
 {
-    int x=0;
-    int y=0;
-    for(u32 z=0;z<mesh->getMeshBufferCount();z++)
-    {
-        SMeshBuffer *buf=(SMeshBuffer*)mesh->getMeshBuffer(z);
-        int vertcnt=buf->getVertexCount();
-        int cubecnt=vertcnt/24;
-        int indcnt=0;
-        
-        int x0=x;
-        int y0=y;
-        for(int i=0;i<cubecnt;i++)
-        {
-            if(array[y0*width+x0]==1) 
-            {
-                indcnt+=36;
-            }
-            x0++;
-            if(x0>=width) 
-            {
-                x0=0;
-                y0++;
-            }
-        }
-        
-        buf->Indices.set_used(indcnt);
-        
-        int n_ind=0;
-        for(int i=0;i<cubecnt;i++)
-        {
-            if(array[y*width+x]==1) 
-            {
-                u16 n=i*24;
-                //printf("n= %d\n",n);
-                for(int j=0;j<36;j++)
-                {
-                    buf->Indices[n_ind++]=n+cube_indices[j];
-                }
-            }
-          
-            x++;
-            if(x>=width) 
-            {
-                x=0;
-                y++;
-            }
-        }
-        buf->recalculateBoundingBox();
-    }
+    sMeshBufferAdjarency adj;
+    if((x<0) || (y<0) || (x>=width) || (x>=height)) 
+        return adj;
     
-    mesh->recalculateBoundingBox();
+    if(x>0) adj.left=(bool)array[y*width+x-1];
+    if(y>0) adj.top=(bool)array[(y-1)*width+x];
+    if(x<(width-1)) adj.right=(bool)array[y*width+x+1];
+    if(y<(height-1)) adj.bottom=(bool)array[(y+1)*width+x];
+    //adj.left=false;
+    //adj.top=false;
+    //adj.right=true;
+    //adj.bottom=true;
+    return adj;
 }

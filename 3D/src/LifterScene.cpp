@@ -135,17 +135,18 @@ bool LifterScene::loadMap(wchar_t* Path)
     pField=createField( mbPath);
     
     if(!pField) return false;
-    mbWall.init(pField->getSize().first,pField->getSize().second,CELLSIZE,
-            float(pField->getSize().first)/18.f*2.f, float(pField->getSize().second)/18.f*2.f,
-            driver,smgr);
-    mbEarth.init(pField->getSize().first,pField->getSize().second,CELLSIZE,
-            float(pField->getSize().first)/18.f*2.f, float(pField->getSize().second)/18.f*2.f,
-            driver,smgr);
-
     earth_ind=new char[pField->getSize().first*pField->getSize().second];
     wall_ind=new char[pField->getSize().first*pField->getSize().second];
-
     updateIndices();
+    
+    mbWall.create(pField->getSize().first,pField->getSize().second,CELLSIZE,
+            float(pField->getSize().first)/18.f*2.f, float(pField->getSize().second)/18.f*2.f,
+            wall_ind,driver,smgr);
+    mbEarth.create(pField->getSize().first,pField->getSize().second,CELLSIZE,
+            float(pField->getSize().first)/18.f*2.f, float(pField->getSize().second)/18.f*2.f,
+            earth_ind,driver,smgr);
+
+    
     
     pWallMeshBufferNode=smgr -> addMeshSceneNode(mbWall.mesh);
     pWallMeshBufferNode->setMaterialType((irr::video::E_MATERIAL_TYPE)parallaxMaterial);//video::EMT_NORMAL_MAP_SOLID);
@@ -160,7 +161,7 @@ bool LifterScene::loadMap(wchar_t* Path)
 
     pEarthMeshBufferNode=smgr -> addMeshSceneNode(mbEarth.mesh);
     pEarthMeshBufferNode->setMaterialType((irr::video::E_MATERIAL_TYPE)parallaxMaterial);//video::EMT_NORMAL_MAP_SOLID);
-    pEarthMeshBufferNode->setMaterialFlag(video::EMF_LIGHTING, true);
+    pEarthMeshBufferNode->setMaterialFlag(video::EMF_LIGHTING, false);
     pEarthMeshBufferNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
     pEarthMeshBufferNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
     pEarthMeshBufferNode->setMaterialTexture(0,pEarthTex);
@@ -189,13 +190,19 @@ bool LifterScene::loadMap(wchar_t* Path)
         it++;
     }
     
-    x=pField->getRobot()->getCoordinate().x;
-    y=pField->getRobot()->getCoordinate().y;
-    addActor(Point(x,(pField->getSize().second-1)-y),ROBOT);
+    if(pField->isRobotAlive())
+    {
+        x=pField->getRobot()->getCoordinate().x;
+        y=pField->getRobot()->getCoordinate().y;
+        addActor(Point(x,(pField->getSize().second-1)-y),ROBOT);
+    }
     
-    x=pField->getLift()->getCoordinate().x;
-    y=pField->getLift()->getCoordinate().y;
-    addActor(Point(x,(pField->getSize().second-1)-y),CLOSED_LIFT);
+    if(pField->getLift())
+    {
+        x=pField->getLift()->getCoordinate().x;
+        y=pField->getLift()->getCoordinate().y;
+        addActor(Point(x,(pField->getSize().second-1)-y),CLOSED_LIFT);
+    }
     
     float sx=pField->getSize().first*CELLSIZE;
     float sy=pField->getSize().second*CELLSIZE;
@@ -215,18 +222,17 @@ void LifterScene::updateIndices()
            if(pField->getCellType(Point(i,(pField->getSize().second-1)-j))==EARTH)
                 earth_ind[j*pField->getSize().first+i]=1;
            else 
-           {
-               earth_ind[j*pField->getSize().first+i]=0;
-               if(pField->getCellType(Point(i,(pField->getSize().second-1)-j))==WALL)
-                   wall_ind[j*pField->getSize().first+i]=1;
-               else 
-                   wall_ind[j*pField->getSize().first+i]=0;
-           }
+                earth_ind[j*pField->getSize().first+i]=0;
+           
+           if(pField->getCellType(Point(i,(pField->getSize().second-1)-j))==WALL)
+               wall_ind[j*pField->getSize().first+i]=1;
+           else 
+               wall_ind[j*pField->getSize().first+i]=0;
            
        }
    }
-   mbWall.setIndices(wall_ind);
-   mbEarth.setIndices(earth_ind);
+   //mbWall.setIndices(wall_ind);
+   //mbEarth.setIndices(earth_ind);
 }
 
 void LifterScene::addActor(Point pos, CellType type)
