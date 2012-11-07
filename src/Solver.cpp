@@ -8,6 +8,14 @@
 #include "Solver.h"
 
 #include <iostream>
+
+/**
+ * Конструктор класса Solver
+ * Задает карту.
+ * Обнуляет индекс текущей цели, количество собранных лямбд и наилучший результат.
+ * Создает оптимальный путь для карты.
+ * @param Field *f - карта.
+ */
 Solver::Solver(Field *f): lambdaRoute(), bestLambdaRoute(), snapshots()  {
 	pField = f;
 	currentGoalIndex = 0;
@@ -17,7 +25,10 @@ Solver::Solver(Field *f): lambdaRoute(), bestLambdaRoute(), snapshots()  {
 	bestField = new Field(*pField);
 }
 
-
+/**
+ * Поиск пути - отвечает за поиск наилучшего пути и выдачу результата.
+ * @return результат.
+ */
 std::string Solver::solve() {
 	int backtracksCount = 0;
 	// инициализация переменных для А*
@@ -70,7 +81,10 @@ std::string Solver::solve() {
 	return lambdaRoute + t;
 }
 
-
+/**
+ * Получение следующией лямбы из оптимального пути.
+ * @return следующая лямбда.
+ */
 const FieldMember* Solver::getNextGoal() {
 	FieldMember *result;
 	do {
@@ -88,7 +102,10 @@ const FieldMember* Solver::getNextGoal() {
 	return result;
 }
 
-
+/**
+ * Создание промежуточного состояния карты.
+ * @param string& deltaPath - текущий путь.
+ */
 void Solver::createSnapshot(const std::string& deltaPath) {
 	SolverSnapshot *result = new SolverSnapshot(new Field(*pField),
 												currentGoalIndex - 1,
@@ -96,7 +113,9 @@ void Solver::createSnapshot(const std::string& deltaPath) {
 	snapshots.push_back(result);
 }
 
-
+/**
+ * Загрузка промежуточного состояния карты.
+ */
 void Solver::loadSnapshot() {
 	SolverSnapshot* s = snapshots.back();
 	*pField = *s->snapshot;
@@ -106,7 +125,10 @@ void Solver::loadSnapshot() {
 	optimalPath.deleteCell(currentGoalIndex + 1);
 }
 
-
+/**
+ * Создание оптимального пути.
+ * @param Field *f - карта.
+ */
 void Solver::createOptimalPath(Field *f) {
 	NearestNeighbour nn(f);
 	nn.createTour(f->getRobot()->getCoordinate());
@@ -114,7 +136,10 @@ void Solver::createOptimalPath(Field *f) {
 	TwoOptOptimizer::optimize(&optimalPath);
 }
 
-
+/**
+ * Откат к предыдущему состоянию.
+ * Если текущий результат собранных лямбд больше, чем лучший результат, то текущий результат становится лучшим.
+ */
 void Solver::backtrack() {
 	if (lambdasCollected > bestLambdasCollected) {
 		bestLambdasCollected = lambdasCollected;
@@ -125,7 +150,10 @@ void Solver::backtrack() {
 	loadSnapshot();
 }
 
-
+/**
+ * todo.
+ * @return todo.
+ */
 std::string Solver::revisitLambdas() {
 	lambdaRoute = "";
 	createOptimalPath(bestField);
@@ -153,7 +181,10 @@ std::string Solver::revisitLambdas() {
 	return lambdaRoute + t;
 }
 
-
+/**
+ * Деструктор класса Solver.
+ * Удаляет промежуточные состояния карты.
+ */
 Solver::~Solver() {
 	std::list<SolverSnapshot*>::iterator it = snapshots.begin();
 	for (; it != snapshots.end(); it++) {
