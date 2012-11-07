@@ -3,11 +3,14 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
+/**
+ * Инкапсулирует тесты для класса FieldMember.
+ */
 class FieldMemberTest : public CPPUNIT_NS::TestFixture {
 
     CPPUNIT_TEST_SUITE(FieldMemberTest);
 
-    CPPUNIT_TEST(equalsOperatorTest);
+    CPPUNIT_TEST(testEqualsOperator);
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -41,39 +44,39 @@ private:
      *      a == b постоянно должно вычисляться в одно и то же значение.
      * </p>
      */
-    void equalsOperatorTest();
+    void testEqualsOperator();
     /**
      * Вспомогательная функция для проверки рефлексивности.
      */
-    void equalsOperatorReflexivityTest();
+    void testEqualsOperatorReflexivity();
     /**
      * Вспомогательная функция для проверки симметричности.
      */
-    void equalsOperatorSymmetryTest();
+    void testEqualsOperatorSymmetry();
     /**
      * Вспомогательная функция для проверки симметричности для случая равных объектов.
      */
-    void equalsOperatorSymmetryEqObjTest();
+    void testEqualsOperatorSymmetryEqObj();
     /**
      * Вспомогательная функция для проверки симметричности для случая неравных объектов.
      */
-    void equalsOperatorSymmetryUneqObjTest();
+    void testEqualsOperatorSymmetryUneqObj();
     /**
      * Вспомогательная функция для проверки транзитивности.
      */
-    void equalsOperatorTransitivityTest();
+    void testEqualsOperatorTransitivity();
     /**
      * Вспомогательная функция для проверки транзитивности для случая равных объектов.
      */
-    void equalsOperatorTransitivityEqObjTest();
+    void testEqualsOperatorTransitivityEqObj();
     /**
      * Вспомогательная функция для проверки транзитивности для случая неравных объектов.
      */
-    void equalsOperatorTransitivityUneqObjTest();
+    void testEqualsOperatorTransitivityUneqObj();
     /**
      * Вспомогательная функция для проверки консистентности.
      */
-    void equalsOperatorConsistencyTest();
+    void testEqualsOperatorConsistency();
 
 };
 
