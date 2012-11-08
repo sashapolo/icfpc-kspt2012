@@ -25,7 +25,7 @@ AStar::~AStar() {
  */
 std::string AStar::solve(Field** pResultField) {
 	AStarPoint *current = start;
-	while (!openedList.empty()) {
+	while (!openedList.empty() && !SignalHandler::sigIntReceived()) {
 		if (current->isGoalReached()) {
 			*pResultField = new Field(*(current->getField()));
 			return current->getPath();
@@ -51,6 +51,7 @@ void AStar::addNeighboursToOpenedList(const AStarPoint& current) {
 	checkPoint(Point(x, y - 1), current, "U");
 	checkPoint(Point(x - 1, y), current, "L");
 	checkPoint(Point(x + 1, y), current, "R");
+	checkPoint(Point(x, y), current, "W");
 }
 
     /**
@@ -65,7 +66,6 @@ void AStar::checkPoint(Point point, const AStarPoint& current, std::string move)
         sSimResult res;
 		Field* newField = fieldSim.calcRobotSteps(current.getField(), move, &res);
 		int newCost = current.getGeneralCost() + tmp->getMetric();
-		//TODO утечка?
 		AStarPoint *result = new AStarPoint(newField,
 										newField->getXY(point),
 										newCost,
@@ -74,6 +74,8 @@ void AStar::checkPoint(Point point, const AStarPoint& current, std::string move)
 		result->setHeuristics(h->calculate(*result));
 		if (!isInClosedList(result)) {
 			openedList.push(result);
+		} else {
+			delete result;
 		}
 	}
 }

@@ -186,7 +186,7 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
                     if(NewField->getCellType(Point(x+1,y))==EARTH)
                         NewField->getXY(Point(x+1,y))->setMetric(FieldMember::METRIC_MEDIUM);
                 }
-                
+
                 if(NewField->getCellType(Point(x-1,y))==EMPTY)
                 {
                     if(NewField->getCellType(Point(x-1,y+1))==EARTH)
@@ -222,9 +222,9 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
     }
     
     Point RobotCrd=NewField->getRobot()->getCoordinate();       //metric to "movable" stones
-    if((NewField->getCellType(RobotCrd+Point(1,0))==STONE) && (NewField->getCellType(RobotCrd+Point(2,0))==EMPTY))       
+    if((NewField->getCellType(RobotCrd+Point(1,0))==STONE) && (NewField->getCellType(RobotCrd+Point(2,0))==EMPTY))
         NewField->getXY(RobotCrd+Point(1,0))->setMetric(FieldMember::METRIC_MEDIUM);
-    if((NewField->getCellType(RobotCrd+Point(-1,0))==STONE) && (NewField->getCellType(RobotCrd+Point(-2,0))==EMPTY)) 
+    if((NewField->getCellType(RobotCrd+Point(-1,0))==STONE) && (NewField->getCellType(RobotCrd+Point(-2,0))==EMPTY))
         NewField->getXY(RobotCrd+Point(-1,0))->setMetric(FieldMember::METRIC_MEDIUM);
     
     

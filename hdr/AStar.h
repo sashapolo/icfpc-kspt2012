@@ -15,6 +15,7 @@
 #include "FieldSim.h"
 #include "Heuristic.h"
 #include "Comparators.h"
+#include "SignalHandler.h"
 
 typedef std::priority_queue<AStarPoint*,
 						    std::vector<AStarPoint*>,
