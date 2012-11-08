@@ -60,7 +60,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	
 # Executable to run the tests
 $(TESTEXE): $(TESTOBJS) $(OBJS_WITHOUT_MAIN)
-	$(LD) $(LFLAGS) $(TEST_LIBS) $^ -o $@
+	$(LD) $(LFLAGS)  $^ -o $@ $(TEST_LIBS)
 
 $(OBJ_DIR)/%.o: $(TST_DIR)/%.cpp
 	$(CC) -I $(HDR_DIR) $(CFLAGS) -c $< -o $@
@@ -68,7 +68,7 @@ $(OBJ_DIR)/%.o: $(TST_DIR)/%.cpp
 
 # 3D launcher
 $(3DEXE): $(3D_OBJS) $(3D_DEP_OBJS)
-	$(LD) $(LFLAGS) $(3D_LIBS) $^ -o $@ -L/usr/local/lib -lIrrlicht
+	$(LD) $(LFLAGS)  $^ -o $@ -L/usr/local/lib -lIrrlicht $(3D_LIBS) 
 
 $(3D_OBJ_DIR)/%.o: $(3D_SRC_DIR)/%.cpp
 	$(CC) -I $(3D_HDR_DIR) -I $(HDR_DIR) $(CFLAGS) -c $< -o $@
