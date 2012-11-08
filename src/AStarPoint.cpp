@@ -119,8 +119,16 @@ bool AStarPoint::operator== (const AStarPoint& x) const {
 	std::list<FieldMember*>::const_iterator it1 = pField->getStoneCacheIt();
 	std::list<FieldMember*>::const_iterator end1 = pField->getStoneCacheEnd();
 	std::list<FieldMember*>::const_iterator it2 = x.pField->getStoneCacheIt();
-	for (; it1 != end1; it1++, it2++) {
-		if ((*it1)->getCoordinate() != (*it2)->getCoordinate()) {
+	std::list<FieldMember*>::const_iterator end2 = x.pField->getStoneCacheEnd();
+	bool flag = false;
+	for (; it1 != end1; it1++) {
+		for (; it2 != end2; it2++) {
+			if ((*it1)->getCoordinate() == (*it2)->getCoordinate()) {
+				flag = true;
+				break;
+			}
+		}
+		if (!flag) {
 			return false;
 		}
 	}

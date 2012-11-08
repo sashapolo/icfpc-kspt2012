@@ -7,6 +7,7 @@
 
 #include "Solver.h"
 
+
 /**
  * Конструктор класса Solver
  * Задает карту.
@@ -44,10 +45,10 @@ std::string Solver::solve() {
 	while ((pField->getRobot()->getCoordinate() != finish)
 			&& !SignalHandler::sigIntReceived()) {
 		if (!t.empty()) {
-			score = 25 * (lambdasCollected - lambdasCollectedOld);
+			lambdasCollected++;
+			score += 25 * (lambdasCollected - lambdasCollectedOld);
 			score -= t.size();
 			lambdasCollectedOld = lambdasCollected;
-			lambdasCollected++;
 			if (lambdasCollected >= 20) {
 				SolverSnapshot *s = snapshots.front();
 				delete s;
@@ -125,6 +126,12 @@ const FieldMember* Solver::getNextGoal() {
  * @param string& deltaPath - текущий путь.
  */
 void Solver::createSnapshot(const std::string& deltaPath) {
+	if (score > bestScore) {
+		bestScore = score;
+		bestLambdaRoute = lambdaRoute;
+		delete bestField;
+		bestField = new Field(*pField);
+	}
 	SolverSnapshot *result = new SolverSnapshot(new Field(*pField),
 												currentGoalIndex - 1,
 												deltaPath);

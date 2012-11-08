@@ -8,7 +8,7 @@
 #include "FieldSim.h"
 
 /////////////////////////////////////////////
-void drawField(Field* pField, Path* pPath,  int nStep)
+void drawField(const Field* pField, Path* pPath,  int nStep)
 {
     CellType cell;
     char cellsymb;
@@ -58,7 +58,7 @@ void drawField(Field* pField, Path* pPath,  int nStep)
             switch(metric)
             {
                 case FieldMember::METRIC_NORMAL: cellsymb=cellTypeToChar(cell); break;
-                case FieldMember::METRIC_MEDIUM: cellsymb='?'; break;
+                //case FieldMember::METRIC_MEDIUM: cellsymb='?'; break;
                 case FieldMember::METRIC_INFINITY: cellsymb='!'; break;
                 default: cellsymb='X'; break;
             }

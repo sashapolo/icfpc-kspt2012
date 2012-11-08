@@ -33,7 +33,7 @@ std::string AStar::solve(Field** pResultField) {
 		openedList.pop();
 		if (!isInClosedList(current)) {
 			addNeighboursToOpenedList(*current);
-			closedList.insert(current);
+			closedList.push_front(current);
 		}
 		current = openedList.top();
 	}
@@ -47,11 +47,11 @@ std::string AStar::solve(Field** pResultField) {
 void AStar::addNeighboursToOpenedList(const AStarPoint& current) {
 	int x = current.getCell()->getCoordinate().x;
 	int y = current.getCell()->getCoordinate().y;
+	checkPoint(Point(x, y), current, "W");
 	checkPoint(Point(x, y + 1), current, "D");
 	checkPoint(Point(x, y - 1), current, "U");
 	checkPoint(Point(x - 1, y), current, "L");
 	checkPoint(Point(x + 1, y), current, "R");
-	checkPoint(Point(x, y), current, "W");
 }
 
     /**
@@ -88,6 +88,6 @@ void AStar::checkPoint(Point point, const AStarPoint& current, std::string move)
  */
 bool AStar::isInClosedList(AStarPoint* pCurrent) const {
 	AStarClosedList::const_iterator it = find_if(closedList.begin(), closedList.end(),
-			bind2nd(Comparators::PointerComparatorEquals<AStarPoint*>(), pCurrent));;
+			bind2nd(Comparators::PointerComparatorEquals<AStarPoint*>(), pCurrent));
 	return (it != closedList.end());
 }

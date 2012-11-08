@@ -353,7 +353,11 @@ bool Field::operator ==(const Field& f) const {
 	for (int y = 0; y < ySize; y++) {
 		int xSize = this->field[y].size();
 		for (int x = 0; x < xSize; x++) {
-			return false;
+			if (field[y][x]->getType() != WALL && field[y][x]->getType() != EMPTY) {
+				if (field[y][x]->getType() != f.field[y][x]->getType()) {
+					return false;
+				}
+			}
 		}
 	}
 	return true;

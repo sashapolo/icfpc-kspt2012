@@ -145,7 +145,7 @@ int main(int argc, char** argv) {
 	Solver s(field);
 	std::string result = s.solve();
 	std::cout<<result<<std::endl;
-	drawStepByStep(field, result);
+	//drawStepByStep(field, result);
 
 //	    Field *oldField = field;
 //		FieldSim fieldSim;
