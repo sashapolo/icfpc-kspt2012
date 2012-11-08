@@ -13,6 +13,7 @@
 #include "SolverSnapshot.h"
 #include "NearestNeighbour.h"
 #include "TwoOptOptimizer.h"
+#include "SignalHandler.h"
 
 class Solver {
 private:

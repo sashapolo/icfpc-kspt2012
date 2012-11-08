@@ -7,8 +7,6 @@
 
 #include "Solver.h"
 
-#include <iostream>
-
 /**
  * Конструктор класса Solver
  * Задает карту.
@@ -23,6 +21,8 @@ Solver::Solver(Field *f): lambdaRoute(), bestLambdaRoute(), snapshots()  {
 	lambdasCollected = 0;
 	bestLambdasCollected = 0;
 	bestField = new Field(*pField);
+	// установка обработчика SIGINT
+	SignalHandler::setupSignalHandler();
 }
 
 /**
@@ -30,55 +30,66 @@ Solver::Solver(Field *f): lambdaRoute(), bestLambdaRoute(), snapshots()  {
  * @return результат.
  */
 std::string Solver::solve() {
-	int backtracksCount = 0;
-	// инициализация переменных для А*
-	Point finish = pField->getLift()->getCoordinate();
-	const FieldMember *goal = getNextGoal();
-	ManhattanHeuristic mH(goal->getCoordinate());
-	AStar astar(pField, pField->getRobot(), &mH);
+	try {
+		int backtracksCount = 0;
+		// инициализация переменных для А*
+		Point finish = pField->getLift()->getCoordinate();
+		const FieldMember *goal = getNextGoal();
+		ManhattanHeuristic mH(goal->getCoordinate());
+		AStar astar(pField, pField->getRobot(), &mH);
 
-	// сохраняем стартовое состояние
-	createSnapshot("");
+		// сохраняем стартовое состояние
+		createSnapshot("");
 
-	std::string t = astar.solve(&pField);
-	while (pField->getRobot()->getCoordinate() != finish) {
-		if (!t.empty()) {
-			lambdasCollected++;
-			if (lambdasCollected >= 35) {
-				SolverSnapshot *s = snapshots.front();
-				delete s;
-				snapshots.pop_front();
-			}
-			lambdaRoute += t;
-			createSnapshot(lambdaRoute);
-			backtracksCount = 0;
-		}
-		goal = getNextGoal();
-		while (goal == NULL) { // если лямбды из оптимального пути закончились
-			// но лямбды на карте еще есть => откат
-			// если откаты не последовательные, то нужно удалить последний снэпшот
-			if (backtracksCount == 0) {
-				snapshots.pop_back();
-			}
-			if (snapshots.empty()) {  // откатываться некуда
-				// попробуем собрать лямбды, которые раньше были недостижимы
-				return bestLambdaRoute + revisitLambdas();
-			}
-			backtrack();
-			if (backtracksCount != 0) {
-				snapshots.pop_back();
+		std::string t = astar.solve(&pField);
+		while (pField->getRobot()->getCoordinate() != finish) {
+			if (!t.empty()) {
+				lambdasCollected++;
+				if (lambdasCollected >= 20) {
+					SolverSnapshot *s = snapshots.front();
+					delete s;
+					snapshots.pop_front();
+				}
+				lambdaRoute += t;
+				createSnapshot(lambdaRoute);
+				backtracksCount = 0;
 			}
 			goal = getNextGoal();
-			backtracksCount++;
+			while (goal == NULL) { // если лямбды из оптимального пути закончились
+				// но лямбды на карте еще есть => откат
+				// если откаты не последовательные, то нужно удалить последний снэпшот
+				if (backtracksCount == 0) {
+					snapshots.pop_back();
+				}
+				if (snapshots.empty()) {  // откатываться некуда
+					// попробуем собрать лямбды, которые раньше были недостижимы
+					revisitLambdas();
+					return bestLambdaRoute + "A";
+				}
+				backtrack();
+				if (backtracksCount != 0) {
+					snapshots.pop_back();
+				}
+				goal = getNextGoal();
+				backtracksCount++;
+			}
+			if (t.empty() && (goal == pField->getLift())) {
+				return lambdaRoute + "A";
+			}
+			mH.setGoal(goal->getCoordinate());
+			AStar astar(pField, pField->getRobot(), &mH);
+			t = astar.solve(&pField);
 		}
-		if (t.empty() && (goal == pField->getLift())) {
+		return lambdaRoute + t;
+	} catch (const SigIntException& e) {
+		if (lambdasCollected > bestLambdasCollected) {
 			return lambdaRoute + "A";
+		} else {
+			return bestLambdaRoute + "A";
 		}
-		mH.setGoal(goal->getCoordinate());
-		AStar astar(pField, pField->getRobot(), &mH);
-		t = astar.solve(&pField);
 	}
-	return lambdaRoute + t;
+	// убираем warning
+	return "";
 }
 
 /**
@@ -155,7 +166,6 @@ void Solver::backtrack() {
  * @return todo.
  */
 std::string Solver::revisitLambdas() {
-	lambdaRoute = "";
 	createOptimalPath(bestField);
 	int goalIndex = 0;
 
@@ -167,18 +177,18 @@ std::string Solver::revisitLambdas() {
 	std::string t = astar.solve(&bestField);
 	while (bestField->getRobot()->getCoordinate() != finish) {
 		if (!t.empty()) {
-			lambdaRoute += t;
+			bestLambdaRoute += t;
 		}
 		if (goalIndex == optimalPath.getSize() ||
 		    (t.empty() && (goal == bestField->getLift()))) {
-			return lambdaRoute + "A";
+			return bestLambdaRoute + "A";
 		}
 		goal = bestField->getXY(optimalPath.getCell(goalIndex++));
 		mH.setGoal(goal->getCoordinate());
 		AStar astar(bestField, bestField->getRobot(), &mH);
 		t = astar.solve(&bestField);
 	}
-	return lambdaRoute + t;
+	return bestLambdaRoute + t;
 }
 
 /**
