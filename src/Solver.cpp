@@ -19,7 +19,8 @@ Solver::Solver(Field *f): lambdaRoute(), bestLambdaRoute(), snapshots()  {
 	currentGoalIndex = 0;
 	createOptimalPath(pField);
 	lambdasCollected = 0;
-	bestLambdasCollected = 0;
+	score = 0;
+	bestScore = 0;
 	bestField = new Field(*pField);
 }
 
@@ -29,6 +30,7 @@ Solver::Solver(Field *f): lambdaRoute(), bestLambdaRoute(), snapshots()  {
  */
 std::string Solver::solve() {
 	int backtracksCount = 0;
+	int lambdasCollectedOld = 0;
 	// инициализация переменных для А*
 	Point finish = pField->getLift()->getCoordinate();
 	const FieldMember *goal = getNextGoal();
@@ -42,6 +44,9 @@ std::string Solver::solve() {
 	while ((pField->getRobot()->getCoordinate() != finish)
 			&& !SignalHandler::sigIntReceived()) {
 		if (!t.empty()) {
+			score = 25 * (lambdasCollected - lambdasCollectedOld);
+			score -= t.size();
+			lambdasCollectedOld = lambdasCollected;
 			lambdasCollected++;
 			if (lambdasCollected >= 20) {
 				SolverSnapshot *s = snapshots.front();
@@ -61,8 +66,7 @@ std::string Solver::solve() {
 			}
 			if (snapshots.empty()) {  // откатываться некуда
 				// попробуем собрать лямбды, которые раньше были недостижимы
-				revisitLambdas();
-				return bestLambdaRoute + "A";
+				return revisitLambdas();
 			}
 			backtrack();
 			if (backtracksCount != 0) {
@@ -75,7 +79,7 @@ std::string Solver::solve() {
 			return lambdaRoute + "A";
 		}
 		if (SignalHandler::sigIntReceived()) {
-			if (lambdasCollected > bestLambdasCollected) {
+			if (score > bestScore) {
 				return lambdaRoute + "A";
 			} else {
 				return bestLambdaRoute + "A";
@@ -86,7 +90,7 @@ std::string Solver::solve() {
 		t = astar.solve(&pField);
 	}
 	if (SignalHandler::sigIntReceived()) {
-		if (lambdasCollected > bestLambdasCollected) {
+		if (score > bestScore) {
 			return lambdaRoute + "A";
 		} else {
 			return bestLambdaRoute + "A";
@@ -155,8 +159,8 @@ void Solver::createOptimalPath(Field *f) {
  * Если текущий результат собранных лямбд больше, чем лучший результат, то текущий результат становится лучшим.
  */
 void Solver::backtrack() {
-	if (lambdasCollected > bestLambdasCollected) {
-		bestLambdasCollected = lambdasCollected;
+	if (score > bestScore) {
+		bestScore = score;
 		bestLambdaRoute = lambdaRoute;
 		delete bestField;
 		bestField = new Field(*pField);
@@ -181,12 +185,18 @@ std::string Solver::revisitLambdas() {
 	while (bestField->getRobot()->getCoordinate() != finish) {
 		if (!t.empty()) {
 			bestLambdaRoute += t;
+		} else if (goal->getType() == OPENED_LIFT) {
+			return bestLambdaRoute += "A";
 		}
-		if (goalIndex == optimalPath.getSize() ||
-		    (t.empty() && (goal == bestField->getLift()))) {
-			return bestLambdaRoute + "A";
+		if (goalIndex == optimalPath.getSize()) {
+			if (bestField->lambdaCacheEmpty()) {
+				goal = bestField->getLift();
+			} else {
+				return bestLambdaRoute + "A";
+			}
+		} else {
+			goal = bestField->getXY(optimalPath.getCell(goalIndex++));
 		}
-		goal = bestField->getXY(optimalPath.getCell(goalIndex++));
 		mH.setGoal(goal->getCoordinate());
 		AStar astar(bestField, bestField->getRobot(), &mH);
 		t = astar.solve(&bestField);
