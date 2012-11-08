@@ -8,11 +8,12 @@ uniform float multiplier;
 float luminance(vec3 c)
 {
 	return dot( c, vec3(0.3, 0.59, 0.11) );
-}
-float highlights(vec3 c, uniform float HighlightThreshold)
+};
+
+float highlights(vec3 c, float HighlightThreshold)
 {
 	return smoothstep(HighlightThreshold, 1.0, luminance(c.rgb));
-}
+};
 
 
 void main() 
