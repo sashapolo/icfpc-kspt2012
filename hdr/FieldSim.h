@@ -10,7 +10,7 @@
 
 #include "stdinclude.h"
 
-void drawField(Field* pField, Path* pPath=0, int nStep=0);
+void drawField(const Field* pField, Path* pPath=0, int nStep=0);
 
 enum eEndState
 {

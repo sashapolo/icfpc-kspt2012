@@ -25,8 +25,11 @@ Field* createField(std::istream &file) {
 
 	file.seekg (0, std::ios::end);
 	file_size = file.tellg();
-	if(file_size==0) {
+	if (file_size==0) {
 		LOGERROR("Can't load map : file is empty");
+		return NULL;
+	} else if (file_size == -1) {
+		LOGERROR("Can't load map : no file specified");
 		return NULL;
 	}
 
@@ -126,12 +129,15 @@ void drawStepByStep(Field* const pField, const std::string path) {
  * @return результат запуска.
  */
 int main(int argc, char** argv) {
-	HTMLLogger Logger;
-    Logger.Init("LOG.html","MainLog");
-    SetLogger(&Logger);
+	// установка обработчика SIGINT
+	SignalHandler::setupSignalHandler();
 
-    Field* field = createField(std::cin);
-    //Field* field = createField("res/maps/map434");
+	HTMLLogger Logger;
+	Logger.Init("LOG.html","MainLog");
+	SetLogger(&Logger);
+
+	Field* field = createField(std::cin);
+//	Field* field = createField("res/maps/map9");
 	if (!field) {
 		printf("Map load error! (See LOG.html)\n");
 		return 0;
@@ -140,21 +146,21 @@ int main(int argc, char** argv) {
 	std::string result = s.solve();
 	std::cout<<result<<std::endl;
 	//drawStepByStep(field, result);
-    
-//    Field *oldField = field;
-//	FieldSim fieldSim;
-//	sSimResult res;
-//	int nStep = 0;
-//	char inStr[100];
-//    printf("Controls:\n\tU - up\n\tD - down\n\tL - left\n\tR - right\n\tW - wait\n\tA - abort\nEnter - accept\n");
-//    drawField(field, &res.path, nStep++);
-//    while(true)
-//    {
-//        scanf("%s",inStr);
-//        Field *newField = fieldSim.calcRobotSteps(oldField,inStr,&res);
-//        drawField(newField,&res.path, nStep++);
-//        printf("Score: %d, NumSteps: %d, NumLambdas: %d, LC: %d, State: %s\n",res.score,res.stepsTaken,res.lambdaReceived,newField->getLambdaCount(),stateToStr(res.state));
-//        oldField = newField;
-//    };
+
+//	    Field *oldField = field;
+//		FieldSim fieldSim;
+//		sSimResult res;
+//		int nStep = 0;
+//		char inStr[100];
+//	    printf("Controls:\n\tU - up\n\tD - down\n\tL - left\n\tR - right\n\tW - wait\n\tA - abort\nEnter - accept\n");
+//	    drawField(field, &res.path, nStep++);
+//	    while(true)
+//	    {
+//	        scanf("%s",inStr);
+//	        Field *newField = fieldSim.calcRobotSteps(oldField,inStr,&res);
+//	        drawField(newField,&res.path, nStep++);
+//	        printf("Score: %d, NumSteps: %d, NumLambdas: %d, LC: %d, State: %s\n",res.score,res.stepsTaken,res.lambdaReceived,newField->getLambdaCount(),stateToStr(res.state));
+//	        oldField = newField;
+//	    };
     return 0;
 }

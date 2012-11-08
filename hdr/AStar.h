@@ -15,12 +15,13 @@
 #include "FieldSim.h"
 #include "Heuristic.h"
 #include "Comparators.h"
+#include "SignalHandler.h"
 
 typedef std::priority_queue<AStarPoint*,
 						    std::vector<AStarPoint*>,
 						    Comparators::PointerComparatorMore<AStarPoint*> >
 		AStarOpenedList;
-typedef std::set<AStarPoint*> AStarClosedList;
+typedef std::list<AStarPoint*> AStarClosedList;
 
 /**
  * А*.<br />

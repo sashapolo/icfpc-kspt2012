@@ -8,7 +8,7 @@
 #include "FieldSim.h"
 
 /////////////////////////////////////////////
-void drawField(Field* pField, Path* pPath,  int nStep)
+void drawField(const Field* pField, Path* pPath,  int nStep)
 {
     CellType cell;
     char cellsymb;
@@ -58,7 +58,7 @@ void drawField(Field* pField, Path* pPath,  int nStep)
             switch(metric)
             {
                 case FieldMember::METRIC_NORMAL: cellsymb=cellTypeToChar(cell); break;
-                case FieldMember::METRIC_MEDIUM: cellsymb='?'; break;
+                //case FieldMember::METRIC_MEDIUM: cellsymb='?'; break;
                 case FieldMember::METRIC_INFINITY: cellsymb='!'; break;
                 default: cellsymb='X'; break;
             }
@@ -158,19 +158,19 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
         x=(*it)->getCoordinate().x;
         y=(*it)->getCoordinate().y;
         
-        if(NewField->getCellType(Point(x,y+1))==EMPTY)
+        if((NewField->getCellType(Point(x,y+1))==EMPTY) || (NewField->getCellType(Point(x,y+1))==ROBOT))
         {
             NewField->getXY(Point(x,y+2))->setMetric(FieldMember::METRIC_INFINITY);
         }
         else if((NewField->getCellType(Point(x,y+1))==STONE))
         {
             if((NewField->getCellType(Point(x+1,y))==EMPTY) &&
-                (NewField->getCellType(Point(x+1,y+1))==EMPTY))
+                ((NewField->getCellType(Point(x+1,y+1))==EMPTY) || (NewField->getCellType(Point(x+1,y+1))==ROBOT)))
             {
                 NewField->getXY(Point(x+1,y+2))->setMetric(FieldMember::METRIC_INFINITY);
             }
             else if((NewField->getCellType(Point(x-1,y))==EMPTY) &&
-                (NewField->getCellType(Point(x-1,y+1))==EMPTY))
+                ((NewField->getCellType(Point(x-1,y+1))==EMPTY) || (NewField->getCellType(Point(x-1,y+1))==ROBOT)))
             {
                 NewField->getXY(Point(x-1,y+2))->setMetric(FieldMember::METRIC_INFINITY);
             }
@@ -186,7 +186,7 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
                     if(NewField->getCellType(Point(x+1,y))==EARTH)
                         NewField->getXY(Point(x+1,y))->setMetric(FieldMember::METRIC_MEDIUM);
                 }
-                
+
                 if(NewField->getCellType(Point(x-1,y))==EMPTY)
                 {
                     if(NewField->getCellType(Point(x-1,y+1))==EARTH)
@@ -202,7 +202,7 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
         }
         else if(NewField->getCellType(Point(x,y+1))==LAMBDA) 
         {
-            if((NewField->getCellType(Point(x+1,y))==EMPTY) && (NewField->getCellType(Point(x+1,y+1))==EMPTY))
+            if((NewField->getCellType(Point(x+1,y))==EMPTY) && ((NewField->getCellType(Point(x+1,y+1))==EMPTY) || (NewField->getCellType(Point(x+1,y+1))==ROBOT)))
                 NewField->getXY(Point(x+1,y+2))->setMetric(FieldMember::METRIC_INFINITY);
             else if((NewField->getCellType(Point(x+1,y+1))==EARTH) && (NewField->getCellType(Point(x+1,y))==EMPTY))
             {
@@ -222,19 +222,19 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
     }
     
     Point RobotCrd=NewField->getRobot()->getCoordinate();       //metric to "movable" stones
-    if((NewField->getCellType(RobotCrd+Point(1,0))==STONE) && (NewField->getCellType(RobotCrd+Point(2,0))==EMPTY))       
+    if((NewField->getCellType(RobotCrd+Point(1,0))==STONE) && (NewField->getCellType(RobotCrd+Point(2,0))==EMPTY))
         NewField->getXY(RobotCrd+Point(1,0))->setMetric(FieldMember::METRIC_MEDIUM);
-    if((NewField->getCellType(RobotCrd+Point(-1,0))==STONE) && (NewField->getCellType(RobotCrd+Point(-2,0))==EMPTY)) 
+    if((NewField->getCellType(RobotCrd+Point(-1,0))==STONE) && (NewField->getCellType(RobotCrd+Point(-2,0))==EMPTY))
         NewField->getXY(RobotCrd+Point(-1,0))->setMetric(FieldMember::METRIC_MEDIUM);
     
     
     Point DestroyCrd=RobotCrd+Point(0,-1); //test to robot destruction
-    if(NewField->getCellType(DestroyCrd)==STONE)
-    	NewField->getXY(DestroyCrd+Point(0,2))->setMetric(FieldMember::METRIC_INFINITY);
+    //if(NewField->getCellType(DestroyCrd)==STONE)
+    //	NewField->getXY(DestroyCrd+Point(0,2))->setMetric(FieldMember::METRIC_INFINITY);
 
     
     if((NewField->getCellType(DestroyCrd)==STONE) &&
-            (NewField->getCellType(DestroyCrd)!=STONE)) 
+            (pField->getCellType(DestroyCrd)!=STONE)) 
     {
         if(pRobotDestroyed) (*pRobotDestroyed)=true;
     }

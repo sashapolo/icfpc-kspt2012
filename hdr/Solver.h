@@ -24,7 +24,8 @@ private:
 	std::string lambdaRoute;
 	std::string bestLambdaRoute;
 	int lambdasCollected;
-	int bestLambdasCollected;
+	int score;
+	int bestScore;
 	std::list<SolverSnapshot*> snapshots;
 
 	void createOptimalPath(Field *);

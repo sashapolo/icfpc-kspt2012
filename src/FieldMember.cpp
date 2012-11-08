@@ -76,6 +76,5 @@ void FieldMember::setDefaultMetric()
 }
 
 bool FieldMember::operator==(const FieldMember& other) const {
-	return (coordinate == other.coordinate &&
-			cellType == other.cellType);
+	return (cellType == other.cellType);
 }

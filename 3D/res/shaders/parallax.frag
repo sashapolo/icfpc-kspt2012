@@ -19,7 +19,7 @@ vec2 ParallaxOcclusionMap(vec2 baseTC, float lod, in vec3 viewDirNrm, int numSte
 			
 	float height = 1 - step;
 	vec4 offset = vec4(baseTC + delta, 0, lod);
-	vec4 NB1 = texture2D(bumpHeightMap, offset);
+	vec4 NB1 = texture2D(bumpHeightMap, offset.xy);
 
 	for (int i=0; i<numSteps; i++)
 	{
@@ -32,7 +32,7 @@ vec2 ParallaxOcclusionMap(vec2 baseTC, float lod, in vec3 viewDirNrm, int numSte
 		height -= step;
 		offset.xy += delta;
 
-		NB1 = texture2DLod(bumpHeightMap, offset,lod);
+		NB1 = texture2DLod(bumpHeightMap, offset.xy,lod);
 	}
 	
 	vec4 offsetBest = offset;
@@ -56,7 +56,7 @@ vec2 ParallaxOcclusionMap(vec2 baseTC, float lod, in vec3 viewDirNrm, int numSte
 		float t = (t0 * delta1 - t1 * delta0) / denom;
 		offsetBest.xy = -t * intersect.xy + intersect.zw;
 		
-		vec4 NB = texture2DLod(bumpHeightMap, offsetBest,lod);
+		vec4 NB = texture2DLod(bumpHeightMap, offsetBest.xy,lod);
 
 		error = t - NB.w;
 		if (error < 0)

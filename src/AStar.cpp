@@ -25,7 +25,7 @@ AStar::~AStar() {
  */
 std::string AStar::solve(Field** pResultField) {
 	AStarPoint *current = start;
-	while (!openedList.empty()) {
+	while (!openedList.empty() && !SignalHandler::sigIntReceived()) {
 		if (current->isGoalReached()) {
 			*pResultField = new Field(*(current->getField()));
 			return current->getPath();
@@ -33,7 +33,7 @@ std::string AStar::solve(Field** pResultField) {
 		openedList.pop();
 		if (!isInClosedList(current)) {
 			addNeighboursToOpenedList(*current);
-			closedList.insert(current);
+			closedList.push_front(current);
 		}
 		current = openedList.top();
 	}
@@ -47,6 +47,7 @@ std::string AStar::solve(Field** pResultField) {
 void AStar::addNeighboursToOpenedList(const AStarPoint& current) {
 	int x = current.getCell()->getCoordinate().x;
 	int y = current.getCell()->getCoordinate().y;
+	checkPoint(Point(x, y), current, "W");
 	checkPoint(Point(x, y + 1), current, "D");
 	checkPoint(Point(x, y - 1), current, "U");
 	checkPoint(Point(x - 1, y), current, "L");
@@ -65,7 +66,6 @@ void AStar::checkPoint(Point point, const AStarPoint& current, std::string move)
         sSimResult res;
 		Field* newField = fieldSim.calcRobotSteps(current.getField(), move, &res);
 		int newCost = current.getGeneralCost() + tmp->getMetric();
-		//TODO утечка?
 		AStarPoint *result = new AStarPoint(newField,
 										newField->getXY(point),
 										newCost,
@@ -74,6 +74,8 @@ void AStar::checkPoint(Point point, const AStarPoint& current, std::string move)
 		result->setHeuristics(h->calculate(*result));
 		if (!isInClosedList(result)) {
 			openedList.push(result);
+		} else {
+			delete result;
 		}
 	}
 }
@@ -86,6 +88,6 @@ void AStar::checkPoint(Point point, const AStarPoint& current, std::string move)
  */
 bool AStar::isInClosedList(AStarPoint* pCurrent) const {
 	AStarClosedList::const_iterator it = find_if(closedList.begin(), closedList.end(),
-			bind2nd(Comparators::PointerComparatorEquals<AStarPoint*>(), pCurrent));;
+			bind2nd(Comparators::PointerComparatorEquals<AStarPoint*>(), pCurrent));
 	return (it != closedList.end());
 }

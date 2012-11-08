@@ -113,7 +113,30 @@ const FieldMember* AStarPoint::getCell() const {
  * @return true, если совпадают; false в противном случае.
  */
 bool AStarPoint::operator== (const AStarPoint& x) const {
-	return (pCell->getCoordinate() == x.getCell()->getCoordinate());
+	if (pField->getStoneCount() != x.pField->getStoneCount()) {
+		return false;
+	}
+	std::list<FieldMember*>::const_iterator it1 = pField->getStoneCacheIt();
+	std::list<FieldMember*>::const_iterator end1 = pField->getStoneCacheEnd();
+	std::list<FieldMember*>::const_iterator it2 = x.pField->getStoneCacheIt();
+	std::list<FieldMember*>::const_iterator end2 = x.pField->getStoneCacheEnd();
+	bool flag = false;
+	for (; it1 != end1; it1++) {
+		for (; it2 != end2; it2++) {
+			if ((*it1)->getCoordinate() == (*it2)->getCoordinate()) {
+				flag = true;
+				break;
+			}
+		}
+		if (!flag) {
+			return false;
+		}
+	}
+	if (pField->getRobot()->getCoordinate() != x.pField->getRobot()->getCoordinate()) {
+		return false;
+	}
+	return true;
+	//return (*pField == *x.getField());
 }
 
 /**

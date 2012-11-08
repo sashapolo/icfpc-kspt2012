@@ -10,18 +10,12 @@
 
 #include <signal.h>
 
-struct SigIntException {
-};
-
 class SignalHandler {
 private:
-	static void sigIntSignalHandler(int param) {
-		throw SigIntException();
-	}
+	static void sigIntSignalHandler(int param);
 public:
-	static void setupSignalHandler() {
-		signal(SIGINT, sigIntSignalHandler);
-	}
+	static void setupSignalHandler();
+	static bool sigIntReceived();
 };
 
 #endif /* SIGNALHANDLER_H_ */
