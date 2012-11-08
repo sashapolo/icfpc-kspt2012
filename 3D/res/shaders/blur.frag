@@ -29,4 +29,4 @@ void main()
    } 
    avg /= 13.0; 
    gl_FragColor = avg; 
-}; 
+}

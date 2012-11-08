@@ -8,16 +8,16 @@ uniform sampler2D bumpHeightMap;
 uniform sampler2D specularMap;
 uniform sampler2D glowMap;
 
-vec2 ParallaxOcclusionMap(vec2 baseTC, float lod, in vec3 viewDirNrm, int numSteps, float displacement)
+vec2 ParallaxOcclusionMap(vec2 baseTC, float lod, vec3 viewDirNrm, int numSteps, float displacement)
 {
-	float step =  1.0 / numSteps;
+	float step =  1.0 / float(numSteps);
 	float bumpScale = displacement;
 	
-	vec2 delta = vec2(viewDirNrm.x, viewDirNrm.y) * bumpScale / (-viewDirNrm.z * numSteps); // / max(-viewDirNrm.z * numSteps, 0.1)
+	vec2 delta = vec2(viewDirNrm.x, viewDirNrm.y) * bumpScale / (-viewDirNrm.z * float(numSteps)); 
 		
 	vec4 NB0 = texture2D(bumpHeightMap, baseTC);
 			
-	float height = 1 - step;
+	float height = 1.0 - step;
 	vec4 offset = vec4(baseTC + delta, 0, lod);
 	vec4 NB1 = texture2D(bumpHeightMap, offset.xy);
 
@@ -32,7 +32,7 @@ vec2 ParallaxOcclusionMap(vec2 baseTC, float lod, in vec3 viewDirNrm, int numSte
 		height -= step;
 		offset.xy += delta;
 
-		NB1 = texture2DLod(bumpHeightMap, offset.xy,lod);
+		NB1 = texture2D(bumpHeightMap, offset.xy);
 	}
 	
 	vec4 offsetBest = offset;
@@ -44,7 +44,9 @@ vec2 ParallaxOcclusionMap(vec2 baseTC, float lod, in vec3 viewDirNrm, int numSte
 	float delta1 = t1 - NB1.w;
 	float delta0 = t0 - NB0.w;
 
-	vec4 intersect = vec4(delta * numSteps, delta * numSteps + baseTC);
+	vec4 intersect;
+	intersect.xy=delta * float(numSteps);
+	intersect.zw=delta * float(numSteps) + baseTC;
 
 	for (int i=0; i<10; i++)
 	{
@@ -56,10 +58,10 @@ vec2 ParallaxOcclusionMap(vec2 baseTC, float lod, in vec3 viewDirNrm, int numSte
 		float t = (t0 * delta1 - t1 * delta0) / denom;
 		offsetBest.xy = -t * intersect.xy + intersect.zw;
 		
-		vec4 NB = texture2DLod(bumpHeightMap, offsetBest.xy,lod);
+		vec4 NB = texture2D(bumpHeightMap, offsetBest.xy);
 
 		error = t - NB.w;
-		if (error < 0)
+		if (error < 0.0)
 		{
 			delta1 = error;
 			t1 = t;
@@ -79,7 +81,7 @@ void main()
    vec3 L = normalize(LightDirection);
    vec3 E = normalize(ViewDirection);
    
-   vec2 tex=ParallaxOcclusionMap(gl_TexCoord[0],0,E,15,0.03);
+   vec2 tex=ParallaxOcclusionMap(gl_TexCoord[0].xy,0.0,E,15,0.03);
 
 
    vec3 N = normalize( ( texture2D( bumpHeightMap, tex).xyz * 2.0 ) - 1.0 );

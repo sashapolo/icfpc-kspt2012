@@ -10,14 +10,14 @@ uniform sampler2D glowMap;
 
 void main()
 {
-   vec3 N = normalize( ( texture2D( bumpMap, gl_TexCoord[0]).xyz * 2.0 ) - 1.0 );
+   vec3 N = normalize( ( texture2D( bumpMap, gl_TexCoord[0].xy).xyz * 2.0 ) - 1.0 );
    vec3 L = normalize(LightDirection);
    vec3 E = normalize(ViewDirection);
    vec3 R = reflect(-L, N);
 
-   vec4 Color =  texture2D( colorMap, gl_TexCoord[0]); 
-   vec4 vSpecular= texture2D( specularMap, gl_TexCoord[0]); 
-   vec4 vGlow=texture2D( glowMap, gl_TexCoord[0]); 
+   vec4 Color =  texture2D( colorMap, gl_TexCoord[0].xy); 
+   vec4 vSpecular= texture2D( specularMap, gl_TexCoord[0].xy); 
+   vec4 vGlow=texture2D( glowMap, gl_TexCoord[0].xy); 
    
    float fShade=max(dot(N,L),0.0);
    vec4 Ambient  =  Color * .01;

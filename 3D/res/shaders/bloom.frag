@@ -8,12 +8,12 @@ uniform float multiplier;
 float luminance(vec3 c)
 {
 	return dot( c, vec3(0.3, 0.59, 0.11) );
-};
+}
 
 float highlights(vec3 c, float HighlightThreshold)
 {
 	return smoothstep(HighlightThreshold, 1.0, luminance(c.rgb));
-};
+}
 
 
 void main() 
@@ -43,6 +43,6 @@ void main()
    avg /= 12.0; 
    avg.a = highlights(avg.rgb,strength);
 //   gl_FragColor = sample+avg*avg.a; 
-gl_FragColor.xyz=orig+avg*0.1+avg*avg.a;
-gl_FragColor.w=1;
-};
+gl_FragColor.xyz=orig.xyz+avg.xyz*0.1+avg.xyz*avg.a;
+gl_FragColor.w=1.0;
+}
