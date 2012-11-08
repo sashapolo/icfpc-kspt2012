@@ -21,12 +21,19 @@ class Path {
 public:
 	Path();
     int getSize() const;
-	Point getCell(int) const;
-	void addCell(const Point&);
-	bool isEmpty() const;
-	int getDistance() const;
-	void swap(int i, int j);
-	void deleteCell(int);
+    /**
+    * Возвращает координаты точки,
+    * в которой робот находился на заданном шаге.
+    * <div style="font-weight: bold">Индексация шагов начинается с нуля.</div>
+    * @param index номер получаемого шага
+    * @return координаты робота на шаге с заданным номером
+    */
+    Point getCell(int) const;
+    void addCell(const Point&);
+    bool isEmpty() const;
+    int getDistance() const;
+    void swap(int i, int j);
+    void deleteCell(int);
 };
 
 #endif /* PATH_H_ */

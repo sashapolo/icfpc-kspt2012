@@ -12,20 +12,19 @@ Path::Path(): path() {
 }
 
 Point Path::getCell(int index) const {
-        /**
-         * Возвращает координаты робота
-	 * @param int index - переменная, определяющая шаг
-	 * @return координаты робота с выбранным индексом
-	 */
-	return path[index];
+    return path[index];
 }
 
 void Path::addCell(const Point& c) {
-    	/**
-	 * Добавляет шаг к пути
-	 * @param Point& c - точка, которая добавляется к пути
-	 */
-	path.push_back(c);
+    /**
+     * Добавляет шаг к пути
+     * @param Point& c - точка, которая добавляется к пути
+     */
+    /*
+     * ToDo проверка того,
+     * что добавляемая точка находится рядом с последней добавленной.
+     */
+    path.push_back(c);
 }
 
 int Path::getSize() const {
