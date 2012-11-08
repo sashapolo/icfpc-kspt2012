@@ -21,8 +21,6 @@ Solver::Solver(Field *f): lambdaRoute(), bestLambdaRoute(), snapshots()  {
 	lambdasCollected = 0;
 	bestLambdasCollected = 0;
 	bestField = new Field(*pField);
-	// установка обработчика SIGINT
-	SignalHandler::setupSignalHandler();
 }
 
 /**
