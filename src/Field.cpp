@@ -88,6 +88,7 @@ Field::Field(const std::string &ASCIIMap): field(), lambdaCache(), stoneCache() 
     int numSkippedElements=0;
     int numInsertedElements=0;
     int numUnknownCharacters=0;
+    int lastn=0;
     for(unsigned int i = 0; i < ASCIIMap.length(); i++) {
         switch(ASCIIMap[i])
         {
@@ -99,6 +100,7 @@ Field::Field(const std::string &ASCIIMap): field(), lambdaCache(), stoneCache() 
                 if(maxX<currX) maxX=currX;
                 currX=0;
                 currY++;
+                lastn=i;
                 break;
             case '#':
             case 'R':
@@ -117,6 +119,8 @@ Field::Field(const std::string &ASCIIMap): field(), lambdaCache(), stoneCache() 
         }
         if(bEndCycle) break;
     }
+    if(lastn<(ASCIIMap.length()-1)) currY++;
+    if(maxX<currX) maxX=currX;
     maxY=currY;
     
     LOGINFO("Map parse: Estimated map size: %d,%d",maxX,maxY);
