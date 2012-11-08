@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
 	SetLogger(&Logger);
 
 	Field* field = createField(std::cin);
-//	Field* field = createField("res/maps/map9");
+	//Field* field = createField("res/maps/lightning6.map");
 	if (!field) {
 		printf("Map load error! (See LOG.html)\n");
 		return 0;

@@ -8,7 +8,7 @@
 #include "AStar.h"
 
 
-AStar::AStar(const Field* pField, FieldMember* s, Heuristic* h)
+AStar::AStar(Field* pField, FieldMember* s, Heuristic* h)
 				: fieldSim(), start(new AStarPoint(pField, s, 0, 1)) {
 	this->h = h;
 	openedList.push(start);
@@ -16,6 +16,11 @@ AStar::AStar(const Field* pField, FieldMember* s, Heuristic* h)
 
 AStar::~AStar() {
 	delete start;
+	while (!openedList.empty()) {
+		AStarPoint *result = openedList.top();
+		delete result;
+		openedList.pop();
+	}
 }
 
 /**
@@ -27,7 +32,7 @@ std::string AStar::solve(Field** pResultField) {
 	AStarPoint *current = start;
 	while (!openedList.empty() && !SignalHandler::sigIntReceived()) {
 		if (current->isGoalReached()) {
-			*pResultField = new Field(*(current->getField()));
+			*pResultField = current->getField();
 			return current->getPath();
 		}
 		openedList.pop();
@@ -36,6 +41,7 @@ std::string AStar::solve(Field** pResultField) {
 			closedList.push_front(current);
 		}
 		current = openedList.top();
+
 	}
 	return "";
 }

@@ -42,7 +42,7 @@ private:
 	void addNeighboursToOpenedList(const AStarPoint&);
 
 public:
-	AStar(const Field*, FieldMember*, Heuristic*);
+	AStar(Field*, FieldMember*, Heuristic*);
 	std::string solve(Field**);
 	virtual ~AStar();
 };
