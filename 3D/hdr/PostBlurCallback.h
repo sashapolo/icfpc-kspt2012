@@ -38,6 +38,8 @@ public:
         Vertices[3] = video::S3DVertex( 1.0f, -1.0f, 0.0f,1,1,0, video::SColor(255,0,255,255), 1.0f, 1.0f); 
         Vertices[4] = video::S3DVertex(-1.0f, -1.0f, 0.0f,1,1,0, video::SColor(255,0,255,255), 0.0f, 1.0f); 
         Vertices[5] = video::S3DVertex( 1.0f,  1.0f, 0.0f,1,1,0, video::SColor(255,0,255,255), 1.0f, 0.0f); 
+        callback=0;
+        rt0=0;
     } 
 
 
@@ -45,22 +47,32 @@ public:
     { 
         video::IVideoDriver* driver = smgr->getVideoDriver(); 
         video::IGPUProgrammingServices* gpu = driver->getGPUProgrammingServices(); 
-
+        
         callback= new PostBlurCallback; 
         callback->sampleDist=sampleDist; 
-        Material.MaterialType=(E_MATERIAL_TYPE)gpu->addHighLevelShaderMaterialFromFiles 
+        Material.MaterialType=(E_MATERIAL_TYPE) gpu->addHighLevelShaderMaterialFromFiles 
         ( 
             "3D/res/shaders/bloom.vert", "main", video::EVST_VS_1_1, 
             "3D/res/shaders/blur.frag", "main", video::EPST_PS_1_1, 
             callback, (video::EMT_SOLID) 
-        ); 
+        );
 
 
-        rt0 = driver->addRenderTargetTexture(core::dimension2d<unsigned int>(sizeW,sizeH)); 
         Material.Wireframe = false; 
         Material.Lighting = false; 
-        Material.setTexture(0,rt0); 
+        resize(driver,sizeW,sizeH);
     } 
+    
+    void resize(video::IVideoDriver* driver,unsigned int sizeW,unsigned int sizeH)
+    {
+        if(rt0)
+        {
+            if((rt0->getSize().Width==sizeW) && (rt0->getSize().Height==sizeH)) return;
+            driver->removeTexture(rt0);
+        }
+        rt0 = driver->addRenderTargetTexture(core::dimension2d<u32>(sizeW,sizeH));
+        Material.setTexture(0,rt0);
+    }
 
     virtual void OnPreRender(){} 
 
