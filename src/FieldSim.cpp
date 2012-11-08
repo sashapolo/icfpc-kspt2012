@@ -234,7 +234,7 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
 
     
     if((NewField->getCellType(DestroyCrd)==STONE) &&
-            (NewField->getCellType(DestroyCrd)!=STONE)) 
+            (pField->getCellType(DestroyCrd)!=STONE)) 
     {
         if(pRobotDestroyed) (*pRobotDestroyed)=true;
     }
