@@ -12,7 +12,7 @@ const int cube_indices[36] = {
 };
 
 MeshBuffer::MeshBuffer() {
-    mesh=new SMesh();
+    mesh=0;
     width=0;
     height=0;
     cellsize=1.f;
@@ -21,11 +21,22 @@ MeshBuffer::MeshBuffer() {
 }
 
 MeshBuffer::~MeshBuffer() {
-    mesh->drop();
+    
+}
+
+void MeshBuffer::release()
+{
+    if(mesh)
+    {
+        mesh->drop();
+        mesh=0;
+    };
 }
 
 void MeshBuffer::create(int width_, int height_, float cellsize_,float texScaleX, float texScaleY,char* array, IVideoDriver *driver, ISceneManager* smgr)
 {
+    release();
+    mesh=new SMesh();
     width=width_;
     height=height_;
     cellsize=cellsize_;

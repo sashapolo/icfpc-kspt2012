@@ -79,6 +79,8 @@ void LifterScene::init(IVideoDriver* driver_, ISceneManager* smgr_)
 
 void LifterScene::release()
 {
+    mbWall.release();
+    mbEarth.release();
     clear();
 }
 

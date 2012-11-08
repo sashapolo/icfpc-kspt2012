@@ -88,6 +88,7 @@ Field::Field(const std::string &ASCIIMap): field(), lambdaCache(), stoneCache() 
     int numSkippedElements=0;
     int numInsertedElements=0;
     int numUnknownCharacters=0;
+    int lastn=0;
     for(unsigned int i = 0; i < ASCIIMap.length(); i++) {
         switch(ASCIIMap[i])
         {
@@ -99,6 +100,7 @@ Field::Field(const std::string &ASCIIMap): field(), lambdaCache(), stoneCache() 
                 if(maxX<currX) maxX=currX;
                 currX=0;
                 currY++;
+                lastn=i;
                 break;
             case '#':
             case 'R':
@@ -110,6 +112,8 @@ Field::Field(const std::string &ASCIIMap): field(), lambdaCache(), stoneCache() 
             case ' ':
                 currX++;
                 break; 
+            case '\r':
+                break;
             default:
                 LOGWARNING("Map parse: Unknown character \'%c\' at %d,%d.",ASCIIMap[i],currX,currY);
                 numUnknownCharacters++;
@@ -117,6 +121,8 @@ Field::Field(const std::string &ASCIIMap): field(), lambdaCache(), stoneCache() 
         }
         if(bEndCycle) break;
     }
+    if(lastn<(ASCIIMap.length()-1)) currY++;
+    if(maxX<currX) maxX=currX;
     maxY=currY;
     
     LOGINFO("Map parse: Estimated map size: %d,%d",maxX,maxY);
@@ -171,7 +177,15 @@ Field::Field(const std::string &ASCIIMap): field(), lambdaCache(), stoneCache() 
             numSkippedElements,numInsertedElements,numUnknownCharacters);
     // Reading the map
     
-    if (!lambdaCache.empty() && pLift->getType() == OPENED_LIFT) {
+    if((!pLift) || (!pRobot) || (lambdaCache.empty()))
+    {
+        LOGERROR("Map parse: not all required objects are exists");
+        throw FieldParseException();
+        return;
+    }
+    
+    if (pLift->getType() == OPENED_LIFT) {
+        LOGERROR("Map parse: lift can't be opened");
     	throw FieldParseException();
     }
 }
