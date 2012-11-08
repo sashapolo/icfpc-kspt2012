@@ -112,6 +112,8 @@ Field::Field(const std::string &ASCIIMap): field(), lambdaCache(), stoneCache() 
             case ' ':
                 currX++;
                 break; 
+            case '\r':
+                break;
             default:
                 LOGWARNING("Map parse: Unknown character \'%c\' at %d,%d.",ASCIIMap[i],currX,currY);
                 numUnknownCharacters++;
@@ -175,7 +177,15 @@ Field::Field(const std::string &ASCIIMap): field(), lambdaCache(), stoneCache() 
             numSkippedElements,numInsertedElements,numUnknownCharacters);
     // Reading the map
     
-    if (!lambdaCache.empty() && pLift->getType() == OPENED_LIFT) {
+    if((!pLift) || (!pRobot) || (lambdaCache.empty()))
+    {
+        LOGERROR("Map parse: not all required objects are exists");
+        throw FieldParseException();
+        return;
+    }
+    
+    if (pLift->getType() == OPENED_LIFT) {
+        LOGERROR("Map parse: lift can't be opened");
     	throw FieldParseException();
     }
 }

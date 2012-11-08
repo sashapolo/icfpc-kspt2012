@@ -186,6 +186,7 @@ int main()
         driver->endScene();
     }
 
+    lifterScene.release();
     device->drop();
 
     return 0;

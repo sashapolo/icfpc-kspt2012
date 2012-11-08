@@ -33,7 +33,7 @@ public:
     int addCubes(int& x_start, int& y_start,int max_cnt, u32 bufNum,char* array);
     void setIndices(char* array);
     sMeshBufferAdjarency getAdjarency(int x, int y,char* array); 
-    
+    void release();
     SMesh* mesh;
 private:
     
