@@ -17,6 +17,7 @@ public:
     void removeActor(Point pos);
     
     void updateIndices();
+    void updateScene();
 private:
     IVideoDriver* driver;
     ISceneManager* smgr;
@@ -33,11 +34,21 @@ private:
     
     ITexture* pStoneTex;
     ITexture* pStoneBump;
+    ITexture* pStoneSpecular;
     ITexture* pRobotTex;
     ITexture* pRobotBump;
     ITexture* pFireTex;
     ITexture* pLiftTex;
     ITexture* pSunTex;
+    
+    ITexture* pBlackTex;
+    ITexture* pWhiteTex;
+    ITexture* pGreyTex;
+    
+    ITexture* pStoneSpriteTex;
+    ITexture* pStoneSpriteBump;
+    ITexture* pStoneSpriteSpecular;
+    ITexture* pLambdaSpriteTex;
     
     IMesh* pStoneMesh;
     IMesh* pLambdaMesh;

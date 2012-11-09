@@ -43,16 +43,27 @@ void LifterScene::init(IVideoDriver* driver_, ISceneManager* smgr_)
     
     pStoneTex=driver->getTexture(L"3D/res/textures/stone.png");
     pStoneBump=driver->getTexture(L"3D/res/textures/stone_n.png");
+    pStoneSpecular=driver->getTexture(L"3D/res/textures/stone_s.png");
     pRobotTex=driver->getTexture(L"3D/res/textures/ufo.png");
     pRobotBump=driver->getTexture(L"3D/res/textures/ufo_n.png");
     pFireTex=driver->getTexture(L"3D/res/textures/fireball.png");
     pLiftTex=driver->getTexture(L"3D/res/textures/lift_closed.png");
     pSunTex=driver->getTexture(L"3D/res/textures/sun.png");
     
-    pStoneMesh=smgr->getMesh(L"3D/res/models/stone.3ds");
+    pStoneSpriteTex=driver->getTexture(L"3D/res/textures/stone_sprite.png");
+    pStoneSpriteBump=driver->getTexture(L"3D/res/textures/stone_sprite_n.png");
+    pStoneSpriteSpecular=driver->getTexture(L"3D/res/textures/stone_sprite_s.png");
+    pLambdaSpriteTex=driver->getTexture(L"3D/res/textures/lambda_sprite.png");
+    
+    pBlackTex=driver->getTexture(L"3D/res/textures/black.png");
+    pWhiteTex=driver->getTexture(L"3D/res/textures/white.png");
+    pGreyTex=driver->getTexture(L"3D/res/textures/grey.png");
+    
+    pStoneMesh=smgr->getMesh(L"3D/res/models/stone.3DS");
     pLambdaMesh=smgr->getMesh(L"3D/res/models/lambda.3DS");
     pRobotMesh=smgr->getMesh(L"3D/res/models/ufo.3DS");
     
+
     light1 = smgr->addLightSceneNode(0, core::vector3df(0,0,-50),
             video::SColorf(1.0f, 1.0f, 1.0f, 0.0f), 2500);
     
@@ -66,14 +77,14 @@ void LifterScene::init(IVideoDriver* driver_, ISceneManager* smgr_)
     bumpMaterial = gpu-> addHighLevelShaderMaterialFromFiles(
             "3D/res/shaders/bump.vert","main",irr::video::EVST_VS_2_0,
             "3D/res/shaders/bump.frag","main",irr::video::EPST_PS_2_0,
-            bumpCallback,irr::video::EMT_SOLID,1);
+            bumpCallback,irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL,1);
     
     ShaderParallaxCallback* parallaxCallback = new ShaderParallaxCallback();
     parallaxCallback->SceneManager=smgr;
     parallaxMaterial = gpu-> addHighLevelShaderMaterialFromFiles(
             "3D/res/shaders/parallax.vert","main",irr::video::EVST_VS_2_0,
             "3D/res/shaders/parallax.frag","main",irr::video::EPST_PS_2_0,
-            parallaxCallback,irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL,1);
+            parallaxCallback,irr::video::EMT_SOLID,1);
 
 }
 
@@ -237,6 +248,48 @@ void LifterScene::updateIndices()
    //mbEarth.setIndices(earth_ind);
 }
 
+#define BILLBOARD_DISTANCE 200
+void LifterScene::updateScene()
+{
+    scene::ICameraSceneNode* pCurrCamera=smgr -> getActiveCamera();
+
+    for(int i=0;i<StoneArr.size();i++)
+    {
+        if(pCurrCamera->getPosition().getDistanceFrom(StoneArr[i]->getPosition())<BILLBOARD_DISTANCE)
+        {
+            core::list<ISceneNode*>::ConstIterator it=StoneArr[i]->getChildren().begin();
+            (*it)->setVisible(true);
+            it++;
+            (*it)->setVisible(false);
+        }
+        else
+        {
+            core::list<ISceneNode*>::ConstIterator it=StoneArr[i]->getChildren().begin();
+            (*it)->setVisible(false);
+            it++;
+            (*it)->setVisible(true);
+        }
+    }
+    
+    for(int i=0;i<LambdaArr.size();i++)
+    {
+        if(pCurrCamera->getPosition().getDistanceFrom(LambdaArr[i]->getPosition())<BILLBOARD_DISTANCE)
+        {
+            core::list<ISceneNode*>::ConstIterator it=LambdaArr[i]->getChildren().begin();
+            (*it)->setVisible(true);
+            it++;
+            (*it)->setVisible(false);
+        }
+        else
+        {
+            core::list<ISceneNode*>::ConstIterator it=LambdaArr[i]->getChildren().begin();
+            (*it)->setVisible(false);
+            it++;
+            (*it)->setVisible(true);
+        }
+    }
+}
+
 void LifterScene::addActor(Point pos, CellType type)
 {
     scene::ISceneNode* pNode;
@@ -244,6 +297,9 @@ void LifterScene::addActor(Point pos, CellType type)
     scene::IParticleSystemSceneNode* ps;
     scene::IParticleEmitter* em;
     scene::IParticleAffector* paf;
+    
+    scene::ISceneNode* pNodeLow;
+    scene::ISceneNode* pNodeHi;
     
     switch(type)
     {
@@ -254,30 +310,58 @@ void LifterScene::addActor(Point pos, CellType type)
            earth_ind[pos.y*pField->getSize().first+pos.x]=1; 
            break;
         case STONE:
-            pNode=smgr -> addMeshSceneNode(pStoneMesh);
+            //pNode=smgr -> addMeshSceneNode(pStoneMesh);//addOctreeSceneNode
+            pNode=smgr -> addEmptySceneNode();
+            pNodeLow=smgr -> addMeshSceneNode(pStoneMesh);
+            pNodeHi=smgr -> addBillboardSceneNode();
+            pNode->addChild(pNodeLow);
+            pNode->addChild(pNodeHi);//addOctreeSceneNode
+            
             pNode->setPosition(vector3df(pos.x*CELLSIZE,pos.y*CELLSIZE,0));
             pNode->setRotation(vector3df(pos.x*49,pos.y*49,pos.x*49));
-            pNode->setScale(vector3df(0.5,0.5,0.5));
+            //pNode->setScale(vector3df(0.5,0.5,0.5));
 
-            pNode->setMaterialType(video::EMT_NORMAL_MAP_SOLID);
-            pNode->setMaterialFlag(video::EMF_LIGHTING, true);
-            pNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
-            pNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
-            pNode->setMaterialTexture(0,pStoneTex);
-            pNode->setMaterialTexture(1,pStoneBump);
-            
+            pNodeLow->setMaterialType((irr::video::E_MATERIAL_TYPE)bumpMaterial);//video::EMT_NORMAL_MAP_SOLID);
+            pNodeLow->setMaterialFlag(video::EMF_LIGHTING, false);
+            pNodeLow->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
+            pNodeLow->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
+            pNodeLow->setMaterialTexture(0,pStoneTex);
+            pNodeLow->setMaterialTexture(1,pStoneBump);
+            pNodeLow->setMaterialTexture(2,pStoneSpecular);
+            pNodeLow->setMaterialTexture(3,pBlackTex);
+    
+            pNodeHi->setMaterialType((irr::video::E_MATERIAL_TYPE)bumpMaterial);//video::EMT_NORMAL_MAP_SOLID);
+            pNodeHi->setMaterialFlag(video::EMF_LIGHTING, false);
+            pNodeHi->setMaterialFlag(video::EMF_BACK_FACE_CULLING, false);
+            pNodeHi->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
+            pNodeHi->setMaterialTexture(0,pStoneSpriteTex);
+            pNodeHi->setMaterialTexture(1,pStoneSpriteBump);
+            pNodeHi->setMaterialTexture(2,pStoneSpriteSpecular);
+            pNodeHi->setMaterialTexture(3,pBlackTex);
 
             StoneArr.push_back(pNode);
             break;
         case LAMBDA:
-            pNode=smgr -> addMeshSceneNode(pLambdaMesh);
-            pNode->setPosition(vector3df(pos.x*CELLSIZE,pos.y*CELLSIZE-CELLSIZE*0.5,0));
+            pNode=smgr -> addEmptySceneNode();
+            pNodeLow=smgr -> addMeshSceneNode(pLambdaMesh);
+            pNodeHi=smgr -> addBillboardSceneNode();
+            pNode->addChild(pNodeLow);
+            pNode->addChild(pNodeHi);
+            
+            pNode->setPosition(vector3df(pos.x*CELLSIZE,pos.y*CELLSIZE,0));
             pNode->setScale(vector3df(CELLSIZE,CELLSIZE,CELLSIZE));
 
-            pNode->setMaterialType(video::EMT_SOLID);
-            pNode->setMaterialFlag(video::EMF_LIGHTING, true);
-            pNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
-            pNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
+            pNodeLow->setMaterialType(video::EMT_SOLID);
+            pNodeLow->setMaterialFlag(video::EMF_LIGHTING, true);
+            pNodeLow->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
+            pNodeLow->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
+            
+            pNodeHi->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+            pNodeHi->setMaterialFlag(video::EMF_LIGHTING, true);
+            pNodeHi->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
+            pNodeHi->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
+            pNodeHi->setMaterialTexture(0,pLambdaSpriteTex);
+            pNodeHi->setMaterialTexture(1,pWhiteTex);
 
             anim = smgr->createRotationAnimator(core::vector3df(0,-0.4f,0));
                     pNode->addAnimator(anim);

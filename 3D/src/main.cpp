@@ -172,6 +172,8 @@ int main()
             infoText->setText(tmp);
         }
         
+        lifterScene.updateScene();
+        
         driver->beginScene(true, true, SColor(255,100,101,140));
 
         driver->setRenderTarget(Blur->rt0, true, true, video::SColor(0,0,0,0));
