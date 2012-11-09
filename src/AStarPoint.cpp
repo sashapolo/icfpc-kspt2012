@@ -17,7 +17,7 @@
  * @param string move - шаг.
  * @return новый путь.
  */
-AStarPoint::AStarPoint(const Field* field, const FieldMember* cell,
+AStarPoint::AStarPoint(Field* field, const FieldMember* cell,
 		int cost, int heuristicsValue, std::string path, std::string move):
 				pField(field), pCell(cell) {
 	G = cost;
@@ -47,7 +47,7 @@ bool AStarPoint::isGoalReached() const {
  * Получение поля.
  * @return поле.
  */
-const Field* AStarPoint::getField() const {
+Field* AStarPoint::getField() const {
 	return pField;
 }
 

@@ -57,6 +57,8 @@ std::string Solver::solve() {
 			lambdaRoute += t;
 			createSnapshot(lambdaRoute);
 			backtracksCount = 0;
+		} else if (goal == pField->getLift()) {
+			return lambdaRoute + "A";
 		}
 		goal = getNextGoal();
 		while (goal == NULL && !SignalHandler::sigIntReceived()) { // если лямбды из оптимального пути закончились
@@ -75,9 +77,6 @@ std::string Solver::solve() {
 			}
 			goal = getNextGoal();
 			backtracksCount++;
-		}
-		if (t.empty() && (goal == pField->getLift())) {
-			return lambdaRoute + "A";
 		}
 		if (SignalHandler::sigIntReceived()) {
 			if (score > bestScore) {
@@ -108,7 +107,7 @@ const FieldMember* Solver::getNextGoal() {
 	FieldMember *result;
 	do {
 		if (currentGoalIndex >= optimalPath.getSize()) {
-			return pField->lambdaCacheEmpty() ? pField->getLift() : NULL;
+			return pField->getLift()->getType() == OPENED_LIFT ? pField->getLift() : NULL;
 		}
 		result = pField->getXY(optimalPath.getCell(currentGoalIndex));
 		if (result->getType() != LAMBDA) {

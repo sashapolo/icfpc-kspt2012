@@ -12,21 +12,21 @@
 
 class AStarPoint {
 private:
-	const Field* pField;
+	Field* pField;
 	const FieldMember* pCell;
 	int G;	// стоимость
 	int H;  // эвристика
 	std::string path;	// путь до этой точки
 
 public:
-	AStarPoint(const Field*, const FieldMember*,
+	AStarPoint(Field*, const FieldMember*,
 			int cost = 0, int heuristicsValue = 0,
 			std::string path = "", std::string move = "");
 	AStarPoint(const AStarPoint& orig);
 
 	bool isGoalReached() const;
 
-	const Field* getField() const;
+	Field* getField() const;
 
 	std::string getPath() const;
 

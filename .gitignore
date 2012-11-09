@@ -35,6 +35,7 @@ doc/doxygen/html
 
 # Logger data
 LOG.html
+log.html
 
 # Emacs temporary files
 *~
