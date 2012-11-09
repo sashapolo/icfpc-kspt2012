@@ -8,99 +8,40 @@
 #include "Field.h"
 
 
-Field::~Field() {
-	for (unsigned int i = 0; i < field.size(); i++) {
-		for (unsigned int j = 0; j < field[i].size(); j++) {
-			delete field[i][j];
-		}
-	}
-}
-
-
-std::list<FieldMember*>::const_iterator Field::getLambdaCacheIt() const{
-   	return lambdaCache.begin();
-}
-std::list<FieldMember*>::iterator Field::getLambdaCacheIt() {
-	return lambdaCache.begin();
-}
-std::list<FieldMember*>::const_iterator Field::getLambdaCacheEnd() const{
-	return lambdaCache.end();
-}
-bool Field::lambdaCacheEmpty() const {
-	return lambdaCache.empty();
-}
-std::list<FieldMember*>::iterator Field::deleteLambdaFromCache(std::list<FieldMember*>::iterator it) {
-	return lambdaCache.erase(it);
-}
-
-
-std::list<FieldMember*>::const_iterator Field::getStoneCacheIt() const{
-	return stoneCache.begin();
-}
-std::list<FieldMember*>::iterator Field::getStoneCacheIt() {
-	return stoneCache.begin();
-}
-std::list<FieldMember*>::const_iterator Field::getStoneCacheEnd() const{
-	return stoneCache.end();
-}
-std::list<FieldMember*>::iterator Field::deleteStoneFromCache(std::list<FieldMember*>::iterator it) {
-	return stoneCache.erase(it);
-}
-
-
-FieldMember* const Field::getXY(const Point &point) const {
-    return field.at(point.y).at(point.x);
-}
-FieldMember* Field::getXY(const Point &point) {
-    return field.at(point.y).at(point.x);
-}
-
-
-std::pair<int, int> Field::getSize() const {
-    if (field.size() == 0) {
-    	return std::make_pair(0,0);
-    }
-    return std::make_pair(field[0].size(), field.size());
-}
-
-
-// TODO: наверное, этот метод надо оптимизировать, так как создание карты
-// получается путем наращивания векторов,
-// но это будет делаться всего один раз, так что, возможно, это не так уж и накладно
-
-Field::Field(const std::string &ASCIIMap): field(), lambdaCache(), stoneCache() {
-    /*
-     * Index used when filling vectors while reading the map.
-     * At this stage vectors are variable length.
-     * Further after determining the maximum length
-     * all other vectors will be padded with empty cells.
-     */
-    pRobot=0;
-    pLift=0;
+Field::Field(const std::string &ASCIIMap): lambdaCache(), stoneCache() {
     // Calculating map size
-    int maxX=0;
-    int maxY=0;
-    int currX=0;
-    int currY=0;
-    bool bEndLine=false;
-    bool bEndCycle=false;
-    int endLine=0;
-    int numSkippedElements=0;
-    int numInsertedElements=0;
-    int numUnknownCharacters=0;
-    int lastn=0;
-    for(unsigned int i = 0; i < ASCIIMap.length(); i++) {
-        switch(ASCIIMap[i])
-        {
+    int maxX = 0;
+    int maxY = 0;
+    int currX = 0;
+    int currY = 0;
+    bool bEndLine = false;
+    bool bEndCycle = false;
+    int endLine = 0;
+    int numSkippedElements = 0;
+    int numInsertedElements = 0;
+    int numUnknownCharacters = 0;
+    int lastn = 0;
+
+    for (unsigned int i = 0; i < ASCIIMap.length(); i++) {
+        switch (ASCIIMap[i]) {
             case '\n':
-                if(currX==0) {
-                    if(!bEndLine) {LOGINFO("Map parse: *Skipped after %d line",currY); bEndLine=true; endLine=currY; break;}
+                if(currX == 0) {
+                    if (!bEndLine) {
+                    	LOGINFO("Map parse: *Skipped after %d line", currY);
+                    	bEndLine = true;
+                    	endLine = currY;
+                    	break;
+                    }
+                } else if (bEndLine) {
+                	LOGERROR("Map parse: Empty string at %d line", endLine);
+                	bEndCycle = true;
+                	throw FieldParseException();
                 }
-                else if(bEndLine) {LOGERROR("Map parse: Empty string at %d line",endLine);bEndCycle=true; throw FieldParseException(); break;};
-                if(maxX<currX) maxX=currX;
-                currX=0;
+                if (maxX < currX)
+                	maxX = currX;
+                currX = 0;
                 currY++;
-                lastn=i;
+                lastn = i;
                 break;
             case '#':
             case 'R':
@@ -115,27 +56,27 @@ Field::Field(const std::string &ASCIIMap): field(), lambdaCache(), stoneCache() 
             case '\r':
                 break;
             default:
-                LOGWARNING("Map parse: Unknown character \'%c\' at %d,%d.",ASCIIMap[i],currX,currY);
+                LOGWARNING("Map parse: Unknown character \'%c\' at %d,%d.", ASCIIMap[i], currX, currY);
                 numUnknownCharacters++;
                 continue; 
         }
-        if(bEndCycle) break;
+        if (bEndCycle)
+        	break;
     }
-    if(lastn<(ASCIIMap.length()-1)) currY++;
-    if(maxX<currX) maxX=currX;
-    maxY=currY;
-    
-    LOGINFO("Map parse: Estimated map size: %d,%d",maxX,maxY);
+    if (lastn < (ASCIIMap.length() - 1))
+    	currY++;
+    if (maxX < currX)
+    	maxX = currX;
+    maxY = currY;
 
-    for(int i=0;i<maxY;i++) 
-    {
-        std::vector<FieldMember*> tmp;
-        tmp.resize(maxX,0);
-        field.push_back(tmp);
-    };
-    currX=0;
-    currY=0;
-    for(unsigned int i = 0; i < ASCIIMap.length(); i++) {
+    LOGINFO("Map parse: Estimated map size: %d,%d", maxX, maxY);
+    xSize = maxX;
+    ySize = maxY;
+    field = new char[xSize][ySize];
+    
+    currX = 0;
+    currY = 0;
+    for (unsigned int i = 0; i < ASCIIMap.length(); i++) {
         switch(ASCIIMap[i])
         {
             case '\n':
@@ -150,10 +91,9 @@ Field::Field(const std::string &ASCIIMap): field(), lambdaCache(), stoneCache() 
             case '.':
             case 'O':
             case ' ':
-                if((currX<maxX) && (currY<maxY)) {
-                    write(Point(currX,currY),charToCellType(ASCIIMap[i]));
-                }
-                else if(ASCIIMap[i]!=' ') {
+                if ((currX < maxX) && (currY < maxY)) {
+                	field[currX][currY] = charToCellType(ASCIIMap[i]);
+                } else if (ASCIIMap[i] != ' ') {
                     numSkippedElements++;
                 }
                 currX++;
@@ -163,31 +103,89 @@ Field::Field(const std::string &ASCIIMap): field(), lambdaCache(), stoneCache() 
         }
     }
     
-    for(unsigned int i=0;i<field.size();i++)
-    {
-        for(unsigned int j=0;j<field[i].size();j++)
-        {
-            if(field[i][j]==0) {
-                write(Point(j,i),EMPTY);
+    for (unsigned int i=0; i < xSize; i++) {
+        for (unsigned int j=0; j<ySize; j++) {
+            if(field[i][j] == 0) {
+            	field[i][j] == EMPTY;
                 numInsertedElements++;
             }
         }
     }
+
     LOGINFO("Map parse: \n\t\t- Skipped elements: %d\n\t\t- Inserted elements: %d\n\t\t- Wrong characters: %d",
-            numSkippedElements,numInsertedElements,numUnknownCharacters);
+            numSkippedElements, numInsertedElements, numUnknownCharacters);
+
     // Reading the map
-    
-    if((!pLift) || (!pRobot) || (lambdaCache.empty()))
-    {
-        LOGERROR("Map parse: not all required objects are exists");
+    if ((!lift) || (!robot)) {
+        LOGERROR("Map parse: not all required objects exist");
         throw FieldParseException();
-        return;
     }
     
-    if (pLift->getType() == OPENED_LIFT) {
+    if (field[lift.x][lift.y] == OPENED_LIFT && lambdaCache.empty()) {
         LOGERROR("Map parse: lift can't be opened");
     	throw FieldParseException();
     }
+}
+
+
+Field::~Field() {
+	delete field;
+
+	FieldCache::iterator it1 = lambdaCache.begin();
+	FieldCache::iterator end1 = lambdaCache.end();
+	for (; it1 != end1; it1++) {
+		delete *it1;
+	}
+
+	FieldCache::iterator it2 = stoneCache.begin();
+	FieldCache::iterator end2 = stoneCache.end();
+	for (; it2 != end2; it2++) {
+		delete *it2;
+	}
+}
+
+
+FieldCache::const_iterator Field::getLambdaCacheIt() const{
+   	return lambdaCache.begin();
+}
+FieldCache::iterator Field::getLambdaCacheIt() {
+	return lambdaCache.begin();
+}
+FieldCache::const_iterator Field::getLambdaCacheEnd() const{
+	return lambdaCache.end();
+}
+bool Field::lambdaCacheEmpty() const {
+	return lambdaCache.empty();
+}
+FieldCache::iterator Field::deleteLambdaFromCache(FieldCache::iterator it) {
+	return lambdaCache.erase(it);
+}
+
+
+FieldCache::const_iterator Field::getStoneCacheIt() const{
+	return stoneCache.begin();
+}
+FieldCache::iterator Field::getStoneCacheIt() {
+	return stoneCache.begin();
+}
+FieldCache::const_iterator Field::getStoneCacheEnd() const{
+	return stoneCache.end();
+}
+FieldCache::iterator Field::deleteStoneFromCache(FieldCache::iterator it) {
+	return stoneCache.erase(it);
+}
+
+
+Field::CellType Field::getXY(const Point &point) const {
+    return field[point.y][point.x];
+}
+
+
+std::pair<int, int>& Field::getSize() const {
+    if (ySize == 0) {
+    	return std::make_pair(0,0);
+    }
+    return std::make_pair(ySize, xSize);
 }
 
 
@@ -202,13 +200,13 @@ Field::Field(const Field& orig): field(orig.field.size(),
     	    // перерасчет кэшей
     		switch (field[i][j]->getType()) {
     		case (ROBOT):
-				this->pRobot = field[i][j];
+				this->robot = field[i][j];
 				break;
     		case (CLOSED_LIFT):
-				this->pLift = field[i][j];
+				this->lift = field[i][j];
 				break;
     		case (OPENED_LIFT):
-				this->pLift = field[i][j];
+				this->lift = field[i][j];
 				break;
 			case (LAMBDA):
 				this->lambdaCache.push_back(field[i][j]);
@@ -236,7 +234,7 @@ void Field::write(Point xy, CellType type)
         prevType=pOldMember->getType();
         if(prevType==type) return;
         
-        std::list<FieldMember*>::iterator it;
+        FieldCache::iterator it;
         if(prevType==LAMBDA){
             it=getLambdaCacheIt();
             while(it!=getLambdaCacheEnd())
@@ -253,8 +251,8 @@ void Field::write(Point xy, CellType type)
                 it++;
             }
         }
-        else if(prevType==ROBOT) pRobot=NULL;
-        else if((prevType==CLOSED_LIFT) || (prevType==CLOSED_LIFT)) pLift=NULL;
+        else if(prevType==ROBOT) robot=NULL;
+        else if((prevType==CLOSED_LIFT) || (prevType==CLOSED_LIFT)) lift=NULL;
     }
     
     switch(type)
@@ -262,19 +260,19 @@ void Field::write(Point xy, CellType type)
         case STONE: stoneCache.push_back(pNewMember); break;
         case LAMBDA: lambdaCache.push_back(pNewMember); break;
         case OPENED_LIFT: 
-            if(pLift) 
+            if(lift) 
                 throw FieldParseException();
-            pLift=pNewMember; 
+            lift=pNewMember; 
             break;
         case CLOSED_LIFT: 
-            if(pLift) 
+            if(lift) 
                 throw FieldParseException();
-            pLift=pNewMember; 
+            lift=pNewMember; 
             break;
         case ROBOT: 
-            if(pRobot) 
+            if(robot) 
                 throw FieldParseException();
-            pRobot=pNewMember; 
+            robot=pNewMember; 
             break;
         default: break;
     }
@@ -307,20 +305,20 @@ void Field::setFieldMember(const FieldMember& fieldMember) {
 
 
 FieldMember* const Field::getRobot() const {
-	return pRobot;
+	return robot;
 }
 FieldMember* Field::getRobot() {
-	return pRobot;
+	return robot;
 }
 
 
 FieldMember* const Field::getLift() const {
-	return pLift;
+	return lift;
 }
 
 
 bool Field::isRobotAlive() const {
-	return pRobot;
+	return robot;
 }
 
 
@@ -340,13 +338,13 @@ Field& Field::operator=(const Field& orig) {
 			field[i][j] = new FieldMember(*orig.field[i][j]);
 			switch (field[i][j]->getType()) {
 			case (ROBOT):
-				this->pRobot = field[i][j];
+				this->robot = field[i][j];
 				break;
 			case (CLOSED_LIFT):
-				this->pLift = field[i][j];
+				this->lift = field[i][j];
 				break;
 			case (OPENED_LIFT):
-				this->pLift = field[i][j];
+				this->lift = field[i][j];
 				break;
 			case (LAMBDA):
 				this->lambdaCache.push_back(field[i][j]);

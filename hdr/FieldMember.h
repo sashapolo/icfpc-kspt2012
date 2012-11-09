@@ -9,8 +9,6 @@
 
 #include "Point.h"
 
-enum CellType {CLOSED_LIFT, EARTH, EMPTY, LAMBDA, OPENED_LIFT, ROBOT, STONE, WALL};
-
 char cellTypeToChar(CellType type);
 CellType charToCellType(char c);
 

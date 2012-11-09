@@ -11,20 +11,32 @@
 
 #include "FieldMember.h"
 
+typedef std::list<Point*> FieldCache;
+
 
 /**
  * Represents field.
  */
 class Field {
 private:
-	std::vector< std::vector<FieldMember*> > field;
-    std::list<FieldMember*> lambdaCache;
-    std::list<FieldMember*> stoneCache;
-    FieldMember* pRobot;
-    FieldMember* pLift;
+	CellType field[][];
+	int xSize, ySize;
+	FieldCache lambdaCache, stoneCache;
+    Point robot, lift;
 
 public:
-    struct FieldParseException {}; // ислючение, говорящее о неправильности задания карты
+    enum CellType { CLOSED_LIFT,
+    			    OPENED_LIFT,
+    			    EARTH,
+    			    EMPTY,
+    			    LAMBDA,
+    			    ROBOT,
+    			    STONE,
+    			    WALL };
+
+    // ислючение, говорящее о неправильности задания карты
+    struct FieldParseException {};
+
     /**
      * Trivial constructor: makes field cell of given coordinate with given cell type.
      * Lines in the map being passed are of variable length.
@@ -46,29 +58,28 @@ public:
     /**
      * There are caches of Lambdas and Stones to provide some assistance to algorithm.
      */
-    std::list<FieldMember*>::const_iterator getLambdaCacheIt() const;
-    std::list<FieldMember*>::iterator getLambdaCacheIt();
-    std::list<FieldMember*>::const_iterator getLambdaCacheEnd() const;
+    FieldCache::const_iterator getLambdaCacheIt() const;
+    FieldCache::iterator getLambdaCacheIt();
+    FieldCache::const_iterator getLambdaCacheEnd() const;
     bool lambdaCacheEmpty() const;
-    std::list<FieldMember*>::iterator deleteLambdaFromCache(std::list<FieldMember*>::iterator it);
+    FieldCache::iterator deleteLambdaFromCache(FieldCache::iterator it);
 
-    std::list<FieldMember*>::const_iterator getStoneCacheIt() const;
-    std::list<FieldMember*>::iterator getStoneCacheIt();
-    std::list<FieldMember*>::const_iterator getStoneCacheEnd() const;
-    std::list<FieldMember*>::iterator deleteStoneFromCache(std::list<FieldMember*>::iterator it);
+    FieldCache::const_iterator getStoneCacheIt() const;
+    FieldCache::iterator getStoneCacheIt();
+    FieldCache::const_iterator getStoneCacheEnd() const;
+    FieldCache::iterator deleteStoneFromCache(FieldCache::iterator it);
 
 
-    void write(Point xy, CellType type);
+    void write(const Point& xy, CellType type);
 
     /**
      * Returns cell with given coordinates.
      *
      * param pPoint pointer to the point object representing coordinates of the cell to retrieve
      */
-    FieldMember* const getXY(const Point &point) const;
-    FieldMember* getXY(const Point &point);
+    CellType getXY(const Point &point) const;
 
-    std::pair<int, int> getSize() const;
+    std::pair<int, int>& getSize() const;
 
     /**
      * Swaps contents of the two cells.
@@ -78,25 +89,10 @@ public:
      */
     void swap(const Point &Cell1, const Point &Cell2);
 
-    /**
-     * Returns type of the cell with given coordinates.
-     *
-     * @param rPoint
-     * @return 
-     */
-    CellType getCellType(const Point &point) const;
+    const Point& getRobot() const;
+    Point& getRobot();
 
-    /**
-     * Writes given field member into position, specified by coordinates contained in field member.
-     *
-     * @param rFieldMember
-     */
-    void setFieldMember(const FieldMember& fieldMember);
-
-    FieldMember* const getRobot() const;
-    FieldMember* getRobot();
-
-    FieldMember* const getLift() const;
+    const Point& getLift() const;
 
     bool isRobotAlive() const;
     

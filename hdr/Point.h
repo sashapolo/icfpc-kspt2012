@@ -13,7 +13,6 @@
 
 class Point {
 public:
-
     /**
      * Координата x.
      */
@@ -24,91 +23,63 @@ public:
      */
     int y;
     
-    void Set(int X,int Y)
-    {
-        /**
-         * Присваивает точке заданные координаты.
-         * @param int X - координата x
-         * @param int Y - координата y
-         */
-        x=X;
-        y=Y;
-    }
-    
-    Point operator + (Point other) {
-        /**
-         * Изменяет координаты точки(сложение).
-         * @param other - точка
-         * @return новые координаты точки
-         */
-        return Point(x+other.x,y+other.y);
-    }
-    Point operator - (Point other) {
-        /**
-         * Изменяет координаты точки(вычитание).
-         * @param Point other - точка
-         * @return новые координаты точки
-         */
-        return Point(x-other.x,y-other.y);
-    }
-    void operator += (Point other) {
-        /**
-         * Изменяет координаты текущей точки(сложение).
-         * @param Point other - точка
-         */
-        x+=other.x;
-        y+=other.y;
-    }
-    void operator -= (Point other) {
-        /**
-         * Изменяет координаты текущей точки(вычитание).
-         * @param Point other - точка
-         */
-        x-=other.x;
-        y-=other.y;
-    }
-    
-//    Point& operator = (Point& other)
-//    {
-//        x=other.x;
-//        y=other.y;
-//        return (*this);
-//    }
-    bool operator == (Point other) const {
-        /**
-         * Сравнение на равенство.
-         * @param Point other - точка
-         * @return если координаты совпадают, то возвращает true. Если не совпадают - false.
-         */
-        if((x==other.x) && (y==other.y)) return true;
-        return false;
-    }
-    bool operator != (Point other) const {
-        /**
-         * Сравнение на неравенство.
-         * @param Point other - точка
-         * @return если координаты не совпадают, то возвращает true. Если совпадают - false.
-         */
-        return !((*this)==other);
-    }
+    /**
+	 * Объект точка
+	 * @param int x - координата x
+	 * @param int y - координата y
+	 */
+	Point(int x, int y);
 
-    Point(int x, int y) {
-        /**
-         * Объект точка
-         * @param int x - координата x
-         * @param int y - координата y
-         */
-        this->x = x;
-        this->y = y;
-    }
+    /**
+	 * Присваивает точке заданные координаты.
+	 * @param int x - координата x
+	 * @param int y - координата y
+	 */
+    void set(int x,int y);
+    
+    /**
+	 * Изменяет координаты точки(сложение).
+	 * @param other - точка
+	 * @return новые координаты точки
+	 */
+    Point& operator + (const Point& other);
 
-    int getDistance(const Point& to) const {
-		int tx = x - to.x;
-		int ty = y - to.y;
-			tx = (tx < 0)? -tx : tx;
-			ty = (ty < 0)? -ty : ty;
-		return tx + ty;
-    }
+    /**
+	 * Изменяет координаты точки(вычитание).
+	 * @param Point other - точка
+	 * @return новые координаты точки
+	 */
+    Point& operator - (const Point& other);
+
+    /**
+	 * Изменяет координаты текущей точки(сложение).
+	 * @param Point other - точка
+	 */
+    void operator += (const Point& other);
+
+    /**
+     * Изменяет координаты текущей точки(вычитание).
+     * @param Point other - точка
+     */
+    void operator -= (const Point& other);
+
+    Point& operator = (const Point& other);
+
+    /**
+	 * Сравнение на равенство.
+	 * @param Point other - точка
+	 * @return если координаты совпадают, то возвращает true. Если не совпадают - false.
+	 */
+    bool operator == (const Point& other) const;
+
+    /**
+	 * Сравнение на неравенство.
+	 * @param Point other - точка
+	 * @return если координаты не совпадают, то возвращает true. Если совпадают - false.
+	 */
+    bool operator != (const Point& other) const;
+    
+    int getDistance(const Point& to) const;
 };
 
 #endif	/* POINT_H */
