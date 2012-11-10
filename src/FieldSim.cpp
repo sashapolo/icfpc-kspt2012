@@ -94,7 +94,7 @@ FieldSim::FieldSim(const FieldSim& orig) {
 FieldSim::~FieldSim() {
 }
 
-Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
+Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed, std::vector<sSimChange>* pChanges) const
 {
     Field *NewField = new Field(*pField);
     if(!pField->isRobotAlive())
@@ -117,6 +117,7 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
                 {
                     NewField->write(Point(x,y),EMPTY);
                     NewField->write(Point(x,y+1),STONE);
+                    if(pChanges) (*pChanges).push_back(sSimChange(-1,-1,CH_MOVE,STONE,EMPTY,Point(x,y),Point(x,y+1)));
                 }
                 else if((pField->getCellType(Point(x,y+1))==STONE))
                 {
@@ -125,12 +126,14 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
                     {
                         NewField->write(Point(x,y),EMPTY);
                         NewField->write(Point(x+1,y+1),STONE);
+                        if(pChanges) (*pChanges).push_back(sSimChange(-1,-1,CH_MOVE,STONE,EMPTY,Point(x,y),Point(x+1,y+1)));
                     }
                     else if((pField->getCellType(Point(x-1,y))==EMPTY) &&
                         (pField->getCellType(Point(x-1,y+1))==EMPTY))
                     {
                         NewField->write(Point(x,y),EMPTY);
                         NewField->write(Point(x-1,y+1),STONE);
+                        if(pChanges) (*pChanges).push_back(sSimChange(-1,-1,CH_MOVE,STONE,EMPTY,Point(x,y),Point(x-1,y+1)));
                     }
                 }
                 else if((pField->getCellType(Point(x,y+1))==LAMBDA) &&
@@ -139,6 +142,7 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
                 {
                     NewField->write(Point(x,y),EMPTY);
                     NewField->write(Point(x+1,y+1),STONE);
+                    if(pChanges) (*pChanges).push_back(sSimChange(-1,-1,CH_MOVE,STONE,EMPTY,Point(x,y),Point(x+1,y+1)));
                 }
             }
         }
@@ -236,6 +240,7 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
     if((NewField->getCellType(DestroyCrd)==STONE) &&
             (pField->getCellType(DestroyCrd)!=STONE)) 
     {
+        if(pChanges) (*pChanges).push_back(sSimChange(-1,-1,CH_DESTROY,ROBOT,STONE,NewField->getRobot()->getCoordinate(),DestroyCrd));
         if(pRobotDestroyed) (*pRobotDestroyed)=true;
     }
     else
@@ -295,6 +300,8 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
                  {
                      if(result->getCellType(AbsNextPos+NextPos)==EMPTY) \
                      {
+                         pResult->Changes.push_back(sSimChange(-1,-1,CH_MOVE,ROBOT,STONE,result->getRobot()->getCoordinate(),AbsNextPos));
+                         pResult->Changes.push_back(sSimChange(-1,-1,CH_MOVE,STONE,EMPTY,AbsNextPos,AbsNextPos+NextPos));
                          result->swap(AbsNextPos+NextPos,AbsNextPos);
                          result->swap(AbsNextPos,result->getRobot()->getCoordinate());
                          pResult->path.addCell(AbsNextPos);
@@ -323,16 +330,20 @@ Field* FieldSim::calcNextState(Field* pField, bool* pRobotDestroyed) const
                  }
                  break;
              case EMPTY: 
+                 pResult->Changes.push_back(sSimChange(-1,-1,CH_MOVE,ROBOT,STONE,result->getRobot()->getCoordinate(),AbsNextPos));
                  result->swap(AbsNextPos,result->getRobot()->getCoordinate());
                  pResult->path.addCell(AbsNextPos);
                  break;
              case EARTH: 
-                 //FieldMember tmp=(*result->getRobot());
+                 pResult->Changes.push_back(sSimChange(-1,-1,CH_DESTROY,EARTH,EMPTY,AbsNextPos,AbsNextPos));
+                 pResult->Changes.push_back(sSimChange(-1,-1,CH_MOVE,ROBOT,STONE,result->getRobot()->getCoordinate(),AbsNextPos));
                  result->write(result->getRobot()->getCoordinate(),EMPTY);
                  result->write(AbsNextPos,ROBOT);
                  pResult->path.addCell(AbsNextPos);
                  break;
              case LAMBDA:
+                 pResult->Changes.push_back(sSimChange(-1,-1,CH_DESTROY,LAMBDA,EMPTY,AbsNextPos,AbsNextPos));
+                 pResult->Changes.push_back(sSimChange(-1,-1,CH_MOVE,ROBOT,STONE,result->getRobot()->getCoordinate(),AbsNextPos));
                  result->write(result->getRobot()->getCoordinate(),EMPTY);
                  result->write(AbsNextPos,ROBOT);
                  pResult->path.addCell(AbsNextPos);

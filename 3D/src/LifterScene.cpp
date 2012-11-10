@@ -1,6 +1,13 @@
 #include "stdinclude.h"
 #include "LifterScene.h"
 #define CELLSIZE 10.0f
+#define BILLBOARD_DISTANCE 200
+#define SCENE_UPDATE_TIME 300
+
+int msecDiff(timespec& t1,timespec& t2)
+{
+    return abs((t2.tv_sec-t1.tv_sec)*1000+(t2.tv_nsec-t1.tv_nsec)/1000);
+};
 
 LifterScene::LifterScene() {
     driver=0;
@@ -88,56 +95,6 @@ void LifterScene::init(IVideoDriver* driver_, ISceneManager* smgr_)
 
 }
 
-void LifterScene::release()
-{
-    mbWall.release();
-    mbEarth.release();
-    clear();
-}
-
-void LifterScene::clear()
-{
-    if(earth_ind) 
-    {
-        delete [] earth_ind;
-        earth_ind=0;
-    }
-    if(wall_ind) 
-    {
-        delete [] wall_ind;
-        wall_ind=0;
-    }
-    
-    if(pWallMeshBufferNode) 
-    {
-        pWallMeshBufferNode->remove();
-        pWallMeshBufferNode=0;
-    };
-    
-    if(pEarthMeshBufferNode) 
-    {
-        pEarthMeshBufferNode->remove();
-        pEarthMeshBufferNode=0;
-    }
-    
-    if(pRobotNode)
-    {
-        pRobotNode->remove();
-        pRobotNode=0;
-    }
-    
-    if(pLiftNode)
-    {
-        pLiftNode->remove();
-        pLiftNode=0;
-    }
-    
-    for(unsigned int i=0;i<StoneArr.size();i++) StoneArr[i]->remove();
-    StoneArr.clear();
-    for(unsigned int i=0;i<LambdaArr.size();i++) LambdaArr[i]->remove();
-    LambdaArr.clear();
-}
-
 bool LifterScene::loadMap(wchar_t* Path)
 {
     clear();
@@ -150,72 +107,20 @@ bool LifterScene::loadMap(wchar_t* Path)
     if(!pField) return false;
     earth_ind=new char[pField->getSize().first*pField->getSize().second];
     wall_ind=new char[pField->getSize().first*pField->getSize().second];
-    updateIndices();
     
     mbWall.create(pField->getSize().first,pField->getSize().second,CELLSIZE,
             float(pField->getSize().first)/18.f*2.f, float(pField->getSize().second)/18.f*2.f,
-            wall_ind,driver,smgr);
+            0,driver,smgr);
     mbEarth.create(pField->getSize().first,pField->getSize().second,CELLSIZE,
             float(pField->getSize().first)/18.f*2.f, float(pField->getSize().second)/18.f*2.f,
-            earth_ind,driver,smgr);
+            0,driver,smgr);
 
-    
+    setBaseSceneNodes();
     
     pWallMeshBufferNode=smgr -> addMeshSceneNode(mbWall.mesh);
-    pWallMeshBufferNode->setMaterialType((irr::video::E_MATERIAL_TYPE)parallaxMaterial);//video::EMT_NORMAL_MAP_SOLID);
-    pWallMeshBufferNode->setMaterialFlag(video::EMF_LIGHTING, false);
-    pWallMeshBufferNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
-    pWallMeshBufferNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
-    pWallMeshBufferNode->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, false);
-    pWallMeshBufferNode->setMaterialTexture(0,pWallTex);
-    pWallMeshBufferNode->setMaterialTexture(1,pWallBump);
-    pWallMeshBufferNode->setMaterialTexture(2,pWallSpecular);
-    pWallMeshBufferNode->setMaterialTexture(3,pWallGlow);
-
+    setParallaxMaterial(pWallMeshBufferNode,pWallTex,pWallBump,pWallSpecular,pWallGlow);
     pEarthMeshBufferNode=smgr -> addMeshSceneNode(mbEarth.mesh);
-    pEarthMeshBufferNode->setMaterialType((irr::video::E_MATERIAL_TYPE)parallaxMaterial);//video::EMT_NORMAL_MAP_SOLID);
-    pEarthMeshBufferNode->setMaterialFlag(video::EMF_LIGHTING, false);
-    pEarthMeshBufferNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
-    pEarthMeshBufferNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
-    pEarthMeshBufferNode->setMaterialTexture(0,pEarthTex);
-    pEarthMeshBufferNode->setMaterialTexture(1,pEarthBump);
-    pEarthMeshBufferNode->setMaterialTexture(2,pEarthSpecular);
-    pEarthMeshBufferNode->setMaterialTexture(3,pEarthGlow);
-
-    std::list<FieldMember*>::iterator it=pField->getStoneCacheIt();
-    int x,y;
-    while(it!=pField->getStoneCacheEnd())
-    {
-        x=(*it)->getCoordinate().x;
-        y=(*it)->getCoordinate().y;
-        
-        addActor(Point(x,(pField->getSize().second-1)-y),STONE);
-        it++;
-    }
-    
-    it=pField->getLambdaCacheIt();
-    while(it!=pField->getLambdaCacheEnd())
-    {
-        x=(*it)->getCoordinate().x;
-        y=(*it)->getCoordinate().y;
-        
-        addActor(Point(x,(pField->getSize().second-1)-y),LAMBDA);
-        it++;
-    }
-    
-    if(pField->isRobotAlive())
-    {
-        x=pField->getRobot()->getCoordinate().x;
-        y=pField->getRobot()->getCoordinate().y;
-        addActor(Point(x,(pField->getSize().second-1)-y),ROBOT);
-    }
-    
-    if(pField->getLift())
-    {
-        x=pField->getLift()->getCoordinate().x;
-        y=pField->getLift()->getCoordinate().y;
-        addActor(Point(x,(pField->getSize().second-1)-y),CLOSED_LIFT);
-    }
+    setParallaxMaterial(pEarthMeshBufferNode,pEarthTex,pEarthBump,pEarthSpecular,pEarthGlow);
     
     float sx=pField->getSize().first*CELLSIZE;
     float sy=pField->getSize().second*CELLSIZE;
@@ -226,34 +131,86 @@ bool LifterScene::loadMap(wchar_t* Path)
     return (bool)pField;
 }
 
-void LifterScene::updateIndices()
+void LifterScene::setBaseSceneNodes()
 {
-   for(int j=0;j<pField->getSize().second;j++)
-   {
-       for(int i=0;i<pField->getSize().first;i++)
-       {
-           if(pField->getCellType(Point(i,(pField->getSize().second-1)-j))==EARTH)
+    u32 nStone=0;
+    u32 nLambda=0;
+    CellType cell;
+    for(int j=0;j<pField->getSize().second;j++)
+    {
+        for(int i=0;i<pField->getSize().first;i++)
+        {
+            cell=pField->getCellType(Point(i,(pField->getSize().second-1)-j));
+            if(cell==EARTH)
                 earth_ind[j*pField->getSize().first+i]=1;
-           else 
+            else 
                 earth_ind[j*pField->getSize().first+i]=0;
-           
-           if(pField->getCellType(Point(i,(pField->getSize().second-1)-j))==WALL)
-               wall_ind[j*pField->getSize().first+i]=1;
-           else 
-               wall_ind[j*pField->getSize().first+i]=0;
-           
-       }
-   }
-   //mbWall.setIndices(wall_ind);
-   //mbEarth.setIndices(earth_ind);
+
+            if(cell==WALL)
+                wall_ind[j*pField->getSize().first+i]=1;
+            else 
+                wall_ind[j*pField->getSize().first+i]=0;
+            
+            switch(cell)
+            {
+                case STONE:
+                        if(nStone<StoneArr.size())
+                            StoneArr[nStone++]->setPosition(vector3df(i*CELLSIZE,j*CELLSIZE,0));
+                        else {addActor(Point(i,j),STONE); nStone++;};
+                    break;
+                case LAMBDA:
+                        if(nLambda<LambdaArr.size())
+                            LambdaArr[nLambda++]->setPosition(vector3df(i*CELLSIZE,j*CELLSIZE,0));
+                        else {addActor(Point(i,j),LAMBDA); nLambda++;};
+                    break;
+                case OPENED_LIFT:
+                case CLOSED_LIFT:
+                        if(pLiftNode)
+                            pLiftNode->setPosition(vector3df(i*CELLSIZE,j*CELLSIZE,0));
+                        else
+                            addActor(Point(i,j),CLOSED_LIFT);
+                    break;
+                case ROBOT:
+                        if(pRobotNode)
+                            pRobotNode->setPosition(vector3df(i*CELLSIZE,j*CELLSIZE,0));
+                        else
+                            addActor(Point(i,j),ROBOT);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+    for(int i=StoneArr.size()-1;(i>=nStone)  && (StoneArr.size()!=0);i--) {StoneArr[i]->remove(); StoneArr.pop_back();};
+    for(int i=LambdaArr.size()-1;(i>=nLambda) && (LambdaArr.size()!=0);i--) {LambdaArr[i]->remove(); LambdaArr.pop_back();};
+    mbWall.update(wall_ind);
+    mbEarth.update(earth_ind);
 }
 
-#define BILLBOARD_DISTANCE 200
+eEndState LifterScene::step(char chStep)
+{
+    if(!pField) return ES_NONE;
+    std::string str=" ";
+    str[0]=chStep;
+    result.Changes.clear();
+    Field* pNewField=sim.calcRobotSteps(pField,str,&result,false);
+    delete pField;
+    pField=pNewField;
+    setBaseSceneNodes();
+    return result.state;
+}
+
 void LifterScene::updateScene()
 {
+    timespec currentTime;
+    clock_gettime(CLOCK_MONOTONIC,&currentTime);
+    if(msecDiff(currentTime,prevUpdateTime)<SCENE_UPDATE_TIME) return;
+    prevUpdateTime=currentTime;
+    
+    
     scene::ICameraSceneNode* pCurrCamera=smgr -> getActiveCamera();
 
-    for(int i=0;i<StoneArr.size();i++)
+    for(u32 i=0;i<StoneArr.size();i++)
     {
         if(pCurrCamera->getPosition().getDistanceFrom(StoneArr[i]->getPosition())<BILLBOARD_DISTANCE)
         {
@@ -271,7 +228,7 @@ void LifterScene::updateScene()
         }
     }
     
-    for(int i=0;i<LambdaArr.size();i++)
+    for(u32 i=0;i<LambdaArr.size();i++)
     {
         if(pCurrCamera->getPosition().getDistanceFrom(LambdaArr[i]->getPosition())<BILLBOARD_DISTANCE)
         {
@@ -321,23 +278,8 @@ void LifterScene::addActor(Point pos, CellType type)
             pNode->setRotation(vector3df(pos.x*49,pos.y*49,pos.x*49));
             //pNode->setScale(vector3df(0.5,0.5,0.5));
 
-            pNodeLow->setMaterialType((irr::video::E_MATERIAL_TYPE)bumpMaterial);//video::EMT_NORMAL_MAP_SOLID);
-            pNodeLow->setMaterialFlag(video::EMF_LIGHTING, false);
-            pNodeLow->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
-            pNodeLow->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
-            pNodeLow->setMaterialTexture(0,pStoneTex);
-            pNodeLow->setMaterialTexture(1,pStoneBump);
-            pNodeLow->setMaterialTexture(2,pStoneSpecular);
-            pNodeLow->setMaterialTexture(3,pBlackTex);
-    
-            pNodeHi->setMaterialType((irr::video::E_MATERIAL_TYPE)bumpMaterial);//video::EMT_NORMAL_MAP_SOLID);
-            pNodeHi->setMaterialFlag(video::EMF_LIGHTING, false);
-            pNodeHi->setMaterialFlag(video::EMF_BACK_FACE_CULLING, false);
-            pNodeHi->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
-            pNodeHi->setMaterialTexture(0,pStoneSpriteTex);
-            pNodeHi->setMaterialTexture(1,pStoneSpriteBump);
-            pNodeHi->setMaterialTexture(2,pStoneSpriteSpecular);
-            pNodeHi->setMaterialTexture(3,pBlackTex);
+            setBumpMaterial(pNodeLow,pStoneTex,pStoneBump,pStoneSpecular,pBlackTex);
+            setBumpMaterial(pNodeHi,pStoneSpriteTex,pStoneSpriteBump,pStoneSpriteSpecular,pBlackTex);
 
             StoneArr.push_back(pNode);
             break;
@@ -351,17 +293,8 @@ void LifterScene::addActor(Point pos, CellType type)
             pNode->setPosition(vector3df(pos.x*CELLSIZE,pos.y*CELLSIZE,0));
             pNode->setScale(vector3df(CELLSIZE,CELLSIZE,CELLSIZE));
 
-            pNodeLow->setMaterialType(video::EMT_SOLID);
-            pNodeLow->setMaterialFlag(video::EMF_LIGHTING, true);
-            pNodeLow->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
-            pNodeLow->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
-            
-            pNodeHi->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
-            pNodeHi->setMaterialFlag(video::EMF_LIGHTING, true);
-            pNodeHi->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
-            pNodeHi->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
-            pNodeHi->setMaterialTexture(0,pLambdaSpriteTex);
-            pNodeHi->setMaterialTexture(1,pWhiteTex);
+            setDefaultMaterial(pNodeLow,video::EMT_SOLID);
+            setDefaultMaterial(pNodeHi,video::EMT_TRANSPARENT_ALPHA_CHANNEL,pLambdaSpriteTex,pWhiteTex);
 
             anim = smgr->createRotationAnimator(core::vector3df(0,-0.4f,0));
                     pNode->addAnimator(anim);
@@ -375,21 +308,12 @@ void LifterScene::addActor(Point pos, CellType type)
                 pNode=smgr -> addMeshSceneNode(pRobotMesh);
                 pNode->setScale(vector3df(0.05,0.05,0.05));
 
-                pNode->setMaterialType(video::EMT_NORMAL_MAP_SOLID);
-                pNode->setMaterialFlag(video::EMF_LIGHTING, true);
-                pNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
-                pNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);    
-                pNode->setMaterialTexture(0,pRobotTex);
-                pNode->setMaterialTexture(1,pRobotBump);
+                setDefaultMaterial(pNode,video::EMT_NORMAL_MAP_SOLID,pRobotTex,pRobotBump);
                 
                 anim = smgr->createRotationAnimator(core::vector3df(0,0.5f,0));
                 pNode->addAnimator(anim);
                 anim->drop();
                 
-                //anim = smgr->createFlyStraightAnimator(core::vector3df(0,2,0),core::vector3df(0,-2,0),1000,true,true);
-                //pNode->addAnimator(anim);
-                //anim->drop();
-
                 ps = smgr->addParticleSystemSceneNode(false, pNode);
 
                 // create and set emitter
@@ -439,11 +363,7 @@ void LifterScene::addActor(Point pos, CellType type)
             {
                 pNode=smgr -> addCubeSceneNode(CELLSIZE);
 
-                pNode->setMaterialType(video::EMT_SOLID);
-                pNode->setMaterialFlag(video::EMF_LIGHTING, true);
-                pNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
-                pNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);    
-                pNode->setMaterialTexture(0,pLiftTex);
+                setDefaultMaterial(pNode,video::EMT_SOLID,pLiftTex);
                 
                 pLiftNode=pNode;
             }
@@ -452,4 +372,90 @@ void LifterScene::addActor(Point pos, CellType type)
         default:
             break;
     }
+}
+
+void LifterScene::setParallaxMaterial(scene::ISceneNode* pNode, ITexture* diffuse, ITexture* normal, ITexture* specular, ITexture* glow)
+{
+    pNode->setMaterialType((irr::video::E_MATERIAL_TYPE)parallaxMaterial);//video::EMT_NORMAL_MAP_SOLID);
+    pNode->setMaterialFlag(video::EMF_LIGHTING, false);
+    pNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
+    pNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
+    pNode->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, false);
+    if(diffuse) pNode->setMaterialTexture(0,diffuse);
+    if(normal) pNode->setMaterialTexture(1,normal);
+    if(specular) pNode->setMaterialTexture(2,specular);
+    if(glow) pNode->setMaterialTexture(3,glow);
+}
+
+void LifterScene::setBumpMaterial(scene::ISceneNode* pNode, ITexture* diffuse, ITexture* normal, ITexture* specular, ITexture* glow)
+{
+    pNode->setMaterialType((irr::video::E_MATERIAL_TYPE)bumpMaterial);//video::EMT_NORMAL_MAP_SOLID);
+    pNode->setMaterialFlag(video::EMF_LIGHTING, false);
+    pNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
+    pNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
+    pNode->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, false);
+    if(diffuse) pNode->setMaterialTexture(0,diffuse);
+    if(normal) pNode->setMaterialTexture(1,normal);
+    if(specular) pNode->setMaterialTexture(2,specular);
+    if(glow) pNode->setMaterialTexture(3,glow);
+}
+
+void LifterScene::setDefaultMaterial(scene::ISceneNode* pNode, E_MATERIAL_TYPE Type, ITexture* diffuse, ITexture* normal)
+{
+    pNode->setMaterialType(Type);
+    pNode->setMaterialFlag(video::EMF_LIGHTING, true);
+    pNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
+    pNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
+    if(diffuse) pNode->setMaterialTexture(0,diffuse);
+    if(normal) pNode->setMaterialTexture(1,normal);
+}
+
+void LifterScene::release()
+{
+    mbWall.release();
+    mbEarth.release();
+    clear();
+}
+
+void LifterScene::clear()
+{
+    if(earth_ind) 
+    {
+        delete [] earth_ind;
+        earth_ind=0;
+    }
+    if(wall_ind) 
+    {
+        delete [] wall_ind;
+        wall_ind=0;
+    }
+    
+    if(pWallMeshBufferNode) 
+    {
+        pWallMeshBufferNode->remove();
+        pWallMeshBufferNode=0;
+    };
+    
+    if(pEarthMeshBufferNode) 
+    {
+        pEarthMeshBufferNode->remove();
+        pEarthMeshBufferNode=0;
+    }
+    
+    if(pRobotNode)
+    {
+        pRobotNode->remove();
+        pRobotNode=0;
+    }
+    
+    if(pLiftNode)
+    {
+        pLiftNode->remove();
+        pLiftNode=0;
+    }
+    
+    for(unsigned int i=0;i<StoneArr.size();i++) StoneArr[i]->remove();
+    StoneArr.clear();
+    for(unsigned int i=0;i<LambdaArr.size();i++) LambdaArr[i]->remove();
+    LambdaArr.clear();
 }

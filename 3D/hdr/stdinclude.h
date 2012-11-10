@@ -11,6 +11,7 @@
 #include <sys/time.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <time.h>
 
 using namespace std;
 
@@ -41,3 +42,4 @@ using namespace gui;
 #include "PostBloomCallback.h"
 
 #include "LifterScene.h"
+#include "LifterGUI.h"

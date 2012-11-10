@@ -101,6 +101,14 @@ public:
         this->x = x;
         this->y = y;
     }
+    
+    Point() {
+        /**
+         * Объект точка
+         */
+        this->x = 0;
+        this->y = 0;
+    }
 
     int getDistance(const Point& to) const {
 		int tx = x - to.x;

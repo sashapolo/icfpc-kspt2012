@@ -1,6 +1,7 @@
 
 #include "stdinclude.h"
 #include "MeshBuffer.h"
+#define CUBES_INDEX32 1820
 
 const int cube_indices[36] = {
 	 0, 3, 1,  1, 3, 2, // front
@@ -44,12 +45,13 @@ void MeshBuffer::create(int width_, int height_, float cellsize_,float texScaleX
     texscaleY=texScaleY;
     
     maxPrimitives = driver -> getMaximalPrimitiveCount();
-    const u32 bufcubes = maxPrimitives / (24);
+    u32 bufcubes = maxPrimitives / (24);
+    if(bufcubes>CUBES_INDEX32) bufcubes=CUBES_INDEX32;
     maxBuffers = (width*height) / bufcubes;
     if(maxBuffers==0) maxBuffers=1;
     maxCubes = ((width*height)>bufcubes)?bufcubes:(width*height);
     
-    update(array);
+    if(array) update(array);
 }
 
 void MeshBuffer::update(char* array)

@@ -18,7 +18,7 @@ CFLAGS = -Wall -g
 LD = g++
 LFLAGS = -Wall
 TEST_LIBS = -lcppunit
-3D_LIBS = -lGL -lXxf86vm -lXext -lX11 
+3D_LIBS = -lGL -lXxf86vm -lXext -lX11 -lrt 
 
 SRCS = $(foreach sdir, $(SRC_DIR), $(wildcard $(sdir)/*.cpp))
 OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
