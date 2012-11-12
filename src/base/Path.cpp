@@ -11,8 +11,8 @@ Path::Path(): path() {
 }
 
 Path::~Path() {
-	std::vector<Point*>::iterator it = path.begin();
-	std::vector<Point*>::iterator end = path.end();
+	std::vector<const Point*>::iterator it = path.begin();
+	std::vector<const Point*>::iterator end = path.end();
 	for (; it != end; it++) {
 		delete *it;
 	}
@@ -53,7 +53,7 @@ int Path::getDistance() const {
 
 
 void Path::swap(int i, int j) {
-	Point *t = path[i];
+	const Point *t = path[i];
 	path[i] = path[j];
 	path[j] = t;
 }

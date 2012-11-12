@@ -13,16 +13,10 @@
 
 class NearestNeighbour {
 private:
-	Path path;
-	const Field *pField;
-	std::list<Point*> goals;
-
-	const Point* findNearestNeighbour(const Point&);
-	void deleteFromGoals(const Point&);
+	static const Point* findNearestNeighbour(const Point&,
+											 std::list<const Point*>*);
 public:
-	NearestNeighbour(const Field *);
-	void createTour(const Point&);
-	const Path& getTour() const;
+	static Path* createTour(const Point&, const Field&);
 };
 
 #endif /* NEARESTNEIGHBOUR_H_ */

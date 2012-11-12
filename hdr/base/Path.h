@@ -17,7 +17,7 @@
  * Если была команда Wait, то будет повторно записана координата предыдущего шага.
  */
 class Path {
-	std::vector<Point*> path;
+	std::vector<const Point*> path;
 public:
 	Path();
 	virtual ~Path();

@@ -58,9 +58,6 @@ private:
     Point *robot, *lift;
     bool robotKilled;
 
-    FieldCache::iterator deleteLambdaFromCache(FieldCache::iterator it);
-    FieldCache::iterator deleteStoneFromCache(FieldCache::iterator it);
-
     void init(const std::string &ASCIIMap);
 public:
     // значения метрик

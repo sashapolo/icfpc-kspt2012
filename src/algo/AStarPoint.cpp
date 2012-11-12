@@ -23,7 +23,14 @@ AStarPoint::AStarPoint(const Field* pField,
 	} else {
 		this->path = path + move;
 	}
+}
 
+
+AStarPoint::AStarPoint(const AStarPoint& orig): cell(orig.cell) {
+	pField = new Field(*orig.pField);
+	G = orig.G;
+	H = orig.H;
+	pathCost = orig.pathCost;
 }
 
 

@@ -23,9 +23,7 @@ AStar::~AStar() {
 	AStarClosedList::iterator it = closedList.begin();
 	AStarClosedList::iterator end = closedList.end();
 	for (; it != end; it++) {
-		if (*it != NULL) {
-			delete *it;
-		}
+		delete *it;
 	}
 }
 

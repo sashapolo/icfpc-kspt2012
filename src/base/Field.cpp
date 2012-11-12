@@ -114,11 +114,7 @@ void Field::init(const std::string& ASCIIMap) {
     int currX = 0;
     int currY = 0;
     bool bEndLine = false;
-    bool bEndCycle = false;
     int endLine = 0;
-    int numSkippedElements = 0;
-    int numInsertedElements = 0;
-    int numUnknownCharacters = 0;
     bool containsRobot = false;
     bool containsLift = false;
     unsigned int lastn = 0;
@@ -180,8 +176,6 @@ void Field::init(const std::string& ASCIIMap) {
 						   currY);
 				throw FieldParseException();
         }
-        if (bEndCycle)
-        	break;
     }
 	if ((!containsRobot) || (!containsLift)) {
 		LOGERROR("Map parse: not all required objects exist");
@@ -212,54 +206,32 @@ void Field::init(const std::string& ASCIIMap) {
 				break;
 			case '\\':
 				lambdaCache.push_back(new Point(currX, currY));
-				if ((currX < maxX) && (currY < maxY)) {
-					field[currY][currX] = charToCellType(ASCIIMap[i]);
-				} else if (ASCIIMap[i] != ' ') {
-					numSkippedElements++;
-				}
+				field[currY][currX] = charToCellType(ASCIIMap[i]);
 				currX++;
 				break;
 			case '*':
 				stoneCache.push_back(new Point(currX, currY));
-				if ((currX < maxX) && (currY < maxY)) {
-					field[currY][currX] = charToCellType(ASCIIMap[i]);
-				} else if (ASCIIMap[i] != ' ') {
-					numSkippedElements++;
-				}
+				field[currY][currX] = charToCellType(ASCIIMap[i]);
 				currX++;
 				break;
 			case 'R':
 				robot = new Point(currX, currY);
-				if ((currX < maxX) && (currY < maxY)) {
-					field[currY][currX] = charToCellType(ASCIIMap[i]);
-				} else if (ASCIIMap[i] != ' ') {
-					numSkippedElements++;
-				}
+				field[currY][currX] = charToCellType(ASCIIMap[i]);
 				currX++;
 				break;
 			case 'L':
-			case 'O':
 				lift = new Point(currX, currY);
-				if ((currX < maxX) && (currY < maxY)) {
-					field[currY][currX] = charToCellType(ASCIIMap[i]);
-				} else if (ASCIIMap[i] != ' ') {
-					numSkippedElements++;
-				}
+				field[currY][currX] = charToCellType(ASCIIMap[i]);
 				currX++;
 				break;
 			default:
-				if ((currX < maxX) && (currY < maxY)) {
-					field[currY][currX] = charToCellType(ASCIIMap[i]);
-				} else if (ASCIIMap[i] != ' ') {
-					numSkippedElements++;
-				}
+				field[currY][currX] = charToCellType(ASCIIMap[i]);
 				currX++;
 				break;
         }
     }
 
-    LOGINFO("Map parse: \n\t\t- Skipped elements: %d\n\t\t- Inserted elements: %d\n\t\t- Wrong characters: %d",
-            numSkippedElements, numInsertedElements, numUnknownCharacters);
+    LOGINFO("Map successfully parsed");
 }
 
 
@@ -336,11 +308,6 @@ bool Field::lambdaCacheEmpty() const {
 }
 
 
-FieldCache::iterator Field::deleteLambdaFromCache(FieldCache::iterator it) {
-	return lambdaCache.erase(it);
-}
-
-
 FieldCache::const_iterator Field::getStoneCacheIt() const {
 	return stoneCache.begin();
 }
@@ -348,11 +315,6 @@ FieldCache::const_iterator Field::getStoneCacheIt() const {
 
 FieldCache::const_iterator Field::getStoneCacheEnd() const {
 	return stoneCache.end();
-}
-
-
-FieldCache::iterator Field::deleteStoneFromCache(FieldCache::iterator it) {
-	return stoneCache.erase(it);
 }
 
 

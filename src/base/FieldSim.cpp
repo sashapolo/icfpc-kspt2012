@@ -56,10 +56,10 @@ void FieldSim::drawStepByStep(const Field* pField, const std::string& path) {
 			numOfSteps++;
 		}
 		delete oldField;
+		std::cout << "Score: " << score << " NumSteps: " << numOfSteps
+				  << " NumLambdas: " << lambdasCollected << " LC: "
+				  << pField->getLambdaCount() << " State " << state << "\n";
 	}
-	std::cout << "Score: " << score << " NumSteps: " << numOfSteps
-			  << " NumLambdas: " << lambdasCollected << " LC: "
-			  << pField->getLambdaCount() << " State " << state << "\n";
 }
 
 

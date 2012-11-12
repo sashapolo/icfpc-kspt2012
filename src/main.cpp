@@ -27,13 +27,9 @@ int main(int argc, char** argv) {
 
 	try {
 		Field field(std::cin);
-		//Field field("res/maps/map1");
-		Field *tmp;
-		//Solver s(&field);
-		ManhattanHeuristic mH(*field.getLift());
-		AStar star(&field, field.getRobot(), &mH);
-		//std::string result = s.solve();
-		std::string result = star.solve(&tmp);
+		//Field field("res/maps/map5");
+		Solver s(&field);
+		std::string result = s.solve();
 		std::cout<<result<<"\n";
 		FieldSim::drawStepByStep(&field, result);
 	} catch (const FieldParseException& e) {
