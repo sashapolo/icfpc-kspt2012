@@ -29,9 +29,9 @@ void FieldSim::drawStepByStep(const Field* pField, const std::string& path) {
 
 	drawField(pField, 0);
 	if (path.length() > 0) {
-		Field *oldField = new Field(*pField);
+		const Field *oldField = new Field(*pField);
 		for (unsigned int i = 0; i < path.length(); i++) {
-			Field *newField = calcNextState(oldField, path[i]);
+			const Field *newField = calcNextState(oldField, path[i]);
 			drawField(newField, i);
 			delete oldField;
 			oldField = newField;
@@ -63,7 +63,7 @@ void FieldSim::drawStepByStep(const Field* pField, const std::string& path) {
 }
 
 
-Field* FieldSim::calcNextState(const Field* pField, char step) {
+const Field* FieldSim::calcNextState(const Field* pField, char step) {
 	return calcNextFieldState(calcRobotStep(pField, step));
 }
 

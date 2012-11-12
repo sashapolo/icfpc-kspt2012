@@ -23,7 +23,7 @@ public:
 	 * @param string path - путь робота.
 	 */
 	static void drawStepByStep(const Field* pField, const std::string& path = "");
-	static Field* calcNextState(const Field* pField, char step);
+	static const Field* calcNextState(const Field* pField, char step);
 };
 
 #endif	/* FIELDSIM_H */

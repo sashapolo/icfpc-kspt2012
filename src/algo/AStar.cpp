@@ -66,7 +66,7 @@ void AStar::checkPoint(const Point& point,
 					   const AStarPoint& current,
 					   char move) {
 	if (current.getField()->isPassable(point)) {
-		Field* newField = FieldSim::calcNextState(current.getField(), move);
+		const Field* newField = FieldSim::calcNextState(current.getField(), move);
 		int newCost = current.getGeneralCost() + Field::METRIC_NORMAL;
 		AStarPoint *result = new AStarPoint(newField,
 											point,
