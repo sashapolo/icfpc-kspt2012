@@ -5,54 +5,61 @@
  *      Author: alexander
  */
 
-#include "Path.h"
+#include "base/Path.h"
 
 Path::Path(): path() {
-
 }
 
-Point Path::getCell(int index) const {
+Path::~Path() {
+	std::vector<Point*>::iterator it = path.begin();
+	std::vector<Point*>::iterator end = path.end();
+	for (; it != end; it++) {
+		delete *it;
+	}
+}
+
+
+const Point* Path::getCell(int index) const {
     return path[index];
 }
 
+
 void Path::addCell(const Point& c) {
-    /**
-     * Добавляет шаг к пути
-     * @param Point& c - точка, которая добавляется к пути
-     */
     /*
      * ToDo проверка того,
      * что добавляемая точка находится рядом с последней добавленной.
      */
-    path.push_back(c);
+    path.push_back(new Point(c));
 }
 
+
 int Path::getSize() const {
-    /**
-     * Возвращает длину пути
-     * @return длина пути
-     */
     return path.size();
 }
+
 
 bool Path::isEmpty() const {
 	return path.empty();
 }
 
+
 int Path::getDistance() const {
 	int result = 0;
 	for (unsigned int i = 0; i < path.size() - 1; i++) {
-		result += path[i].getDistance(path[i+1]);
+		result += path[i]->getDistance(*path[i+1]);
 	}
 	return result;
 }
 
+
 void Path::swap(int i, int j) {
-	Point t = path[i];
+	Point *t = path[i];
 	path[i] = path[j];
 	path[j] = t;
 }
 
+
 void Path::deleteCell(int index) {
+	delete path[index];
 	path.erase(path.begin() + index);
 }

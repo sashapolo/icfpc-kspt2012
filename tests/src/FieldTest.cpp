@@ -5,8 +5,7 @@
 #include <cppunit/SourceLine.h>
 #include <cppunit/TestAssert.h>
 
-#include "Field.h"
-#include "FieldMember.h"
+#include "base/Field.h"
 
 #include "FieldTest.h"
 
@@ -32,8 +31,8 @@ void FieldTest::testConstructor() {
 	std::string simpleTestMap("##\n##\n");
     Field field(simpleTestMap);
     CellType cellType = WALL;
-    CPPUNIT_ASSERT(field.getXY(*new Point(0,0))->getType() == cellType);
-    CPPUNIT_ASSERT(field.getXY(*new Point(0,1))->getType() == cellType);
-    CPPUNIT_ASSERT(field.getXY(*new Point(1,0))->getType() == cellType);
-    CPPUNIT_ASSERT(field.getXY(*new Point(1,1))->getType() == cellType);
+    CPPUNIT_ASSERT(field.getXY(*new Point(0,0)) == cellType);
+    CPPUNIT_ASSERT(field.getXY(*new Point(0,1)) == cellType);
+    CPPUNIT_ASSERT(field.getXY(*new Point(1,0)) == cellType);
+    CPPUNIT_ASSERT(field.getXY(*new Point(1,1)) == cellType);
 }

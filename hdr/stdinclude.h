@@ -8,22 +8,20 @@
 #ifndef STDINCLUDE_H
 #define	STDINCLUDE_H
 
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <iostream>
 #include <set>
 #include <list>
 #include <vector>
+#include <string>
+#include <queue>
+#include <algorithm>
 
 #include "Logger.h"
 #include "HTMLLogger.h"
-
-#include "Point.h"
-#include "Path.h"
-#include "FieldMember.h"
-#include "Field.h"
-
-#include "FieldSim.h"
+#include "Comparators.h"
+#include "SignalHandler.h"
+#include "base/Path.h"
+#include "base/FieldSim.h"
 
 #endif	/* STDINCLUDE_H */
 

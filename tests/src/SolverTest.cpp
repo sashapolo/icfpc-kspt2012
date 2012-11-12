@@ -1,6 +1,6 @@
-#include "FieldSim.h"
+#include "base/FieldSim.h"
 #include "Logger.h"
-#include "Solver.h"
+#include "algo/Solver.h"
 
 #include "SolverTest.h"
 

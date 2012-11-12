@@ -10,19 +10,19 @@
 
 #include "stdinclude.h"
 
+
 class NearestNeighbour {
 private:
 	Path path;
 	const Field *pField;
-	std::list<Point> goals;
+	std::list<Point*> goals;
 
-	Point findNearestNeighbour(const Point&);
+	const Point* findNearestNeighbour(const Point&);
 	void deleteFromGoals(const Point&);
 public:
 	NearestNeighbour(const Field *);
 	void createTour(const Point&);
-	const Path* getTour() const;
-	virtual ~NearestNeighbour();
+	const Path& getTour() const;
 };
 
 #endif /* NEARESTNEIGHBOUR_H_ */

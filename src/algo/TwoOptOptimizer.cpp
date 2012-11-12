@@ -5,7 +5,7 @@
  *      Author: alexander
  */
 
-#include "TwoOptOptimizer.h"
+#include "algo/TwoOptOptimizer.h"
 
 // Оптимизирует путь при помощи эвристики 2-opt
 void TwoOptOptimizer::optimize(Path *pPath) {
