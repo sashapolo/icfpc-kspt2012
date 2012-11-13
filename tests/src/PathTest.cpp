@@ -82,11 +82,11 @@ void PathTest::fillPathWithNPoints(Path &path, int numOfPoints) {
     int cycleBoundary = (numOfPoints-1);
     for(int i = 0; i < cycleBoundary; i++) {
         if(right) {
-            p.x += 1;
+//            p.x += 1;
             path.addCell(p);
             right = false;
         } else {
-            p.y += 1;
+//            p.y += 1;
             path.addCell(p);
             right = true;
         }

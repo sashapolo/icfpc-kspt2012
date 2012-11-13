@@ -31,7 +31,7 @@ public:
 	 */
 	Point(int x, int y);
 	Point(const Point& orig);
-    
+
     /**
 	 * Изменяет координаты точки(сложение).
 	 * @param other - точка

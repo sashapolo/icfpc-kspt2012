@@ -28,7 +28,7 @@ void FieldTest::tearDown() {
  */
 void FieldTest::testConstructor() {
     // Simplest test ever
-	std::string simpleTestMap("##\n##\n");
+    std::string simpleTestMap("##\n##\n");
     Field field(simpleTestMap);
     CellType cellType = WALL;
     CPPUNIT_ASSERT(field.getXY(*new Point(0,0)) == cellType);

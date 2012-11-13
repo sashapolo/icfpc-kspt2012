@@ -10,7 +10,8 @@ class PathTest : public CPPUNIT_NS::TestFixture {
 
     CPPUNIT_TEST_SUITE(PathTest);
 
-    CPPUNIT_TEST(testPath);
+// Uncomment when test will be refactored
+//    CPPUNIT_TEST(testPath);
 
     CPPUNIT_TEST_SUITE_END();
 

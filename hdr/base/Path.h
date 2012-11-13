@@ -35,9 +35,9 @@ public:
     */
     const Point* getCell(int) const;
     /**
-	 * Добавляет шаг к пути
-	 * @param Point& c - точка, которая добавляется к пути
-	 */
+    * Добавляет шаг к пути
+    * @param Point& c - точка, которая добавляется к пути
+    */
     void addCell(const Point&);
     bool isEmpty() const;
     int getDistance() const;
