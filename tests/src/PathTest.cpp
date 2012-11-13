@@ -74,20 +74,20 @@ void PathTest::fillPathWithNPoints(Path &path, int numOfPoints) {
     }
 
     // Заполнение пути
-    // На первом шаге координаты точки не должны измениться
-    Point p(0,0);
-    path.addCell(p);
-    bool right = true;    // Флаг для цикла, указывающий, вправо или вверх.
-    // Мелкая оптимизация: вычитание на каждой итерации избыточно.
-    int cycleBoundary = (numOfPoints-1);
-    for(int i = 0; i < cycleBoundary; i++) {
+    bool right = false;    // Флаг для цикла, указывающий, вправо или вверх.
+    // Счетчики координат. Необходимы из-за неизменяемости объектов класса Point
+    int xCntr = 0;
+    int yCntr = 0;
+    for(int i = 0; i < numOfPoints; i++) {
         if(right) {
-//            p.x += 1;
-            path.addCell(p);
+            Point point(xCntr, yCntr);
+            path.addCell(point);
+            xCntr++;
             right = false;
         } else {
-//            p.y += 1;
-            path.addCell(p);
+            Point point(xCntr, yCntr);
+            path.addCell(point);
+            yCntr++;
             right = true;
         }
     }
