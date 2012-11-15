@@ -22,7 +22,7 @@ CFLAGS = -Wall -g
 LD = g++
 LFLAGS = -Wall
 TEST_LIBS = -lcppunit
-3D_LIBS = -lGL -lXxf86vm -lXext -lX11 
+3D_LIBS = -lGL -lXxf86vm -lXext -lX11 -lrt
 
 SRCS = $(foreach sdir, $(SRC_DIR), $(wildcard $(sdir)/*.cpp))
 SRCS += $(foreach sdir, $(SRC_DIR)/base, $(wildcard $(sdir)/*.cpp))
@@ -36,9 +36,9 @@ OBJS_WITHOUT_MAIN = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS_WITHOUT_
 
 3D_SRCS = $(foreach sdir, $(3D_SRC_DIR), $(wildcard $(sdir)/*.cpp))
 3D_OBJS = $(patsubst $(3D_SRC_DIR)/%.cpp, $(3D_OBJ_DIR)/%.o, $(3D_SRCS))
-3D_DEP_OBJS = $(OBJ_DIR)/Field.o $(OBJ_DIR)/FieldMember.o \
-	      $(OBJ_DIR)/FieldSim.o $(OBJ_DIR)/Logger.o \
-	      $(OBJ_DIR)/Path.o
+3D_DEP_OBJS = $(OBJ_DIR)/base/Field.o $(OBJ_DIR)/base/Point.o\
+	      $(OBJ_DIR)/base/FieldSim.o $(OBJ_DIR)/Logger.o \
+	      $(OBJ_DIR)/base/Path.o
 
 DOXYGENCFG = doc/doxygen/doxygen-config
 

@@ -23,14 +23,14 @@ struct IllegalWriteException {
 };
 
 // возможные значения ячеек поля
-enum CellType { EMPTY,
-				CLOSED_LIFT,
-				OPENED_LIFT,
-				EARTH,
-				LAMBDA,
-				ROBOT,
-				STONE,
-				WALL };
+enum CellType { EMPTY = ' ',
+				CLOSED_LIFT = 'L',
+				OPENED_LIFT = 'O',
+				EARTH = '.',
+				LAMBDA = '\\',
+				ROBOT = 'R',
+				STONE = '*',
+				WALL = '#' };
 
 /**
  * Преобразование типа ячейки в символ.

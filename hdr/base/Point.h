@@ -18,17 +18,18 @@ public:
     /**
      * Координата x.
      */
-    const int x;
+    int x;
     /**
      * Координата y.
      */
-    const int y;
+    int y;
     
     /**
 	 * Объект точка
 	 * @param int x - координата x
 	 * @param int y - координата y
 	 */
+        Point(void);
 	Point(int x, int y);
 	Point(const Point& orig);
 

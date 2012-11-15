@@ -87,9 +87,7 @@ Field::Field(const std::string& mapFileName): lambdaCache(), stoneCache() {
 	file_buf = new char[file_size + 1];
 	file.seekg(0, std::ios::beg);
 	file.read(file_buf, file_size);
-	if (file_buf[file_size -1] != '\n') {
-		file_buf[file_size] = '\n';
-	}
+        file_buf[file_size]='\0';
 	file.close();
 
 	try {
@@ -362,7 +360,7 @@ void Field::write(int x, int y, CellType newCell) {
 			while (it != end) {
 				if ((*it)->y == y && (*it)->x == x) {
 					delete *it;
-					lambdaCache.erase(it);
+					stoneCache.erase(it);
 					break;
 				}
 				it++;

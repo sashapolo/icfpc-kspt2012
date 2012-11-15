@@ -5,6 +5,8 @@
  * Created on October 1, 2012, 9:05 PM
  */
 
+#include <vector>
+
 #include "base/FieldSim.h"
 
 /////////////////////////////////////////////
@@ -67,8 +69,35 @@ const Field* FieldSim::calcNextState(const Field* pField, char step) {
 	return calcNextFieldState(calcRobotStep(pField, step));
 }
 
+const Field* FieldSim::calcNextStateEx(const Field* pField, char step, sSimResult* pResult) {
+    
+    pResult->stepsTaken++;
+    int lambdaCount = pField->getLambdaCount();
+    Point liftPos=*(pField->getLift());
+    pResult->state=ES_NONE;
+    
+    Field* ret=calcNextFieldState(calcRobotStep(pField, step,&(pResult->Changes)),&(pResult->Changes));
+    if(ret->getLambdaCount()<lambdaCount) {
+        pResult->lambdaReceived++;
+        pResult->state=ES_EAT_LAMBDA;
+        pResult->score+=25;
+    }
+    
+    if(step=='A') {
+        pResult->state=ES_ABORTED;
+        pResult->score+=pResult->lambdaReceived*25;
+    }
+    if(*(ret->getRobot())==liftPos) {
+        pResult->state=ES_FINISHED;
+        pResult->score+=pResult->lambdaReceived*50;
+    }
+    if(!ret->isRobotAlive()) pResult->state=ES_DESTROYED;
+    
+    return ret;
+}
 
-Field* FieldSim::calcNextFieldState(Field* pField) {
+
+Field* FieldSim::calcNextFieldState(Field* pField,FieldChanges* pChanges) {
     if(!pField->isRobotAlive()) {
         return pField;
     }
@@ -82,21 +111,25 @@ Field* FieldSim::calcNextFieldState(Field* pField) {
             char cell = pField->getXY(x, y);
             if (cell == STONE) {
                 if (pField->getXY(x, y+1) == EMPTY) {
+                    if(pChanges) pChanges->push_back(sSimChange(CH_MOVE,STONE,Point(x,y),Point(x,y+1)));
                     newField->write(x, y, EMPTY);
                     newField->write(x, y+1, STONE);
                 } else if ((pField->getXY(x, y+1) == STONE)) {
                     if ((pField->getXY(x+1, y) == EMPTY) &&
                         (pField->getXY(x+1, y+1) == EMPTY)) {
+                        if(pChanges) pChanges->push_back(sSimChange(CH_MOVE,STONE,Point(x,y),Point(x+1,y+1)));
                         newField->write(x, y, EMPTY);
                         newField->write(x+1, y+1, STONE);
                     } else if ((pField->getXY(x-1, y) == EMPTY) &&
                     		   (pField->getXY(x-1,y+1) == EMPTY)) {
+                        if(pChanges) pChanges->push_back(sSimChange(CH_MOVE,STONE,Point(x,y),Point(x-1,y+1)));
                         newField->write(x, y, EMPTY);
                         newField->write(x-1, y+1, STONE);
                     }
                 } else if((pField->getXY(x, y+1) == LAMBDA) &&
                           (pField->getXY(x+1, y) == EMPTY) &&
                           (pField->getXY(x+1, y+1) == EMPTY)) {
+                    if(pChanges) pChanges->push_back(sSimChange(CH_MOVE,STONE,Point(x,y),Point(x+1,y+1)));
                     newField->write(x, y, EMPTY);
                     newField->write(x+1, y+1, STONE);
                 }
@@ -120,7 +153,7 @@ Field* FieldSim::calcNextFieldState(Field* pField) {
 }
 
 
-Field* FieldSim::calcRobotStep(const Field* pField, char step) {
+Field* FieldSim::calcRobotStep(const Field* pField, char step,FieldChanges* pChanges) {
 	Field *newField = new Field(*pField);
 	if (!pField->isRobotAlive()) {
 		LOGERROR("Can't calculate: robot must be alive");
@@ -158,6 +191,10 @@ Field* FieldSim::calcRobotStep(const Field* pField, char step) {
 		case STONE:
 			if ((step == 'L') || (step == 'R')) {
 				if (newField->getXY(absNextPos + *nextPos) == EMPTY) {
+                                        if(pChanges){
+                                            pChanges->push_back(sSimChange(CH_MOVE,ROBOT,*newField->getRobot(),absNextPos));
+                                            pChanges->push_back(sSimChange(CH_MOVE,EMPTY,absNextPos,absNextPos+*nextPos));
+                                        }
 					newField->swap(absNextPos + *nextPos, absNextPos);
 					newField->swap(absNextPos, *newField->getRobot());
 				} else {
@@ -180,11 +217,16 @@ Field* FieldSim::calcRobotStep(const Field* pField, char step) {
 			}
 			break;
 		case EMPTY:
+                        if(pChanges) pChanges->push_back(sSimChange(CH_MOVE,ROBOT,*newField->getRobot(),absNextPos));
 			newField->swap(absNextPos, *newField->getRobot());
 			break;
 		case EARTH:
+                        if(pChanges) pChanges->push_back(sSimChange(CH_DESTROY,EARTH,absNextPos,absNextPos));
 		case LAMBDA:
+                        if(pChanges && (newField->getXY(absNextPos)==LAMBDA)) pChanges->push_back(sSimChange(CH_DESTROY,LAMBDA,absNextPos,absNextPos));
+
 		case OPENED_LIFT:
+                        if(pChanges) pChanges->push_back(sSimChange(CH_MOVE,ROBOT,*newField->getRobot(),absNextPos));
 			newField->write(*newField->getRobot(), EMPTY);
 			newField->write(absNextPos, ROBOT);
 			break;
