@@ -11,6 +11,7 @@ class PathTest : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST_SUITE(PathTest);
 
     CPPUNIT_TEST(testPath);
+    CPPUNIT_TEST(testAddAndGet);
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -69,7 +70,20 @@ private:
      */
     void fillPathWithNPoints(Path &path, int numOfPoints);
 
-    // ToDo: addCell(), then getCell()
+    /**
+     * Простой тест, который проверяет то,
+     * что точка добавляется в конец списка (индекс добавленной точки корректен)
+     * и
+     * ее координаты не искажаются при добавлении.
+     * 
+     * Проверка выполняется при добавлении изначальной точки к пустому пути
+     * и
+     * при добавлении второй точки:
+     * по индукции считаем, что по метод @code{addCell()} будет функционировать корректно
+     * и при всех последующих добавлениях.
+     */
+    void testAddAndGet();
+
 };
 
 #endif	/* PATHTEST_H */

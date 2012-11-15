@@ -93,3 +93,14 @@ void PathTest::fillPathWithNPoints(Path &path, int numOfPoints) {
     }
 
 }
+
+void PathTest::testAddAndGet() {
+    Path path;
+    Point p0(0,0);
+    Point p1(0,1);
+    path.addCell(p0);
+    // Предполагаем, что == для Point работает корректно
+    CPPUNIT_ASSERT(*path.getCell(0) == p0);
+    path.addCell(p1);
+    CPPUNIT_ASSERT(*path.getCell(1) == p1);
+}
