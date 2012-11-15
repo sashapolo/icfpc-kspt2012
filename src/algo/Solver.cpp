@@ -26,8 +26,9 @@ std::string Solver::solve() {
 	// инициализация переменных для А*
 	const Point *finish = pField->getLift();
 	const Point *goal = getNextGoal();
-	ManhattanHeuristic mH(*goal);
-	AStar astar(pField, pField->getRobot(), &mH);
+	ManhattanHeuristic mH(goal);
+	ManualGoal mG(goal);
+	AStar astar(pField, &mH, &mG);
 
 	// сохраняем стартовое состояние
 	//createSnapshot("");
@@ -78,8 +79,9 @@ std::string Solver::solve() {
 			//	return bestLambdaRoute + "A";
 			//}
 		}
-		mH.setGoal(*goal);
-		AStar astar(pField, pField->getRobot(), &mH);
+		mH.setGoal(goal);
+		mG.setGoal(goal);
+		AStar astar(pField, &mH, &mG);
 		t = astar.solve(&pField);
 	}
 	if (SignalHandler::sigIntReceived()) {
@@ -101,7 +103,7 @@ const Point* Solver::getNextGoal() {
 		const Point *result = optimalPath->getCell(currentGoalIndex);
 		if (pField->getXY(*result) != LAMBDA) {
 //			lambdasCollected++;
-			optimalPath->deleteCell(currentGoalIndex);
+//			optimalPath->deleteCell(currentGoalIndex);
 			currentGoalIndex++;
 		} else {
 			return result;

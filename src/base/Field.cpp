@@ -48,9 +48,7 @@ Field::Field(std::istream& file): lambdaCache(), stoneCache() {
 	file_buf = new char[file_size + 1];
 	file.seekg(0, std::ios::beg);
 	file.read(file_buf, file_size);
-	if (file_buf[file_size -1] != '\n') {
-		file_buf[file_size] = '\n';
-	}
+	file_buf[file_size] = '\0';
 
 	try {
 		init(file_buf);
@@ -87,7 +85,7 @@ Field::Field(const std::string& mapFileName): lambdaCache(), stoneCache() {
 	file_buf = new char[file_size + 1];
 	file.seekg(0, std::ios::beg);
 	file.read(file_buf, file_size);
-        file_buf[file_size]='\0';
+    file_buf[file_size]='\0';
 	file.close();
 
 	try {
@@ -463,9 +461,19 @@ bool Field::isPassable(int x, int y) const {
 		case EARTH:
 		case LAMBDA:
 		case EMPTY:
+			if (field[y - 1][x] == ROBOT && field[y - 2][x] == STONE) {
+				return false;
+			}
+			return true;
 		case OPENED_LIFT:
 		case ROBOT:
 			return true;
+		case STONE:
+			if ((field[y][x + 1] == ROBOT && field[y][x - 1] == EMPTY) ||
+				(field[y][x - 1] == ROBOT && field[y][x + 1] == EMPTY)) {
+				return true;
+			}
+			return false;
 		default:
 			return false;
 	}
@@ -478,6 +486,19 @@ bool Field::isPassable(const Point& point) const {
 
 
 bool Field::operator ==(const Field& f) const {
+	if (*robot != *f.robot || lambdaCache.size() != f.lambdaCache.size()) {
+		return false;
+	}
+
+//	FieldCache::const_iterator it = lambdaCache.begin();
+//	FieldCache::const_iterator it2 = f.lambdaCache.begin();
+//	FieldCache::const_iterator end = lambdaCache.end();
+//	for (; it != end; it++, it2++) {
+//		if (*it != *it2) {
+//			return false;
+//		}
+//	}
+
 	for (unsigned int y = 0; y < ySize; y++) {
 		for (unsigned int x = 0; x < xSize; x++) {
 			if (field[y][x] != f.field[y][x]) {

@@ -9,8 +9,9 @@
 #define SOLVER_H_
 
 #include "stdinclude.h"
-#include "algo/AStar.h"
-#include "algo/ManhattanHeuristic.h"
+#include "algo/AStar/AStar.h"
+#include "algo/AStar/ManualGoal.h"
+#include "algo/AStar/ManhattanHeuristic.h"
 #include "algo/SolverSnapshot.h"
 #include "algo/NearestNeighbour.h"
 #include "algo/TwoOptOptimizer.h"

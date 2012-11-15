@@ -8,11 +8,11 @@
 #ifndef HEURISTIC_H_
 #define HEURISTIC_H_
 
-#include "base/Point.h"
+#include "algo/AStar/AStarPoint.h"
 
 class Heuristic {
 public:
-	virtual int calculate(const Point&) const = 0;
+	virtual int calculate(const AStarPoint&) const = 0;
 	virtual ~Heuristic() {};
 };
 

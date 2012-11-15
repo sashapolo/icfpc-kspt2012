@@ -61,7 +61,7 @@ private:
     void init(const std::string &ASCIIMap);
 public:
     // значения метрик
-    const static int METRIC_NORMAL = 10;
+    const static int METRIC_NORMAL = 1;
     const static int METRIC_INFINITY = INT_MAX;
 
 

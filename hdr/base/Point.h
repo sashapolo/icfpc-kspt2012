@@ -29,7 +29,7 @@ public:
 	 * @param int x - координата x
 	 * @param int y - координата y
 	 */
-        Point(void);
+    Point(void);
 	Point(int x, int y);
 	Point(const Point& orig);
 

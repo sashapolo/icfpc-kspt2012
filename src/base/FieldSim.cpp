@@ -15,7 +15,7 @@ void FieldSim::drawField(const Field* pField, int nStep) {
     //print field
     for (int i = 0; i < pField->getSize().second; i++) {
         for (int j = 0; j < pField->getSize().first; j++) {
-            std::cout << cellTypeToChar((CellType)pField->getXY(j, i));
+            std::cout << pField->getXY(j, i);
         }
         std::cout << "\n\t";
     }
@@ -37,11 +37,10 @@ void FieldSim::drawStepByStep(const Field* pField, const std::string& path) {
 			drawField(newField, i);
 			delete oldField;
 			oldField = newField;
-			if (lambdaCount < newField->getLambdaCount()) {
+			if (lambdaCount > newField->getLambdaCount()) {
 				lambdasCollected++;
 				lambdaCount--;
 				score += 25;
-				state = "Collecting a lambda";
 			} else if (!newField->isRobotAlive()) {
 				score = 0;
 				state = "Dead";
@@ -52,10 +51,9 @@ void FieldSim::drawStepByStep(const Field* pField, const std::string& path) {
 			} else if (path[i] == 'A') {
 				score += 25 * lambdasCollected;
 				state = "Aborted";
-			} else {
-				state = "Moving";
 			}
 			numOfSteps++;
+			score--;
 		}
 		delete oldField;
 		std::cout << "Score: " << score << " NumSteps: " << numOfSteps
@@ -70,72 +68,80 @@ const Field* FieldSim::calcNextState(const Field* pField, char step) {
 }
 
 const Field* FieldSim::calcNextStateEx(const Field* pField, char step, sSimResult* pResult) {
-    
-    pResult->stepsTaken++;
-    int lambdaCount = pField->getLambdaCount();
-    Point liftPos=*(pField->getLift());
-    pResult->state=ES_NONE;
-    
-    Field* ret=calcNextFieldState(calcRobotStep(pField, step,&(pResult->Changes)),&(pResult->Changes));
-    if(ret->getLambdaCount()<lambdaCount) {
-        pResult->lambdaReceived++;
-        pResult->state=ES_EAT_LAMBDA;
-        pResult->score+=25;
-    }
-    
-    if(step=='A') {
-        pResult->state=ES_ABORTED;
-        pResult->score+=pResult->lambdaReceived*25;
-    }
-    if(*(ret->getRobot())==liftPos) {
-        pResult->state=ES_FINISHED;
-        pResult->score+=pResult->lambdaReceived*50;
-    }
-    if(!ret->isRobotAlive()) pResult->state=ES_DESTROYED;
-    
-    return ret;
+	pResult->stepsTaken++;
+	int lambdaCount = pField->getLambdaCount();
+	Point liftPos = *(pField->getLift());
+	pResult->state = ES_NONE;
+
+	Field* ret = calcNextFieldState(
+			calcRobotStep(pField, step, &(pResult->Changes)),
+			&(pResult->Changes));
+	if (ret->getLambdaCount() < lambdaCount) {
+		pResult->lambdaReceived++;
+		pResult->state = ES_EAT_LAMBDA;
+		pResult->score += 25;
+	}
+
+	if (step == 'A') {
+		pResult->state = ES_ABORTED;
+		pResult->score += pResult->lambdaReceived * 25;
+	}
+	if (*(ret->getRobot()) == liftPos) {
+		pResult->state = ES_FINISHED;
+		pResult->score += pResult->lambdaReceived * 50;
+	}
+	if (!ret->isRobotAlive())
+		pResult->state = ES_DESTROYED;
+
+	return ret;
 }
 
 
-Field* FieldSim::calcNextFieldState(Field* pField,FieldChanges* pChanges) {
+Field* FieldSim::calcNextFieldState(Field* pField, FieldChanges* pChanges) {
     if(!pField->isRobotAlive()) {
         return pField;
     }
     
     Field *newField = new Field(*pField);
 
-    for (int y = pField->getSize().second - 2; y >= 0; y--)
-    {
-        for (int x = 0; x < pField->getSize().first - 1; x++)
-        {
-            char cell = pField->getXY(x, y);
-            if (cell == STONE) {
-                if (pField->getXY(x, y+1) == EMPTY) {
-                    if(pChanges) pChanges->push_back(sSimChange(CH_MOVE,STONE,Point(x,y),Point(x,y+1)));
-                    newField->write(x, y, EMPTY);
-                    newField->write(x, y+1, STONE);
-                } else if ((pField->getXY(x, y+1) == STONE)) {
-                    if ((pField->getXY(x+1, y) == EMPTY) &&
-                        (pField->getXY(x+1, y+1) == EMPTY)) {
-                        if(pChanges) pChanges->push_back(sSimChange(CH_MOVE,STONE,Point(x,y),Point(x+1,y+1)));
-                        newField->write(x, y, EMPTY);
-                        newField->write(x+1, y+1, STONE);
-                    } else if ((pField->getXY(x-1, y) == EMPTY) &&
-                    		   (pField->getXY(x-1,y+1) == EMPTY)) {
-                        if(pChanges) pChanges->push_back(sSimChange(CH_MOVE,STONE,Point(x,y),Point(x-1,y+1)));
-                        newField->write(x, y, EMPTY);
-                        newField->write(x-1, y+1, STONE);
-                    }
-                } else if((pField->getXY(x, y+1) == LAMBDA) &&
-                          (pField->getXY(x+1, y) == EMPTY) &&
-                          (pField->getXY(x+1, y+1) == EMPTY)) {
-                    if(pChanges) pChanges->push_back(sSimChange(CH_MOVE,STONE,Point(x,y),Point(x+1,y+1)));
-                    newField->write(x, y, EMPTY);
-                    newField->write(x+1, y+1, STONE);
-                }
-            }
-        }
-    }
+	for (int y = pField->getSize().second - 2; y >= 0; y--) {
+		for (int x = 0; x < pField->getSize().first - 1; x++) {
+			char cell = pField->getXY(x, y);
+			if (cell == STONE) {
+				if (pField->getXY(x, y + 1) == EMPTY) {
+					if (pChanges)
+						pChanges->push_back(sSimChange(CH_MOVE, STONE, Point(x, y),
+											Point(x, y + 1)));
+					newField->write(x, y, EMPTY);
+					newField->write(x, y + 1, STONE);
+				} else if ((pField->getXY(x, y + 1) == STONE)) {
+					if ((pField->getXY(x + 1, y) == EMPTY)
+							&& (pField->getXY(x + 1, y + 1) == EMPTY)) {
+						if (pChanges)
+							pChanges->push_back(sSimChange(CH_MOVE, STONE, Point(x, y),
+												Point(x + 1, y + 1)));
+						newField->write(x, y, EMPTY);
+						newField->write(x + 1, y + 1, STONE);
+					} else if ((pField->getXY(x - 1, y) == EMPTY)
+							&& (pField->getXY(x - 1, y + 1) == EMPTY)) {
+						if (pChanges)
+							pChanges->push_back(sSimChange(CH_MOVE, STONE, Point(x, y),
+												Point(x - 1, y + 1)));
+						newField->write(x, y, EMPTY);
+						newField->write(x - 1, y + 1, STONE);
+					}
+				} else if ((pField->getXY(x, y + 1) == LAMBDA)
+						&& (pField->getXY(x + 1, y) == EMPTY)
+						&& (pField->getXY(x + 1, y + 1) == EMPTY)) {
+					if (pChanges)
+						pChanges->push_back(sSimChange(CH_MOVE, STONE, Point(x, y),
+											Point(x + 1, y + 1)));
+					newField->write(x, y, EMPTY);
+					newField->write(x + 1, y + 1, STONE);
+				}
+			}
+		}
+	}
     
     if (newField->lambdaCacheEmpty() && newField->isLiftClosed()) {
         newField->write(*newField->getLift(), OPENED_LIFT);
@@ -188,57 +194,66 @@ Field* FieldSim::calcRobotStep(const Field* pField, char step,FieldChanges* pCha
 
 	//step solve
 	switch (newField->getXY(absNextPos)) {
-		case STONE:
-			if ((step == 'L') || (step == 'R')) {
-				if (newField->getXY(absNextPos + *nextPos) == EMPTY) {
-                                        if(pChanges){
-                                            pChanges->push_back(sSimChange(CH_MOVE,ROBOT,*newField->getRobot(),absNextPos));
-                                            pChanges->push_back(sSimChange(CH_MOVE,EMPTY,absNextPos,absNextPos+*nextPos));
-                                        }
-					newField->swap(absNextPos + *nextPos, absNextPos);
-					newField->swap(absNextPos, *newField->getRobot());
-				} else {
-					LOGWARNING("Wrong robot step from(%d,%d) to (%d,%d)[*]",
-								newField->getRobot()->x,
-								newField->getRobot()->y,
-								absNextPos.x,
-								absNextPos.y);
-					delete nextPos;
-					return newField;
+	case STONE:
+		if ((step == 'L') || (step == 'R')) {
+			if (newField->getXY(absNextPos + *nextPos) == EMPTY) {
+				if (pChanges) {
+					pChanges->push_back(
+							sSimChange(CH_MOVE, ROBOT, *newField->getRobot(),
+									absNextPos));
+					pChanges->push_back(
+							sSimChange(CH_MOVE, EMPTY, absNextPos,
+									absNextPos + *nextPos));
 				}
+				newField->swap(absNextPos + *nextPos, absNextPos);
+				newField->swap(absNextPos, *newField->getRobot());
 			} else {
 				LOGWARNING("Wrong robot step from(%d,%d) to (%d,%d)[*]",
-							newField->getRobot()->x,
-							newField->getRobot()->y,
-							absNextPos.x,
-							absNextPos.y);
+						newField->getRobot()->x, newField->getRobot()->y,
+						absNextPos.x, absNextPos.y);
 				delete nextPos;
 				return newField;
 			}
-			break;
-		case EMPTY:
-                        if(pChanges) pChanges->push_back(sSimChange(CH_MOVE,ROBOT,*newField->getRobot(),absNextPos));
-			newField->swap(absNextPos, *newField->getRobot());
-			break;
-		case EARTH:
-                        if(pChanges) pChanges->push_back(sSimChange(CH_DESTROY,EARTH,absNextPos,absNextPos));
-		case LAMBDA:
-                        if(pChanges && (newField->getXY(absNextPos)==LAMBDA)) pChanges->push_back(sSimChange(CH_DESTROY,LAMBDA,absNextPos,absNextPos));
-
-		case OPENED_LIFT:
-                        if(pChanges) pChanges->push_back(sSimChange(CH_MOVE,ROBOT,*newField->getRobot(),absNextPos));
-			newField->write(*newField->getRobot(), EMPTY);
-			newField->write(absNextPos, ROBOT);
-			break;
-		default:
-			LOGWARNING("Wrong robot step from(%d,%d) to (%d,%d)[%c]",
-					   newField->getRobot()->x,
-					   newField->getRobot()->y,
-					   absNextPos.x,
-					   absNextPos.y,
-					   cellTypeToChar((CellType)newField->getXY(absNextPos)));
+		} else {
+			LOGWARNING("Wrong robot step from(%d,%d) to (%d,%d)[*]",
+					newField->getRobot()->x, newField->getRobot()->y,
+					absNextPos.x, absNextPos.y);
 			delete nextPos;
 			return newField;
+		}
+		break;
+	case EMPTY:
+		if (pChanges)
+			pChanges->push_back(sSimChange(CH_MOVE, ROBOT, *newField->getRobot(),
+								absNextPos));
+		newField->swap(absNextPos, *newField->getRobot());
+		break;
+	case EARTH:
+		if (pChanges)
+			pChanges->push_back(sSimChange(CH_DESTROY, EARTH, absNextPos, absNextPos));
+		newField->write(*newField->getRobot(), EMPTY);
+		newField->write(absNextPos, ROBOT);
+		break;
+	case LAMBDA:
+		if (pChanges)
+			pChanges->push_back(sSimChange(CH_DESTROY, LAMBDA, absNextPos, absNextPos));
+		newField->write(*newField->getRobot(), EMPTY);
+		newField->write(absNextPos, ROBOT);
+		break;
+	case OPENED_LIFT:
+		if (pChanges)
+			pChanges->push_back(sSimChange(CH_MOVE, ROBOT, *newField->getRobot(),
+								absNextPos));
+		newField->write(*newField->getRobot(), EMPTY);
+		newField->write(absNextPos, ROBOT);
+		break;
+	default:
+		LOGWARNING("Wrong robot step from(%d,%d) to (%d,%d)[%c]",
+				newField->getRobot()->x, newField->getRobot()->y, absNextPos.x,
+				absNextPos.y,
+				cellTypeToChar((CellType) newField->getXY(absNextPos)));
+		delete nextPos;
+		return newField;
 	}
 	delete nextPos;
 	return newField;

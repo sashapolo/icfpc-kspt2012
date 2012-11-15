@@ -8,23 +8,23 @@
 #ifndef MANHATTANHEURISTIC_H_
 #define MANHATTANHEURISTIC_H_
 
-#include "algo/Heuristic.h"
-#include "base/Field.h"
+#include "algo/AStar/Heuristic.h"
+#include "base/Point.h"
 
 class ManhattanHeuristic: public Heuristic {
 private:
 	const Point *goal;
 public:
-	ManhattanHeuristic(const Point& g);
+	ManhattanHeuristic(const Point* g);
 
 	/**
 	 * Подсчет Манхеттенской эвристики.
 	 * @param AStarPoint& a - точка.
 	 * @return значение.
 	 */
-	virtual int calculate(const Point&) const;
+	virtual int calculate(const AStarPoint&) const;
 
-	void setGoal(const Point& g);
+	void setGoal(const Point* g);
 };
 
 

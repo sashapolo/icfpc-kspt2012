@@ -5,13 +5,15 @@
  *      Author: alexander
  */
 
-#include "algo/AStar.h"
+#include "algo/AStar/AStar.h"
 
 
-AStar::AStar(const Field* pField, const Point* start, const Heuristic* h) {
-	this->start = new AStarPoint(new Field(*pField), *start, 0, h->calculate(*start));
+AStar::AStar(const Field* pField, const Heuristic* h, const AStarGoal* g) {
+	AStarPoint *start = new AStarPoint(new Field(*pField), *pField->getRobot(), 0, 0);
+	start->setHeuristics(h->calculate(*start));
+	openedList.push(start);
 	this->h = h;
-	openedList.push(this->start);
+	this->goal = g;
 }
 
 
@@ -34,9 +36,9 @@ bool AStar::isGoalReached(const AStarPoint& current) {
 
 
 std::string AStar::solve(Field** pResultField) {
-	AStarPoint *current = start;
+	AStarPoint *current = openedList.top();
 	while (!openedList.empty() && !SignalHandler::sigIntReceived()) {
-		if (isGoalReached(*current)) {
+		if (goal->isGoalReached(*current)) {
 			*pResultField = new Field(*current->getField());
 			return current->getPath();
 		}
@@ -67,14 +69,15 @@ void AStar::checkPoint(const Point& point,
 					   char move) {
 	if (current.getField()->isPassable(point)) {
 		const Field* newField = FieldSim::calcNextState(current.getField(), move);
+		if (!newField->isRobotAlive()) {
+			delete newField;
+			return;
+		}
 		int newCost = current.getGeneralCost() + Field::METRIC_NORMAL;
-		AStarPoint *result = new AStarPoint(newField,
-											point,
-											newCost,
-											h->calculate(point),
-											current.getPath(),
-											move);
+		AStarPoint *result = new AStarPoint(newField, point, newCost, 0,
+											current.getPath(), move);
 		if (!isInClosedList(*result)) {
+			result->setHeuristics(h->calculate(*result));
 			openedList.push(result);
 		} else {
 			delete result;

@@ -9,8 +9,9 @@
 #define ASTAR_H_
 
 #include "stdinclude.h"
-#include "algo/AStarPoint.h"
-#include "algo/Heuristic.h"
+#include "algo/AStar/AStarPoint.h"
+#include "algo/AStar/AStarGoal.h"
+#include "algo/AStar/Heuristic.h"
 
 
 typedef std::priority_queue<AStarPoint*,
@@ -26,8 +27,8 @@ typedef std::list<AStarPoint*> AStarClosedList;
 
 class AStar {
 private:
-	AStarPoint *start;
 	const Heuristic *h;
+	const AStarGoal *goal;
 	AStarOpenedList openedList;
 	AStarClosedList closedList;
 
@@ -52,9 +53,10 @@ private:
 	 */
 	void addNeighboursToOpenedList(const AStarPoint&);
 	bool isGoalReached(const AStarPoint&);
+
 public:
-	AStar(const Field*, const Point*, const Heuristic*);
-	virtual ~AStar();
+	AStar(const Field*, const Heuristic*, const AStarGoal*);
+	~AStar();
 	/**
 	 * Поиск пути.
 	 * @param Field** pResultField - состояние карты после прохождения пути.

@@ -5,16 +5,16 @@
  *      Author: alexander
  */
 
-#include "algo/ManhattanHeuristic.h"
+#include "algo/AStar/ManhattanHeuristic.h"
 
-ManhattanHeuristic::ManhattanHeuristic(const Point& g) {
-	goal = &g;
+ManhattanHeuristic::ManhattanHeuristic(const Point* g) {
+	goal = g;
 }
 
-void ManhattanHeuristic::setGoal(const Point& g) {
-	goal = &g;
+void ManhattanHeuristic::setGoal(const Point* g) {
+	goal = g;
 }
 
-int ManhattanHeuristic::calculate(const Point& start) const {
-	return start.getDistance(*goal) * Field::METRIC_NORMAL;
+int ManhattanHeuristic::calculate(const AStarPoint& start) const {
+	return start.getCell().getDistance(*goal) * Field::METRIC_NORMAL;
 }

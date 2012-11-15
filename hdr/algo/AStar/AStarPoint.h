@@ -61,16 +61,7 @@ public:
 	 */
 	int getHeuristics() const;
 
-	/**
-	 * Получение установка стоимости пути.
-	 * @param int G - стоимость.
-	 */
-	void setGeneralCost(int G);
-	/**
-	 * Получение установка эвристики.
-	 * @param int H - эвристика.
-	 */
-	void setHeuristics(int H);
+	void setHeuristics(int);
 
 	/**
 	 * Сравнение на равенство.

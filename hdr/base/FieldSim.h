@@ -85,7 +85,7 @@ public:
 	 */
 	static void drawStepByStep(const Field* pField, const std::string& path = "");
 	static const Field* calcNextState(const Field* pField, char step);
-        static const Field* calcNextStateEx(const Field* pField, char step, sSimResult* pResult);
+	static const Field* calcNextStateEx(const Field* pField, char step, sSimResult* pResult);
 };
 
 #endif	/* FIELDSIM_H */

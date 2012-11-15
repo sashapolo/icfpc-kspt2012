@@ -5,7 +5,7 @@
  *      Author: alexander
  */
 
-#include "algo/AStarPoint.h"
+#include "algo/AStar/AStarPoint.h"
 
 
 AStarPoint::AStarPoint(const Field* pField,
@@ -59,20 +59,8 @@ int AStarPoint::getGeneralCost() const {
 }
 
 
-void AStarPoint::setGeneralCost(int G) {
-	this->G = G;
-	pathCost = G + H;
-}
-
-
 int AStarPoint::getHeuristics() const {
 	return H;
-}
-
-
-void AStarPoint::setHeuristics(int H) {
-	this->H = H;
-	pathCost = G + H;
 }
 
 
@@ -90,6 +78,9 @@ bool AStarPoint::operator >(const AStarPoint& x) const {
 	return (pathCost > x.pathCost);
 }
 
+void AStarPoint::setHeuristics(int value) {
+	H = value;
+}
 
 bool AStarPoint::operator <(const AStarPoint& x) const {
 	return (pathCost < x.pathCost);
