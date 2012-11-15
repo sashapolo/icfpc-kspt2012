@@ -13,10 +13,17 @@ public:
     void clear();
     
     void addActor(Point pos, CellType type);
-    void moveActor(Point pos);
-    void removeActor(Point pos);
+    void moveActor(scene::ISceneNode* pNode, Point pos);
+    void removeActor(scene::ISceneNode* pNode, Point pos);
+    void setBaseSceneNodes();
+    eEndState step(char chStep);
     
-    void updateIndices();
+    void updateScene();
+    
+    void setParallaxMaterial(scene::ISceneNode* pNode, ITexture* diffuse=0, ITexture* normal=0, ITexture* specular=0, ITexture* glow=0);
+    void setBumpMaterial(scene::ISceneNode* pNode, ITexture* diffuse=0, ITexture* normal=0, ITexture* specular=0, ITexture* glow=0);
+    void setDefaultMaterial(scene::ISceneNode* pNode, E_MATERIAL_TYPE Type, ITexture* diffuse=0, ITexture* normal=0);
+    
 private:
     IVideoDriver* driver;
     ISceneManager* smgr;
@@ -33,11 +40,21 @@ private:
     
     ITexture* pStoneTex;
     ITexture* pStoneBump;
+    ITexture* pStoneSpecular;
     ITexture* pRobotTex;
     ITexture* pRobotBump;
     ITexture* pFireTex;
     ITexture* pLiftTex;
     ITexture* pSunTex;
+    
+    ITexture* pBlackTex;
+    ITexture* pWhiteTex;
+    ITexture* pGreyTex;
+    
+    ITexture* pStoneSpriteTex;
+    ITexture* pStoneSpriteBump;
+    ITexture* pStoneSpriteSpecular;
+    ITexture* pLambdaSpriteTex;
     
     IMesh* pStoneMesh;
     IMesh* pLambdaMesh;
@@ -50,8 +67,8 @@ private:
     char* earth_ind;
     char* wall_ind;
     
-    Field* pField;
-    FieldSim sim;
+    const Field* pField;
+    sSimResult result;
     
 
     MeshBuffer mbWall;
@@ -69,5 +86,7 @@ private:
     
     s32 bumpMaterial;
     s32 parallaxMaterial;
+    
+    struct timespec prevUpdateTime;
 };
 

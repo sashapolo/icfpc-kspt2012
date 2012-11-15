@@ -26,4 +26,5 @@ void main()
  
    
    gl_FragColor =Ambient + Diffuse + Specular;
+   gl_FragColor.w=Color.w;
 }
