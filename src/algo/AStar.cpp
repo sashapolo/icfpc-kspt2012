@@ -15,7 +15,7 @@ AStar::AStar(const Field* pField, const Heuristic* h, const AStarGoal* g,
 	openedList.push(start);
 	this->h = h;
 	this->goal = g;
-	this->stateCheckLimit = 10e3 / pField->getSize().first * pField->getSize().second;
+	this->stateCheckLimit = pField->getSize().first * pField->getSize().second * 5;
 }
 
 
@@ -58,9 +58,9 @@ std::string AStar::solve(Field** pResultField) {
 			addNeighboursToOpenedList(*current);
 			closedList.push_front(current);
 		}
-//		if (closedList.size() >= stateCheckLimit) {
-//			return "";
-//		}
+		if (closedList.size() >= stateCheckLimit) {
+			return "";
+		}
 		current = openedList.top();
 	}
 	return "";
