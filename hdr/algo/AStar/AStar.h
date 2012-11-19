@@ -13,7 +13,6 @@
 #include "algo/AStar/AStarGoal.h"
 #include "algo/AStar/Heuristic.h"
 
-
 typedef std::priority_queue<AStarPoint*,
 						    std::vector<AStarPoint*>,
 						    Comparators::PointerComparatorMore<AStarPoint*> >
@@ -32,6 +31,16 @@ private:
 	AStarOpenedList openedList;
 	AStarClosedList closedList;
 
+	// кэш "плохих" лямбд. Лямбда считается плохой, если в процессе решения
+	// выяснилось, что эта лямбда приводит к ловушке
+	const std::list<const Point*>& shittyLambdas;
+	bool isShitty(const Point&);
+
+	// подхак: ограничение, на количество перебираемых состояний
+	// помогает от зацикливаний при недостижимости цели.
+	// Вычисляется в зависимости от размера карты
+	unsigned int stateCheckLimit;
+
 	/**
 	 * Поиск возможности хода.
 	 * @param AStarPoint* pCurrent - текущая точка
@@ -44,9 +53,7 @@ private:
 	 * @param AStarPoint& current - текущая точка.
 	 * @param string move - ход робота.
 	 */
-	void checkPoint(const Point& point,
-					const AStarPoint& current,
-					char move);
+	void checkPoint(const Point& point, const AStarPoint& current, char move);
 	/**
 	 * Добавление соседей текущей точки.
 	 * @param AStarPoint& current - текущая точка.
@@ -55,14 +62,15 @@ private:
 	bool isGoalReached(const AStarPoint&);
 
 public:
-	AStar(const Field*, const Heuristic*, const AStarGoal*);
+	AStar(const Field*, const Heuristic*, const AStarGoal*,
+		  const std::list<const Point*>&);
 	~AStar();
 	/**
 	 * Поиск пути.
 	 * @param Field** pResultField - состояние карты после прохождения пути.
 	 * @return путь поиска лямбд.
 	 */
-	std::string solve(Field** pResultField);
+	std::string solve(Field** pResultField = NULL);
 };
 
 #endif /* ASTAR_H_ */

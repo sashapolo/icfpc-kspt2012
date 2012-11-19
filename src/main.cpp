@@ -1,6 +1,6 @@
 //============================================================================
 // Name        : main.cpp
-// Author      : Group ���2
+// Author      : Group 2
 // Version     :
 // Copyright   :
 // Description : Supaplex analog for icfp contest
@@ -27,13 +27,14 @@ int main(int argc, char** argv) {
 
 	try {
 		Field field(std::cin);
-		//Field field("res/maps/map1");
+		//Field field("res/maps/map10");
 		Solver s(&field);
 		std::string result = s.solve();
 		std::cout<<result<<"\n";
 		FieldSim::drawStepByStep(&field, result);
 	} catch (const FieldParseException& e) {
-		std::cout << "Map load error! (See LOG.html)\n";
+		//std::cout << "Map load error! (See LOG.html)\n";
+		std::cout << "A\n";
 		return 0;
 	}
 

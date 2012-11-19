@@ -80,6 +80,7 @@ bool AStarPoint::operator >(const AStarPoint& x) const {
 
 void AStarPoint::setHeuristics(int value) {
 	H = value;
+	pathCost = G + H;
 }
 
 bool AStarPoint::operator <(const AStarPoint& x) const {

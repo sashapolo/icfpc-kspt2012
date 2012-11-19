@@ -8,88 +8,83 @@
 #include "algo/Solver.h"
 
 
-Solver::Solver(Field *f): lambdaRoute() {
-	//, bestLambdaRoute(), snapshots()  {
-	pField = f;
-	currentGoalIndex = 0;
+Solver::Solver(Field *f): lambdaRoute(), bestLambdaRoute(), snapshots(),
+						  shittyLambdas() {
+	pField = new Field(*f);
+	nextGoalIndex = 0;
+	optimalPath = NULL;
 	createOptimalPath(pField);
-//	lambdasCollected = 0;
-//	score = 0;
-//	bestScore = 0;
-//	bestField = new Field(*pField);
+	lambdasCollected = 0;
+	score = 0;
+	bestScore = 0;
 }
 
-
 std::string Solver::solve() {
-	//int backtracksCount = 0;
-	//int lambdasCollectedOld = 0;
+	int backtracksCount = 0;
+	int lambdasCollectedOld = 0;
+
 	// инициализация переменных для А*
-	const Point *finish = pField->getLift();
+	const Point finish = *pField->getLift();
 	const Point *goal = getNextGoal();
 	ManhattanHeuristic mH(goal);
 	ManualGoal mG(goal);
-	AStar astar(pField, &mH, &mG);
+	AStar astar(pField, &mH, &mG, shittyLambdas);
 
 	// сохраняем стартовое состояние
-	//createSnapshot("");
+	createSnapshot();
 
 	std::string t = astar.solve(&pField);
-	while ((pField->getRobot() != finish) && !SignalHandler::sigIntReceived()) {
+	while ((*pField->getRobot() != finish) && !SignalHandler::sigIntReceived()) {
 		if (!t.empty()) {
-//			lambdasCollected++;
-//			score += 25 * (lambdasCollected - lambdasCollectedOld);
-//			score -= t.size();
-//			lambdasCollectedOld = lambdasCollected;
-//			if (lambdasCollected >= 20) {
-//				SolverSnapshot *s = snapshots.front();
-//				delete s;
-//				snapshots.pop_front();
-//			}
+			// если были откаты, то необходимо заново проложить маршрут
+			if (backtracksCount != 0) {
+				createOptimalPath(pField);
+				nextGoalIndex = 0;
+				clearShittyList();
+				backtracksCount = 0;
+			}
+			lambdasCollected++;
+			if (snapshots.size() >= SNAPSHOT_DEPTH) {
+				delete snapshots.front();
+				snapshots.pop_front();
+			}
+			score += 25 * (lambdasCollected - lambdasCollectedOld) - t.size();
+			lambdasCollectedOld = lambdasCollected;
 			lambdaRoute += t;
-//			createSnapshot(lambdaRoute);
-//			backtracksCount = 0;
-//		} else if (goal == pField->getLift()) {
-//			return lambdaRoute + "A";
-		} else {
-			return lambdaRoute + "A";
+			createSnapshot();
 		}
 		goal = getNextGoal();
-		while (goal == NULL && !SignalHandler::sigIntReceived()) { // если лямбды из оптимального пути закончились
-//			// но лямбды на карте еще есть => откат
-//			// если откаты не последовательные, то нужно удалить последний снэпшот
-//			if (backtracksCount == 0) {
-//				snapshots.pop_back();
-//			}
-//			if (snapshots.empty()) {  // откатываться некуда
-//				// попробуем собрать лямбды, которые раньше были недостижимы
-//				return revisitLambdas();
-//			}
-//			backtrack();
-//			if (backtracksCount != 0) {
-//				snapshots.pop_back();
-//			}
-//			goal = getNextGoal();
-//			backtracksCount++;
-			return lambdaRoute;
+		while (goal == NULL && !SignalHandler::sigIntReceived()) {
+			// если лямбды из оптимального пути закончились,
+			// но лямбды на карте еще есть => откат.
+			// если откаты не последовательные, то нужно очистить список помеченных лямбд
+			if (backtracksCount == 0) {
+				delete snapshots.back();
+				snapshots.pop_back();
+			}
+			if (snapshots.empty()) {  // откатываться некуда
+				return bestLambdaRoute + "A";
+			}
+			shittyLambdas.push_back(new Point(*pField->getRobot()));
+			backtrack();
+			lambdasCollectedOld = lambdasCollected;
+			goal = getNextGoal();
+			backtracksCount++;
 		}
 		if (SignalHandler::sigIntReceived()) {
-			//if (score > bestScore) {
-				return lambdaRoute + "A";
-			//} else {
-			//	return bestLambdaRoute + "A";
-			//}
+			break;
 		}
 		mH.setGoal(goal);
 		mG.setGoal(goal);
-		AStar astar(pField, &mH, &mG);
+		AStar astar(pField, &mH, &mG, shittyLambdas);
 		t = astar.solve(&pField);
 	}
 	if (SignalHandler::sigIntReceived()) {
-//		if (score > bestScore) {
+		if (score > bestScore) {
 			return lambdaRoute + "A";
-//		} else {
-//			return bestLambdaRoute + "A";
-//		}
+		} else {
+			return bestLambdaRoute + "A";
+		}
 	}
 	return lambdaRoute + t;
 }
@@ -99,13 +94,12 @@ std::string Solver::solve() {
  * @return следующая лямбда.
  */
 const Point* Solver::getNextGoal() {
-	while (currentGoalIndex < optimalPath->getSize()) {
-		const Point *result = optimalPath->getCell(currentGoalIndex);
+	while (nextGoalIndex < optimalPath->getSize()) {
+		const Point *result = optimalPath->getCell(nextGoalIndex);
+		nextGoalIndex++;
 		if (pField->getXY(*result) != LAMBDA) {
-//			lambdasCollected++;
-//			optimalPath->deleteCell(currentGoalIndex);
-			currentGoalIndex++;
-		} else {
+			lambdasCollected++;
+		} else if (!isShitty(result)) {
 			return result;
 		}
 	}
@@ -116,36 +110,38 @@ const Point* Solver::getNextGoal() {
  * Создание промежуточного состояния карты.
  * @param string& deltaPath - текущий путь.
  */
-//void Solver::createSnapshot(const std::string& deltaPath) {
-//	if (score > bestScore) {
-//		bestScore = score;
-//		bestLambdaRoute = lambdaRoute;
-//		delete bestField;
-//		bestField = new Field(*pField);
-//	}
-//	SolverSnapshot *result = new SolverSnapshot(new Field(*pField),
-//												currentGoalIndex - 1,
-//												deltaPath);
-//	snapshots.push_back(result);
-//}
+void Solver::createSnapshot() {
+	if (score > bestScore) {
+		bestScore = score;
+		bestLambdaRoute = lambdaRoute;
+	}
+	SolverSnapshot *result = new SolverSnapshot(pField, lambdasCollected, nextGoalIndex,
+												score, lambdaRoute);
+	snapshots.push_back(result);
+}
 
 /**
  * Загрузка промежуточного состояния карты.
  */
-//void Solver::loadSnapshot() {
-//	SolverSnapshot* s = snapshots.back();
-//	*pField = *s->snapshot;
-//	lambdaRoute = s->delta;
-//	lambdasCollected--;
-//	currentGoalIndex = s->currentGoalIndex;
-//	optimalPath.deleteCell(currentGoalIndex + 1);
-//}
+void Solver::loadSnapshot() {
+	SolverSnapshot* s = snapshots.back();
+	pField = new Field(*s->snapshot);
+	lambdaRoute = s->delta;
+	lambdasCollected = s->lambdasCollected;
+	nextGoalIndex = s->nextGoalIndex;
+	score = s->score;
+	delete s;
+	snapshots.pop_back();
+}
 
 /**
  * Создание оптимального пути.
  * @param Field *f - карта.
  */
 void Solver::createOptimalPath(Field *f) {
+	if (optimalPath != NULL) {
+		delete optimalPath;
+	}
 	optimalPath = NearestNeighbour::createTour(*f->getRobot(), *pField);
 	TwoOptOptimizer::optimize(optimalPath);
 }
@@ -154,58 +150,37 @@ void Solver::createOptimalPath(Field *f) {
  * Откат к предыдущему состоянию.
  * Если текущий результат собранных лямбд больше, чем лучший результат, то текущий результат становится лучшим.
  */
-//void Solver::backtrack() {
-//	if (score > bestScore) {
-//		bestScore = score;
-//		bestLambdaRoute = lambdaRoute;
-//		delete bestField;
-//		bestField = new Field(*pField);
-//	}
-//	loadSnapshot();
-//}
+void Solver::backtrack() {
+	if (score > bestScore) {
+		bestScore = score;
+		bestLambdaRoute = lambdaRoute;
+	}
+	loadSnapshot();
+}
 
-/**
- * todo.
- * @return todo.
- */
-//std::string Solver::revisitLambdas() {
-//	createOptimalPath(bestField);
-//	int goalIndex = 0;
-//
-//	Point finish = bestField->getLift()->getCoordinate();
-//	const FieldMember *goal = bestField->getXY(optimalPath.getCell(goalIndex++));
-//	ManhattanHeuristic mH(goal->getCoordinate());
-//	AStar astar(bestField, bestField->getRobot(), &mH);
-//
-//	std::string t = astar.solve(&bestField);
-//	while (bestField->getRobot()->getCoordinate() != finish) {
-//		if (!t.empty()) {
-//			bestLambdaRoute += t;
-//		} else if (goal->getType() == OPENED_LIFT) {
-//			return bestLambdaRoute += "A";
-//		}
-//		if (goalIndex == optimalPath.getSize()) {
-//			if (bestField->lambdaCacheEmpty()) {
-//				goal = bestField->getLift();
-//			} else {
-//				return bestLambdaRoute + "A";
-//			}
-//		} else {
-//			goal = bestField->getXY(optimalPath.getCell(goalIndex++));
-//		}
-//		mH.setGoal(goal->getCoordinate());
-//		AStar astar(bestField, bestField->getRobot(), &mH);
-//		t = astar.solve(&bestField);
-//	}
-//	return bestLambdaRoute + t;
-//}
+bool Solver::isShitty(const Point* point) {
+	std::list<const Point*>::const_iterator it = find_if(shittyLambdas.begin(),
+				shittyLambdas.end(),
+				bind2nd(Comparators::PointerComparatorEquals<const Point*>(), point));
+	return (it != shittyLambdas.end());
+}
 
+void Solver::clearShittyList() {
+	std::list<const Point*>::iterator it = shittyLambdas.begin();
+	while (it != shittyLambdas.end()) {
+		delete *it;
+		it = shittyLambdas.erase(it);
+	}
+}
 
 Solver::~Solver() {
 	delete optimalPath;
-//	std::list<SolverSnapshot*>::iterator it = snapshots.begin();
-//	for (; it != snapshots.end(); it++) {
-//		delete *it;
-//	}
-//	delete bestField;
+
+	std::list<SolverSnapshot*>::iterator it1 = snapshots.begin();
+	std::list<SolverSnapshot*>::iterator end1 = snapshots.end();
+	for (; it1 != end1; it1++) {
+		delete *it1;
+	}
+
+	clearShittyList();
 }

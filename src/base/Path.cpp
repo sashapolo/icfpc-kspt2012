@@ -12,9 +12,9 @@ Path::Path(): path() {
 
 Path::~Path() {
 	std::vector<const Point*>::iterator it = path.begin();
-	std::vector<const Point*>::iterator end = path.end();
-	for (; it != end; it++) {
+	while (it != path.end()) {
 		delete *it;
+		it = path.erase(it);
 	}
 }
 

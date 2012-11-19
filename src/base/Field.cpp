@@ -490,20 +490,12 @@ bool Field::operator ==(const Field& f) const {
 		return false;
 	}
 
-//	FieldCache::const_iterator it = lambdaCache.begin();
-//	FieldCache::const_iterator it2 = f.lambdaCache.begin();
-//	FieldCache::const_iterator end = lambdaCache.end();
-//	for (; it != end; it++, it2++) {
-//		if (*it != *it2) {
-//			return false;
-//		}
-//	}
-
 	for (unsigned int y = 0; y < ySize; y++) {
 		for (unsigned int x = 0; x < xSize; x++) {
-			if (field[y][x] != f.field[y][x]) {
-				return false;
-			}
+			if (field[y][x] != EARTH && f.field[y][x] != EARTH)
+				if (field[y][x] != f.field[y][x]) {
+					return false;
+				}
 		}
 	}
 	return true;

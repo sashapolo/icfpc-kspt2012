@@ -8,12 +8,14 @@
 #include "algo/AStar/AStar.h"
 
 
-AStar::AStar(const Field* pField, const Heuristic* h, const AStarGoal* g) {
-	AStarPoint *start = new AStarPoint(new Field(*pField), *pField->getRobot(), 0, 0);
-	start->setHeuristics(h->calculate(*start));
+AStar::AStar(const Field* pField, const Heuristic* h, const AStarGoal* g,
+			 const std::list<const Point*> &shittyLambdas):
+			 	 shittyLambdas(shittyLambdas) {
+	AStarPoint *start = new AStarPoint(new Field(*pField), *pField->getRobot(), 1, 0);
 	openedList.push(start);
 	this->h = h;
 	this->goal = g;
+	this->stateCheckLimit = 10e3 / pField->getSize().first * pField->getSize().second;
 }
 
 
@@ -34,12 +36,21 @@ bool AStar::isGoalReached(const AStarPoint& current) {
 	return current.getHeuristics() == 0;
 }
 
+bool AStar::isShitty(const Point& point) {
+	std::list<const Point*>::const_iterator it = find_if(shittyLambdas.begin(),
+				shittyLambdas.end(),
+				bind2nd(Comparators::PointerComparatorEquals<const Point*>(), &point));
+	return (it != shittyLambdas.end());
+}
 
 std::string AStar::solve(Field** pResultField) {
 	AStarPoint *current = openedList.top();
 	while (!openedList.empty() && !SignalHandler::sigIntReceived()) {
 		if (goal->isGoalReached(*current)) {
-			*pResultField = new Field(*current->getField());
+			if (pResultField != NULL) {
+				delete *pResultField;
+				*pResultField = new Field(*current->getField());
+			}
 			return current->getPath();
 		}
 		openedList.pop();
@@ -47,6 +58,9 @@ std::string AStar::solve(Field** pResultField) {
 			addNeighboursToOpenedList(*current);
 			closedList.push_front(current);
 		}
+//		if (closedList.size() >= stateCheckLimit) {
+//			return "";
+//		}
 		current = openedList.top();
 	}
 	return "";
@@ -68,19 +82,21 @@ void AStar::checkPoint(const Point& point,
 					   const AStarPoint& current,
 					   char move) {
 	if (current.getField()->isPassable(point)) {
-		const Field* newField = FieldSim::calcNextState(current.getField(), move);
-		if (!newField->isRobotAlive()) {
-			delete newField;
-			return;
-		}
-		int newCost = current.getGeneralCost() + Field::METRIC_NORMAL;
-		AStarPoint *result = new AStarPoint(newField, point, newCost, 0,
-											current.getPath(), move);
-		if (!isInClosedList(*result)) {
-			result->setHeuristics(h->calculate(*result));
-			openedList.push(result);
-		} else {
-			delete result;
+		if (!(current.getField()->getXY(point) == LAMBDA && isShitty(point))) {
+			const Field* newField = FieldSim::calcNextState(current.getField(), move);
+			if (!newField->isRobotAlive()) {
+				delete newField;
+				return;
+			}
+			int newCost = current.getGeneralCost() + Field::METRIC_NORMAL;
+			AStarPoint *result = new AStarPoint(newField, point, newCost, 0,
+												current.getPath(), move);
+			if (!isInClosedList(*result)) {
+				result->setHeuristics(h->calculate(*result));
+				openedList.push(result);
+			} else {
+				delete result;
+			}
 		}
 	}
 }

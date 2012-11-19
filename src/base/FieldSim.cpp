@@ -25,7 +25,7 @@ void FieldSim::drawField(const Field* pField, int nStep) {
 void FieldSim::drawStepByStep(const Field* pField, const std::string& path) {
 	int lambdasCollected = 0;
 	int score = 0;
-	std::string state = "Started";
+	std::string state = "In progress";
 	int lambdaCount = pField->getLambdaCount();
 	int numOfSteps = 0;
 
@@ -34,24 +34,25 @@ void FieldSim::drawStepByStep(const Field* pField, const std::string& path) {
 		const Field *oldField = new Field(*pField);
 		for (unsigned int i = 0; i < path.length(); i++) {
 			const Field *newField = calcNextState(oldField, path[i]);
-			drawField(newField, i);
-			delete oldField;
-			oldField = newField;
-			if (lambdaCount > newField->getLambdaCount()) {
-				lambdasCollected++;
-				lambdaCount--;
-				score += 25;
-			} else if (!newField->isRobotAlive()) {
+			if (!newField->isRobotAlive()) {
 				score = 0;
 				state = "Dead";
 				break;
+			} else if (lambdaCount > newField->getLambdaCount()) {
+				lambdasCollected++;
+				lambdaCount--;
+				score += 25;
 			} else if (*newField->getLift() == *newField->getRobot()) {
 				score += 50 * lambdasCollected;
 				state = "Finished";
 			} else if (path[i] == 'A') {
 				score += 25 * lambdasCollected;
 				state = "Aborted";
+				break;
 			}
+			drawField(newField, i + 1);
+			delete oldField;
+			oldField = newField;
 			numOfSteps++;
 			score--;
 		}

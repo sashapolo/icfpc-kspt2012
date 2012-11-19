@@ -18,23 +18,31 @@
 
 class Solver {
 private:
+	static const unsigned int SNAPSHOT_DEPTH = 20;
+
 	Field *pField;
-	//Field *bestField;
 	Path *optimalPath;
-	int currentGoalIndex;
+	int nextGoalIndex;
+
 	std::string lambdaRoute;
-	//std::string bestLambdaRoute;
-	//int lambdasCollected;
-	//int score;
-	//int bestScore;
-	//std::list<SolverSnapshot*> snapshots;
+	std::string bestLambdaRoute;
+
+	int lambdasCollected;
+	int score;
+	int bestScore;
+
+	std::list<SolverSnapshot*> snapshots;
+	std::list<const Point*> shittyLambdas;
+
+	bool isShitty(const Point*);
+	void clearShittyList();
 
 	void createOptimalPath(Field *);
 	const Point* getNextGoal();
-//	void createSnapshot(const std::string&);
-//	void loadSnapshot();
-//	std::string revisitLambdas();
-//	void backtrack();
+
+	void createSnapshot();
+	void loadSnapshot();
+	void backtrack();
 public:
 	/**
 	 * Конструктор класса Solver
