@@ -67,8 +67,7 @@ private:
     char* earth_ind;
     char* wall_ind;
     
-    Field* pField;
-    FieldSim sim;
+    const Field* pField;
     sSimResult result;
     
 

@@ -102,7 +102,8 @@ bool LifterScene::loadMap(wchar_t* Path)
     char* mbPath=new char[len];
     for(int i=0;i<len-1;i++) mbPath[i]=(char)Path[i];
     mbPath[len-1]='\0';
-    pField=createField( mbPath);
+    pField=new Field( mbPath);
+    result=sSimResult();
     
     if(!pField) return false;
     earth_ind=new char[pField->getSize().first*pField->getSize().second];
@@ -135,12 +136,12 @@ void LifterScene::setBaseSceneNodes()
 {
     u32 nStone=0;
     u32 nLambda=0;
-    CellType cell;
+    char cell;
     for(int j=0;j<pField->getSize().second;j++)
     {
         for(int i=0;i<pField->getSize().first;i++)
         {
-            cell=pField->getCellType(Point(i,(pField->getSize().second-1)-j));
+            cell=pField->getXY(Point(i,(pField->getSize().second-1)-j));
             if(cell==EARTH)
                 earth_ind[j*pField->getSize().first+i]=1;
             else 
@@ -181,8 +182,8 @@ void LifterScene::setBaseSceneNodes()
             }
         }
     }
-    for(int i=StoneArr.size()-1;(i>=nStone)  && (StoneArr.size()!=0);i--) {StoneArr[i]->remove(); StoneArr.pop_back();};
-    for(int i=LambdaArr.size()-1;(i>=nLambda) && (LambdaArr.size()!=0);i--) {LambdaArr[i]->remove(); LambdaArr.pop_back();};
+    for(u32 i=StoneArr.size()-1;(i>=nStone)  && (StoneArr.size()!=0);i--) {StoneArr[i]->remove(); StoneArr.pop_back();};
+    for(u32 i=LambdaArr.size()-1;(i>=nLambda) && (LambdaArr.size()!=0);i--) {LambdaArr[i]->remove(); LambdaArr.pop_back();};
     mbWall.update(wall_ind);
     mbEarth.update(earth_ind);
 }
@@ -190,10 +191,9 @@ void LifterScene::setBaseSceneNodes()
 eEndState LifterScene::step(char chStep)
 {
     if(!pField) return ES_NONE;
-    std::string str=" ";
-    str[0]=chStep;
+    if(result.state==ES_FINISHED) return ES_FINISHED;
     result.Changes.clear();
-    Field* pNewField=sim.calcRobotSteps(pField,str,&result,false);
+    const Field* pNewField=FieldSim::calcNextStateEx(pField,chStep,&result);
     delete pField;
     pField=pNewField;
     setBaseSceneNodes();

@@ -28,7 +28,7 @@ Field* createField(std::string mapFileName) {
 	Field *result;
 	try {
 		result = new Field(file_buf);
-	} catch (Field::FieldParseException&) {
+	} catch (FieldParseException&) {
 		LOGERROR("Can't load map from \"%s\": map is incorrect", mapFileName.c_str());
 		file.close();
 		delete [] file_buf;

@@ -26,14 +26,9 @@ using namespace gui;
 #include "Logger.h"
 #include "IrrLogger.h"
 
-#include "Point.h"
-#include "Path.h"
-#include "FieldMember.h"
-#include "Field.h"
+#include "base/Path.h"
+#include "base/FieldSim.h"
 
-#include "FieldSim.h"
-
-#include "Utilities.h"
 #include "MeshBuffer.h"
 
 #include "ShaderBumpCallback.h"
