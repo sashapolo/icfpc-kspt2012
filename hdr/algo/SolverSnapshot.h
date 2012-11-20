@@ -10,7 +10,7 @@
 
 class SolverSnapshot {
 public:
-	Field *snapshot;
+	const Field *snapshot;
 	int nextGoalIndex;
 	int lambdasCollected;
 	int score;
@@ -18,15 +18,11 @@ public:
 
 	SolverSnapshot(const Field *s, int lambdas, int goalIndex, int score,
 				   const std::string& deltaPath) {
-		snapshot = new Field(*s);
+		snapshot = s;
 		lambdasCollected = lambdas;
 		this->score = score;
 		nextGoalIndex = goalIndex;
 		delta = deltaPath;
-	}
-
-	~SolverSnapshot() {
-		delete snapshot;
 	}
 };
 

@@ -43,12 +43,11 @@ bool AStar::isShitty(const Point& point) {
 	return (it != shittyLambdas.end());
 }
 
-std::string AStar::solve(Field** pResultField) {
+std::string AStar::solve(const Field** pResultField) {
 	AStarPoint *current = openedList.top();
 	while (!openedList.empty() && !SignalHandler::sigIntReceived()) {
 		if (goal->isGoalReached(*current)) {
 			if (pResultField != NULL) {
-				delete *pResultField;
 				*pResultField = new Field(*current->getField());
 			}
 			return current->getPath();

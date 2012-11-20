@@ -70,7 +70,7 @@ public:
 	 * @param Field** pResultField - состояние карты после прохождения пути.
 	 * @return путь поиска лямбд.
 	 */
-	std::string solve(Field** pResultField = NULL);
+	std::string solve(const Field** pResultField = NULL);
 };
 
 #endif /* ASTAR_H_ */

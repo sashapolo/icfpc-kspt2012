@@ -20,7 +20,7 @@ class Solver {
 private:
 	static const unsigned int SNAPSHOT_DEPTH = 20;
 
-	Field *pField;
+	const Field *pField;
 	Path *optimalPath;
 	int nextGoalIndex;
 
@@ -37,7 +37,7 @@ private:
 	bool isShitty(const Point*);
 	void clearShittyList();
 
-	void createOptimalPath(Field *);
+	void createOptimalPath(const Field*);
 	const Point* getNextGoal();
 
 	void createSnapshot();
