@@ -25,9 +25,9 @@ AStar::~AStar() {
 		openedList.pop();
 	}
 	AStarClosedList::iterator it = closedList.begin();
-	AStarClosedList::iterator end = closedList.end();
-	for (; it != end; it++) {
+	while (it != closedList.end()) {
 		delete *it;
+		it = closedList.erase(it);
 	}
 }
 

@@ -213,7 +213,7 @@ Solver::~Solver() {
 		delete *it1;
 	}
 
-	if (pField != NULL) {
+	if (!SignalHandler::sigIntReceived()) {
 		delete pField;
 	}
 
