@@ -81,7 +81,7 @@ std::string Solver::solve() {
 			}
 			// если лямбды из оптимального пути закончились,
 			// но лямбды на карте еще есть => откат.
-			// если откаты не последовательные, то нужно очистить список помеченных лямбд
+			// если откаты не последовательные, то нужно удалить последний снэпшот
 			if (backtracksCount == 0) {
 				delete snapshots.back();
 				snapshots.pop_back();
@@ -149,7 +149,8 @@ void Solver::createSnapshot() {
  */
 void Solver::loadSnapshot() {
 	SolverSnapshot* s = snapshots.back();
-	pField = new Field(*s->snapshot);
+	delete pField;
+	pField = s->snapshot;
 	lambdaRoute = s->delta;
 	lambdasCollected = s->lambdasCollected;
 	nextGoalIndex = s->nextGoalIndex;
@@ -163,7 +164,7 @@ void Solver::loadSnapshot() {
  * Создание оптимального пути.
  * @param Field *f - карта.
  */
-void Solver::createOptimalPath(Field *f) {
+void Solver::createOptimalPath(const Field *f) {
 	if (optimalPath != NULL) {
 		delete optimalPath;
 	}
@@ -208,7 +209,12 @@ Solver::~Solver() {
 	std::list<SolverSnapshot*>::iterator it1 = snapshots.begin();
 	std::list<SolverSnapshot*>::iterator end1 = snapshots.end();
 	for (; it1 != end1; it1++) {
+		delete (*it1)->snapshot;
 		delete *it1;
+	}
+
+	if (pField != NULL) {
+		delete pField;
 	}
 
 	clearShittyList();
