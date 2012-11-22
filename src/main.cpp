@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
 
 	try {
 		Field field(std::cin);
-		//Field field("res/maps/map10");
+		//Field field("res/maps/map3");
 		Solver s(&field);
 		std::string result = s.solve();
 		std::cout<<result<<"\n";

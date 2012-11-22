@@ -57,6 +57,8 @@ std::string AStar::solve(Field** pResultField) {
 		if (!isInClosedList(*current)) {
 			addNeighboursToOpenedList(*current);
 			closedList.push_front(current);
+		} else {
+			delete current;
 		}
 		if (closedList.size() >= stateCheckLimit) {
 			return "";

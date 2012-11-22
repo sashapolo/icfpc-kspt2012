@@ -19,6 +19,7 @@ Solver::Solver(Field *f): lambdaRoute(), bestLambdaRoute(), snapshots(),
 	bestScore = 0;
 }
 
+
 std::string Solver::solve() {
 	int backtracksCount = 0;
 	int lambdasCollectedOld = 0;
@@ -34,36 +35,56 @@ std::string Solver::solve() {
 	createSnapshot();
 
 	std::string t = astar.solve(&pField);
-	while ((*pField->getRobot() != finish) && !SignalHandler::sigIntReceived()) {
+	while (!SignalHandler::sigIntReceived()) {
 		if (!t.empty()) {
-			// если были откаты, то необходимо заново проложить маршрут
-			if (backtracksCount != 0) {
-				createOptimalPath(pField);
-				nextGoalIndex = 0;
-				clearShittyList();
-				backtracksCount = 0;
+			if (*pField->getRobot() == finish) {  // дошли до лифта
+				score += lambdasCollected * 50 - t.size();
+				if (score > bestScore) {
+					bestScore = score;
+					bestLambdaRoute = lambdaRoute + t;
+				}
+				// пробуем откатиться на три шага назад, чтобы попробовать новое решение
+				if (snapshots.size() >= 3) {
+					delete snapshots.front();
+					snapshots.pop_front();
+					backtrack();
+					shittyLambdas.push_back(new Point(*pField->getRobot()));
+					backtrack();
+					backtracksCount++;
+				} else {
+					break;
+				}
+			} else {
+				// если были откаты, то необходимо заново проложить маршрут
+				if (backtracksCount != 0) {
+					createOptimalPath(pField);
+					nextGoalIndex = 0;
+					backtracksCount = 0;
+					clearShittyList();
+				}
+
+				lambdasCollected++;
+				if (snapshots.size() >= SNAPSHOT_DEPTH) {
+					delete snapshots.front();
+					snapshots.pop_front();
+				}
+				score += 25 * (lambdasCollected - lambdasCollectedOld) - t.size();
+				lambdasCollectedOld = lambdasCollected;
+				lambdaRoute += t;
+				createSnapshot();
 			}
-			lambdasCollected++;
-			if (snapshots.size() >= SNAPSHOT_DEPTH) {
-				delete snapshots.front();
-				snapshots.pop_front();
-			}
-			score += 25 * (lambdasCollected - lambdasCollectedOld) - t.size();
-			lambdasCollectedOld = lambdasCollected;
-			lambdaRoute += t;
-			createSnapshot();
 		}
 		goal = getNextGoal();
 		while (goal == NULL && !SignalHandler::sigIntReceived()) {
+			if (snapshots.size() <= 1) { // откатываться некуда
+				return bestLambdaRoute + "A";
+			}
 			// если лямбды из оптимального пути закончились,
 			// но лямбды на карте еще есть => откат.
 			// если откаты не последовательные, то нужно очистить список помеченных лямбд
 			if (backtracksCount == 0) {
 				delete snapshots.back();
 				snapshots.pop_back();
-			}
-			if (snapshots.empty()) {  // откатываться некуда
-				return bestLambdaRoute + "A";
 			}
 			shittyLambdas.push_back(new Point(*pField->getRobot()));
 			backtrack();
@@ -89,6 +110,7 @@ std::string Solver::solve() {
 	return lambdaRoute + t;
 }
 
+
 /**
  * Получение следующией лямбы из оптимального пути.
  * @return следующая лямбда.
@@ -106,6 +128,7 @@ const Point* Solver::getNextGoal() {
 	return pField->getXY(*pField->getLift()) == OPENED_LIFT ? pField->getLift() : NULL;
 }
 
+
 /**
  * Создание промежуточного состояния карты.
  * @param string& deltaPath - текущий путь.
@@ -119,6 +142,7 @@ void Solver::createSnapshot() {
 												score, lambdaRoute);
 	snapshots.push_back(result);
 }
+
 
 /**
  * Загрузка промежуточного состояния карты.
@@ -134,6 +158,7 @@ void Solver::loadSnapshot() {
 	snapshots.pop_back();
 }
 
+
 /**
  * Создание оптимального пути.
  * @param Field *f - карта.
@@ -145,6 +170,7 @@ void Solver::createOptimalPath(Field *f) {
 	optimalPath = NearestNeighbour::createTour(*f->getRobot(), *pField);
 	TwoOptOptimizer::optimize(optimalPath);
 }
+
 
 /**
  * Откат к предыдущему состоянию.
@@ -158,12 +184,14 @@ void Solver::backtrack() {
 	loadSnapshot();
 }
 
+
 bool Solver::isShitty(const Point* point) {
 	std::list<const Point*>::const_iterator it = find_if(shittyLambdas.begin(),
 				shittyLambdas.end(),
 				bind2nd(Comparators::PointerComparatorEquals<const Point*>(), point));
 	return (it != shittyLambdas.end());
 }
+
 
 void Solver::clearShittyList() {
 	std::list<const Point*>::iterator it = shittyLambdas.begin();
@@ -172,6 +200,7 @@ void Solver::clearShittyList() {
 		it = shittyLambdas.erase(it);
 	}
 }
+
 
 Solver::~Solver() {
 	delete optimalPath;
