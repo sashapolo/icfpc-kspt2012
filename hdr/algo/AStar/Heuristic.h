@@ -9,10 +9,20 @@
 #define HEURISTIC_H_
 
 #include "algo/AStar/AStarPoint.h"
-
+/**
+ * Эвристика.<br />
+ */
 class Heuristic {
 public:
+	/**
+	 * Подсчет эвристики.
+	 * @param AStarPoint& - точка.
+	 * @return значение.
+	 */
 	virtual int calculate(const AStarPoint&) const = 0;
+	/**
+	 * Деструктор класса Heuristic.
+	 */
 	virtual ~Heuristic() {};
 };
 
