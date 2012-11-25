@@ -24,14 +24,12 @@ LFLAGS = -Wall
 TEST_LIBS = -lcppunit
 3D_LIBS = -lGL -lXxf86vm -lXext -lX11 -lrt
 
-SRCS = $(foreach sdir, $(SRC_DIR), $(wildcard $(sdir)/*.cpp))
-SRCS += $(foreach sdir, $(SRC_DIR)/base, $(wildcard $(sdir)/*.cpp))
-SRCS += $(foreach sdir, $(SRC_DIR)/algo, $(wildcard $(sdir)/*.cpp))
+SRCS = $(shell find $(SRC_DIR) -type f -name *.cpp)
 OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
 
 TESTSRCS = $(foreach sdir, $(TST_SRC_DIR), $(wildcard $(sdir)/*.cpp))
 TESTOBJS = $(patsubst $(TST_SRC_DIR)/%.cpp, $(TST_OBJ_DIR)/%.o, $(TESTSRCS))
-SRCS_WITHOUT_MAIN = $(shell find src -not -name main.cpp -type f)
+SRCS_WITHOUT_MAIN = $(shell find $(SRC_DIR) -not -name main.cpp -type f)
 OBJS_WITHOUT_MAIN = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS_WITHOUT_MAIN))
 
 3D_SRCS = $(foreach sdir, $(3D_SRC_DIR), $(wildcard $(sdir)/*.cpp))
@@ -56,12 +54,9 @@ create_test_object_dir:
 create_3d_object_dir:
 	@mkdir -p $(3D_OBJ_DIR)
 
-solver: 
-	create_object_dir $(EXE)
-tests: 
-	create_object_dir create_test_object_dir $(TESTEXE)
-3dsolver: 
-	create_object_dir create_3d_object_dir $(3DEXE)
+solver: create_object_dir $(EXE)
+tests: create_object_dir create_test_object_dir $(TESTEXE)
+3dsolver: create_object_dir create_3d_object_dir $(3DEXE)
 
 
 # Main executable

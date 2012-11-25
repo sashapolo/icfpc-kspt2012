@@ -35,46 +35,30 @@ std::string Solver::solve() {
 	createSnapshot();
 
 	std::string t = astar.solve(&pField);
-	while (!SignalHandler::sigIntReceived()) {
+	while ((*pField->getRobot() != finish) && !SignalHandler::sigIntReceived()) {
 		if (!t.empty()) {
-			if (*pField->getRobot() == finish) {  // дошли до лифта
-				score += lambdasCollected * 50 - t.size();
-				if (score > bestScore) {
-					bestScore = score;
-					bestLambdaRoute = lambdaRoute + t;
-				}
-				// пробуем откатиться на три шага назад, чтобы попробовать новое решение
-				if (snapshots.size() >= 3) {
-					delete snapshots.front();
-					snapshots.pop_front();
-					backtrack();
-					shittyLambdas.push_back(new Point(*pField->getRobot()));
-					backtrack();
-					backtracksCount++;
-				} else {
-					break;
-				}
-			} else {
-				// если были откаты, то необходимо заново проложить маршрут
-				if (backtracksCount != 0) {
-					createOptimalPath(pField);
-					nextGoalIndex = 0;
-					backtracksCount = 0;
-					clearShittyList();
-				}
-
-				lambdasCollected++;
-				if (snapshots.size() >= SNAPSHOT_DEPTH) {
-					delete snapshots.front();
-					snapshots.pop_front();
-				}
-				score += 25 * (lambdasCollected - lambdasCollectedOld) - t.size();
-				lambdasCollectedOld = lambdasCollected;
-				lambdaRoute += t;
-				createSnapshot();
+			// если были откаты, то необходимо заново проложить маршрут
+			if (backtracksCount != 0) {
+				createOptimalPath(pField);
+				nextGoalIndex = 0;
+				clearShittyList();
+				backtracksCount = 0;
 			}
+			lambdasCollected++;
+			if (snapshots.size() >= SNAPSHOT_DEPTH) {
+				delete snapshots.front();
+				snapshots.pop_front();
+			}
+			score += 25 * (lambdasCollected - lambdasCollectedOld) - t.size();
+			lambdasCollectedOld = lambdasCollected;
+			lambdaRoute += t;
+			createSnapshot();
 		}
-		goal = getNextGoal();
+		if (t.empty() && *goal == finish) {
+			goal = NULL;
+		} else {
+			goal = getNextGoal();
+		}
 		while (goal == NULL && !SignalHandler::sigIntReceived()) {
 			if (snapshots.size() <= 1) { // откатываться некуда
 				return bestLambdaRoute + "A";
@@ -85,6 +69,11 @@ std::string Solver::solve() {
 			if (backtracksCount == 0) {
 				delete snapshots.back();
 				snapshots.pop_back();
+			} else if (backtracksCount >= 2) {
+				delete shittyLambdas.front();
+				shittyLambdas.pop_front();
+				createOptimalPath(pField);
+				nextGoalIndex = 0;
 			}
 			shittyLambdas.push_back(new Point(*pField->getRobot()));
 			backtrack();
