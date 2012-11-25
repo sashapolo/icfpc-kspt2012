@@ -74,17 +74,47 @@ struct sSimResult
 
 class FieldSim {
 private:
+	/**
+	 * Подсчет нового шага робота.
+	 * @param Field* pField - карта.
+	 * @param string path - путь робота.
+	 * @param FieldChanges* pChanges - изменение карты.
+	 * @return новое положение робота.
+	 */
 	static Field* calcRobotStep(const Field* pField, char step,FieldChanges* pChanges=0);
+	/**
+	 * Подсчет следующего состояния карты.
+	 * @param Field* pField - карта.
+	 * @param FieldChanges* pChanges - изменение карты.
+	 * @return новое состояние карты.
+	 */
 	static Field* calcNextFieldState(Field* pField,FieldChanges* pChanges=0);
+	/**
+	 * Отрисовка карты.
+	 * @param int nStep - шаг.
+	 */
 	static void drawField(const Field* pField, int nStep = 0);
 public:
 	/**
 	 * Пошаговая отрисовка.
-	 * @param Field* pField - поле.
-	 * @param string path - путь робота.
+	 * @param Field* pField - карта.
+	 * @param string& path - путь робота.
 	 */
 	static void drawStepByStep(const Field* pField, const std::string& path = "");
+	/**
+	 * Подсчет следующего состояния.
+	 * @param Field* pField - карта.
+	 * @param char step - ход.
+	 * @return значение поля на следующем шаге.
+	 */
 	static const Field* calcNextState(const Field* pField, char step);
+	/**
+	 * Подсчет следующего состояния.
+	 * @param Field* pField - карта.
+	 * @param char step - ход.
+	 * @param sSimResult* pResult - результат симуляции.
+	 * @return значение поля на следующем шаге.
+	 */
 	static const Field* calcNextStateEx(const Field* pField, char step, sSimResult* pResult);
 };
 

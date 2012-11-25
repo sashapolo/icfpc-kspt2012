@@ -12,9 +12,20 @@
 
 class SignalHandler {
 private:
+	/**
+	 * Разрешение обработки сигнала sigInt.
+	 * @param int param - сообщение.
+	 */
 	static void sigIntSignalHandler(int param);
 public:
+	/**
+	 * todo
+	 */
 	static void setupSignalHandler();
+	/**
+	 * Обработчик получения сигнала sigInt.
+	 * @return true, если получен сигнал sigInt, false, если нет.
+	 */
 	static bool sigIntReceived();
 };
 
