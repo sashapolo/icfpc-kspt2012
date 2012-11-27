@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
     FILE *report = fopen(&pathToReport[0], "w");
 
     // ToDo: generify with Boost filesystem
-    const int arrSize = 1;//23;
+    const int arrSize = 12;
     string mapNames[arrSize] = {
         "test",
 //        "bigmap",
@@ -61,23 +61,23 @@ int main(int argc, char** argv) {
 //        "lightning8",
 //        "lightning7",
 //        "lightning9",
-//        "lightning10",
-//        "map1",
-//        "map10",
-//        "map2",
-//        "map3",
-//        "map4",
-//        "map5",
-//        "map6",
-//        "map7",
+        "lightning10",
+        "map1",
+        "map10",
+        "map2",
+        "map3",
+        "map4",
+        "map5",
+        "map6",
+        "map7",
 //        "map8",
 //        "map9",
-//        "map100",
+        "map100",
 //        "map122",
 //        "map177",
 //        "map420",
 //        "map434",
-//        "map442"
+        "map442"
     };
 
     // Итерируемся по именам карт
