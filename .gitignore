@@ -15,6 +15,7 @@
 icfpc_solver
 tester
 lifter3d
+score_harness
 
 # Irrlicht includes
 irrIncludes/
@@ -36,6 +37,9 @@ doc/doxygen/html
 # Logger data
 LOG.html
 log.html
+
+# Score harnessing data
+scoreharnessingreports/
 
 # Emacs temporary files
 *~
