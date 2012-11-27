@@ -41,7 +41,7 @@ OBJS_WITHOUT_MAIN = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS_WITHOUT_
 DOXYGENCFG = doc/doxygen/doxygen-config
 
 
-all: create_object_dir create_test_object_dir create_3d_object_dir $(EXE) $(TESTEXE) $(3DEXE)
+all: create_object_dir create_test_object_dir create_3d_object_dir $(TESTEXE) $(EXE) $(3DEXE) run_tests
 
 create_object_dir:
 	@mkdir -p $(OBJ_DIR)
@@ -53,6 +53,15 @@ create_test_object_dir:
 
 create_3d_object_dir:
 	@mkdir -p $(3D_OBJ_DIR)
+
+run_tests:
+	@echo
+	@echo "****************************************"
+	@echo "            RUNNING TESTS"
+	@echo "****************************************"
+	@echo
+	@./$(TESTEXE)
+	@echo
 
 solver: create_object_dir $(EXE)
 tests: create_object_dir create_test_object_dir $(TESTEXE)
