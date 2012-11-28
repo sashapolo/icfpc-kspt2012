@@ -201,12 +201,13 @@ Field* FieldSim::calcRobotStep(const Field* pField, char step,FieldChanges* pCha
 		if ((step == 'L') || (step == 'R')) {
 			if (newField->getXY(absNextPos + *nextPos) == EMPTY) {
 				if (pChanges) {
+                                        pChanges->push_back(
+							sSimChange(CH_MOVE, STONE, absNextPos,
+									absNextPos + *nextPos));
 					pChanges->push_back(
 							sSimChange(CH_MOVE, ROBOT, *newField->getRobot(),
 									absNextPos));
-					pChanges->push_back(
-							sSimChange(CH_MOVE, EMPTY, absNextPos,
-									absNextPos + *nextPos));
+					
 				}
 				newField->swap(absNextPos + *nextPos, absNextPos);
 				newField->swap(absNextPos, *newField->getRobot());
@@ -232,14 +233,20 @@ Field* FieldSim::calcRobotStep(const Field* pField, char step,FieldChanges* pCha
 		newField->swap(absNextPos, *newField->getRobot());
 		break;
 	case EARTH:
-		if (pChanges)
+		if (pChanges) {
 			pChanges->push_back(sSimChange(CH_DESTROY, EARTH, absNextPos, absNextPos));
+                        pChanges->push_back(sSimChange(CH_MOVE, ROBOT, *newField->getRobot(),
+								absNextPos));
+                }
 		newField->write(*newField->getRobot(), EMPTY);
 		newField->write(absNextPos, ROBOT);
 		break;
 	case LAMBDA:
-		if (pChanges)
+		if (pChanges) {
 			pChanges->push_back(sSimChange(CH_DESTROY, LAMBDA, absNextPos, absNextPos));
+                        pChanges->push_back(sSimChange(CH_MOVE, ROBOT, *newField->getRobot(),
+								absNextPos));
+                }
 		newField->write(*newField->getRobot(), EMPTY);
 		newField->write(absNextPos, ROBOT);
 		break;

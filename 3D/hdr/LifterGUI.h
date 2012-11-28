@@ -35,7 +35,7 @@ public:
     LifterGUI();
     virtual ~LifterGUI();
     
-    void initGUI(IrrlichtDevice *device, IVideoDriver* driver_,ISceneManager* smgr_,IGUIEnvironment* guienv_);
+    void initGUI(IrrlichtDevice *device_, IVideoDriver* driver_,ISceneManager* smgr_,IGUIEnvironment* guienv_);
     void SetGUIColor(SColor col);
     void updateGUI();
     void updateImageLists();
@@ -112,6 +112,7 @@ public:
     
     void release();
 private:
+    IrrlichtDevice *device;
     IVideoDriver* driver;
     ISceneManager* smgr;
     IGUIEnvironment* guienv;

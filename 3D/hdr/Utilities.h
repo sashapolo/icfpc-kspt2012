@@ -1,3 +1,2 @@
 #pragma once
-
-Field* createField(std::string mapFileName);
+int msecDiff(timespec& t1,timespec& t2);

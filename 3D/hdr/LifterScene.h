@@ -6,27 +6,33 @@ public:
     LifterScene();
     virtual ~LifterScene();
     
-    void init(IVideoDriver* driver_, ISceneManager* smgr_);
+    void init(IrrlichtDevice *device_, IVideoDriver* driver_, ISceneManager* smgr_);
     bool loadMap(wchar_t* Path);
     
     void release();
     void clear();
     
-    void addActor(Point pos, CellType type);
-    void moveActor(scene::ISceneNode* pNode, Point pos);
-    void removeActor(scene::ISceneNode* pNode, Point pos);
-    void setBaseSceneNodes();
+    void addActor(Point pos, char type);
+    void moveActor(Point pos0,Point pos1);
+    void removeActor(Point pos);
+    void applyChanges(sSimResult& res);
+
     eEndState step(char chStep);
     
     void updateScene();
+    scene::ISceneNode* getNode(Point p);
+    void setNode(Point p,scene::ISceneNode* node);
     
     void setParallaxMaterial(scene::ISceneNode* pNode, ITexture* diffuse=0, ITexture* normal=0, ITexture* specular=0, ITexture* glow=0);
     void setBumpMaterial(scene::ISceneNode* pNode, ITexture* diffuse=0, ITexture* normal=0, ITexture* specular=0, ITexture* glow=0);
     void setDefaultMaterial(scene::ISceneNode* pNode, E_MATERIAL_TYPE Type, ITexture* diffuse=0, ITexture* normal=0);
     
 private:
+    IrrlichtDevice *device;
     IVideoDriver* driver;
     ISceneManager* smgr;
+    
+    ITexture* pExplosionTexture;
     
     ITexture* pWallTex;
     ITexture* pWallBump;
@@ -74,8 +80,7 @@ private:
     MeshBuffer mbWall;
     MeshBuffer mbEarth;
     
-    std::vector<scene::ISceneNode*> StoneArr;
-    std::vector<scene::ISceneNode*> LambdaArr;
+    scene::ISceneNode** NodeArr;
     
     scene::ISceneNode* pRobotNode;
     scene::ISceneNode* pLiftNode;
