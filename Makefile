@@ -52,6 +52,7 @@ SH_DEP_OBJS = $(OBJ_DIR)/HTMLLogger.o $(OBJ_DIR)/Logger.o $(OBJ_DIR)/SignalHandl
 	      $(OBJ_DIR)/algo/Solver.o $(OBJ_DIR)/algo/TwoOptOptimizer.o \
 	      $(OBJ_DIR)/base/Field.o $(OBJ_DIR)/base/FieldSim.o \
 	      $(OBJ_DIR)/base/Point.o $(OBJ_DIR)/base/Path.o
+SH_REPORT_DIR = scoreharnessingreports
 
 DOXYGENCFG = doc/doxygen/doxygen-config
 
@@ -119,13 +120,14 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 # Score Harnessing
 $(SHEXE): $(SH_OBJS) $(SH_DEP_OBJS)
+	@mkdir -p $(SH_REPORT_DIR)
 	$(LD) $(LFLAGS) $^ -o $@ -L/usr/local/lib -lpthread
 
 $(SH_OBJ_DIR)/%.o: $(SH_SRC_DIR)/%.cpp
-	$(CC) -I $(SH_HDR_DIR) -I $(HDR_DIR) $(CFLAGS) -std=c++0x -c $< -o $@
+	$(CC) -I $(SH_HDR_DIR) -I $(HDR_DIR) $(CFLAGS) -std=c++ox -lpthread -c $< -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CC) -I $(HDR_DIR) $(CFLAGS) -std=c++0x -c $< -o $@
+	$(CC) -I $(HDR_DIR) $(CFLAGS) -c $< -o $@
 
 # Generate documentation
 doxygen:
@@ -133,5 +135,6 @@ doxygen:
 
 # Clean the project
 clean:
-	@rm -rf $(OBJ_DIR) $(3D_OBJ_DIR) $(TST_OBJ_DIR) $(SH_OBJ_DIR) $(EXE) $(TESTEXE) $(3DEXE) $(SHEXE) 2>/dev/null
+	@rm -rf $(OBJ_DIR) $(3D_OBJ_DIR) $(TST_OBJ_DIR) $(SH_OBJ_DIR) $(SH_REPORT_DIR)\
+	        $(EXE) $(TESTEXE) $(3DEXE) $(SHEXE) 2>/dev/null
 

@@ -4,10 +4,6 @@
 #define BILLBOARD_DISTANCE 200
 #define SCENE_UPDATE_TIME 300
 
-int msecDiff(timespec& t1,timespec& t2)
-{
-    return abs((t2.tv_sec-t1.tv_sec)*1000+(t2.tv_nsec-t1.tv_nsec)/1000);
-};
 
 LifterScene::LifterScene() {
     driver=0;
@@ -27,16 +23,20 @@ LifterScene::LifterScene() {
     pEarthMeshBufferNode=0;
     
     pCamera=0;
+    NodeArr=0;
 }
 
 
 LifterScene::~LifterScene() {
 }
 
-void LifterScene::init(IVideoDriver* driver_, ISceneManager* smgr_)
+void LifterScene::init(IrrlichtDevice *device_, IVideoDriver* driver_, ISceneManager* smgr_)
 {
+    device=device_;
     driver=driver_;
     smgr=smgr_;
+    
+    pExplosionTexture=driver->getTexture(L"3D/res/textures/exp.tga");
     
     pWallTex=driver->getTexture(L"3D/res/textures/wall.png");
     pWallBump=driver->getTexture(L"3D/res/textures/wall_n.tga");
@@ -108,6 +108,10 @@ bool LifterScene::loadMap(wchar_t* Path)
     if(!pField) return false;
     earth_ind=new char[pField->getSize().first*pField->getSize().second];
     wall_ind=new char[pField->getSize().first*pField->getSize().second];
+    NodeArr=new scene::ISceneNode*[pField->getSize().first*pField->getSize().second];
+    memset(NodeArr,0,pField->getSize().first*pField->getSize().second*sizeof(scene::ISceneNode*));
+    memset(earth_ind,0,pField->getSize().first*pField->getSize().second*sizeof(char));
+    memset(wall_ind,0,pField->getSize().first*pField->getSize().second*sizeof(char));
     
     mbWall.create(pField->getSize().first,pField->getSize().second,CELLSIZE,
             float(pField->getSize().first)/18.f*2.f, float(pField->getSize().second)/18.f*2.f,
@@ -116,7 +120,18 @@ bool LifterScene::loadMap(wchar_t* Path)
             float(pField->getSize().first)/18.f*2.f, float(pField->getSize().second)/18.f*2.f,
             0,driver,smgr);
 
-    setBaseSceneNodes();
+    char cell;
+    for(int j=0;j<pField->getSize().second;j++)
+    {
+        for(int i=0;i<pField->getSize().first;i++)
+        {
+            cell=pField->getXY(Point(i,(pField->getSize().second-1)-j));
+            addActor(Point(i,j),cell);
+        }
+    }
+    mbWall.update(wall_ind);
+    mbEarth.update(earth_ind);
+
     
     pWallMeshBufferNode=smgr -> addMeshSceneNode(mbWall.mesh);
     setParallaxMaterial(pWallMeshBufferNode,pWallTex,pWallBump,pWallSpecular,pWallGlow);
@@ -132,122 +147,159 @@ bool LifterScene::loadMap(wchar_t* Path)
     return (bool)pField;
 }
 
-void LifterScene::setBaseSceneNodes()
+scene::ISceneNode* LifterScene::getNode(Point p)
 {
-    u32 nStone=0;
-    u32 nLambda=0;
-    char cell;
-    for(int j=0;j<pField->getSize().second;j++)
-    {
-        for(int i=0;i<pField->getSize().first;i++)
-        {
-            cell=pField->getXY(Point(i,(pField->getSize().second-1)-j));
-            if(cell==EARTH)
-                earth_ind[j*pField->getSize().first+i]=1;
-            else 
-                earth_ind[j*pField->getSize().first+i]=0;
-
-            if(cell==WALL)
-                wall_ind[j*pField->getSize().first+i]=1;
-            else 
-                wall_ind[j*pField->getSize().first+i]=0;
-            
-            switch(cell)
-            {
-                case STONE:
-                        if(nStone<StoneArr.size())
-                            StoneArr[nStone++]->setPosition(vector3df(i*CELLSIZE,j*CELLSIZE,0));
-                        else {addActor(Point(i,j),STONE); nStone++;};
-                    break;
-                case LAMBDA:
-                        if(nLambda<LambdaArr.size())
-                            LambdaArr[nLambda++]->setPosition(vector3df(i*CELLSIZE,j*CELLSIZE,0));
-                        else {addActor(Point(i,j),LAMBDA); nLambda++;};
-                    break;
-                case OPENED_LIFT:
-                case CLOSED_LIFT:
-                        if(pLiftNode)
-                            pLiftNode->setPosition(vector3df(i*CELLSIZE,j*CELLSIZE,0));
-                        else
-                            addActor(Point(i,j),CLOSED_LIFT);
-                    break;
-                case ROBOT:
-                        if(pRobotNode)
-                            pRobotNode->setPosition(vector3df(i*CELLSIZE,j*CELLSIZE,0));
-                        else
-                            addActor(Point(i,j),ROBOT);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-    for(u32 i=StoneArr.size()-1;(i>=nStone)  && (StoneArr.size()!=0);i--) {StoneArr[i]->remove(); StoneArr.pop_back();};
-    for(u32 i=LambdaArr.size()-1;(i>=nLambda) && (LambdaArr.size()!=0);i--) {LambdaArr[i]->remove(); LambdaArr.pop_back();};
-    mbWall.update(wall_ind);
-    mbEarth.update(earth_ind);
+    return NodeArr[p.y*pField->getSize().first+p.x];
 }
+
+void LifterScene::setNode(Point p,scene::ISceneNode* node)
+{
+    NodeArr[p.y*pField->getSize().first+p.x]=node;
+}
+
 
 eEndState LifterScene::step(char chStep)
 {
     if(!pField) return ES_NONE;
     if(result.state==ES_FINISHED) return ES_FINISHED;
     result.Changes.clear();
-    const Field* pNewField=FieldSim::calcNextStateEx(pField,chStep,&result);
+    const Field* pNextField=FieldSim::calcNextStateEx(pField,chStep,&result);
+    applyChanges(result);
+    
     delete pField;
-    pField=pNewField;
-    setBaseSceneNodes();
+    pField=pNextField;
+    //setBaseSceneNodes();
     return result.state;
 }
 
 void LifterScene::updateScene()
 {
+    if(!pField) return;
     timespec currentTime;
     clock_gettime(CLOCK_MONOTONIC,&currentTime);
     if(msecDiff(currentTime,prevUpdateTime)<SCENE_UPDATE_TIME) return;
     prevUpdateTime=currentTime;
     
     
+    core::list<ISceneNode*>::ConstIterator nodeIt;
     scene::ICameraSceneNode* pCurrCamera=smgr -> getActiveCamera();
 
-    for(u32 i=0;i<StoneArr.size();i++)
+    FieldCache::const_iterator it=pField->getStoneCacheIt();
+    while(it!=pField->getStoneCacheEnd())
     {
-        if(pCurrCamera->getPosition().getDistanceFrom(StoneArr[i]->getPosition())<BILLBOARD_DISTANCE)
+        Point pt=*(*it);
+        pt.y=(pField->getSize().second-1)-pt.y;
+        scene::ISceneNode* pNode=getNode(pt);
+        if(!pNode) 
         {
-            core::list<ISceneNode*>::ConstIterator it=StoneArr[i]->getChildren().begin();
-            (*it)->setVisible(true);
+            LOGERROR("Wrong node");
             it++;
-            (*it)->setVisible(false);
+            continue;
         }
-        else
+        
+        bool bVisible=false;
+        if(pCurrCamera->getPosition().getDistanceFrom(pNode->getPosition())<BILLBOARD_DISTANCE) bVisible=true;
+        
+        nodeIt=pNode->getChildren().begin();
+        if(pNode->getChildren().size()==2)
         {
-            core::list<ISceneNode*>::ConstIterator it=StoneArr[i]->getChildren().begin();
-            (*it)->setVisible(false);
-            it++;
-            (*it)->setVisible(true);
+            (*nodeIt)->setVisible(bVisible);
+            nodeIt++;
+            (*nodeIt)->setVisible(!bVisible);
         }
+        
+        it++;
     }
     
-    for(u32 i=0;i<LambdaArr.size();i++)
+    it=pField->getLambdaCacheIt();
+    while(it!=pField->getLambdaCacheEnd())
     {
-        if(pCurrCamera->getPosition().getDistanceFrom(LambdaArr[i]->getPosition())<BILLBOARD_DISTANCE)
+        Point pt=*(*it);
+        pt.y=(pField->getSize().second-1)-pt.y;
+        scene::ISceneNode* pNode=getNode(pt);
+        if(!pNode) 
         {
-            core::list<ISceneNode*>::ConstIterator it=LambdaArr[i]->getChildren().begin();
-            (*it)->setVisible(true);
+            LOGERROR("Wrong node");
             it++;
-            (*it)->setVisible(false);
+            continue;
         }
-        else
+        
+        bool bVisible=false;
+        if(pCurrCamera->getPosition().getDistanceFrom(pNode->getPosition())<BILLBOARD_DISTANCE) bVisible=true;
+        
+        nodeIt=pNode->getChildren().begin();
+        if(pNode->getChildren().size()==2)
         {
-            core::list<ISceneNode*>::ConstIterator it=LambdaArr[i]->getChildren().begin();
-            (*it)->setVisible(false);
-            it++;
-            (*it)->setVisible(true);
+            (*nodeIt)->setVisible(bVisible);
+            nodeIt++;
+            (*nodeIt)->setVisible(!bVisible);
+        }
+        
+        it++;
+    }
+}
+
+void LifterScene::applyChanges(sSimResult& res)
+{
+    for(u32 i=0;i<res.Changes.size();i++)
+    {
+        res.Changes[i].pos1=Point(res.Changes[i].pos1.x,(pField->getSize().second-1)-res.Changes[i].pos1.y);
+        res.Changes[i].pos2=Point(res.Changes[i].pos2.x,(pField->getSize().second-1)-res.Changes[i].pos2.y);
+        switch(res.Changes[i].changeType)
+        {
+            case CH_MOVE:
+                moveActor(res.Changes[i].pos1,res.Changes[i].pos2);
+                LOGINFO("Change: move (%d,%d)->(%d,%d)",
+                        res.Changes[i].pos1.x,res.Changes[i].pos1.y,
+                        res.Changes[i].pos2.x,res.Changes[i].pos2.y)
+                break;
+            case CH_DESTROY:
+                removeActor(res.Changes[i].pos1);
+                LOGINFO("Change: destroy (%d,%d)",
+                        res.Changes[i].pos1.x,res.Changes[i].pos1.y)
+                break;
+            default:
+                LOGINFO("Change: none");
+                break;
+        }
+    }
+    mbWall.update(wall_ind);
+    mbEarth.update(earth_ind);
+}
+
+void LifterScene::moveActor(Point pos0,Point pos1)
+{
+    scene::ISceneNode* pNode=getNode(pos0);
+    if(pNode) 
+    {
+        ISceneNodeAnimator * anim=smgr->createFlyStraightAnimator(
+                core::vector3df(pos0.x*CELLSIZE,pos0.y*CELLSIZE,0),
+                core::vector3df(pos1.x*CELLSIZE,pos1.y*CELLSIZE,0),1000);
+        pNode->addAnimator(anim);
+        //pNode->setPosition(vector3df(pos1.x*CELLSIZE,pos1.y*CELLSIZE,0));
+        setNode(pos0,0);
+        setNode(pos1,pNode);
+    }
+}
+
+void LifterScene::removeActor(Point pos)
+{
+    char cell=pField->getXY(Point(pos.x,(pField->getSize().second-1)-pos.y));
+    
+    if(cell==WALL) wall_ind[pos.y*pField->getSize().first+pos.x]=0;
+    else if(cell==EARTH) earth_ind[pos.y*pField->getSize().first+pos.x]=0;
+    else
+    {
+        scene::ISceneNode* pNode=getNode(pos);
+        if(pNode) 
+        {
+            pNode->remove();
+            setNode(pos,0);
         }
     }
 }
 
-void LifterScene::addActor(Point pos, CellType type)
+void LifterScene::addActor(Point pos, char type)
 {
     scene::ISceneNode* pNode;
     scene::ISceneNodeAnimator* anim;
@@ -258,6 +310,8 @@ void LifterScene::addActor(Point pos, CellType type)
     scene::ISceneNode* pNodeLow;
     scene::ISceneNode* pNodeHi;
     
+    
+    removeActor(pos);
     switch(type)
     {
         case WALL:
@@ -280,8 +334,7 @@ void LifterScene::addActor(Point pos, CellType type)
 
             setBumpMaterial(pNodeLow,pStoneTex,pStoneBump,pStoneSpecular,pBlackTex);
             setBumpMaterial(pNodeHi,pStoneSpriteTex,pStoneSpriteBump,pStoneSpriteSpecular,pBlackTex);
-
-            StoneArr.push_back(pNode);
+            setNode(pos,pNode);
             break;
         case LAMBDA:
             pNode=smgr -> addEmptySceneNode();
@@ -297,10 +350,9 @@ void LifterScene::addActor(Point pos, CellType type)
             setDefaultMaterial(pNodeHi,video::EMT_TRANSPARENT_ALPHA_CHANNEL,pLambdaSpriteTex,pWhiteTex);
 
             anim = smgr->createRotationAnimator(core::vector3df(0,-0.4f,0));
-                    pNode->addAnimator(anim);
+            pNode->addAnimator(anim);
             anim->drop();
-
-            LambdaArr.push_back(pNode);
+            setNode(pos,pNode);
             break;
         case ROBOT:
             if(!pRobotNode)
@@ -341,6 +393,7 @@ void LifterScene::addActor(Point pos, CellType type)
                 pRobotNode=pNode;
             }
             pRobotNode->setPosition(vector3df(pos.x*CELLSIZE,pos.y*CELLSIZE,0));
+            setNode(pos,pRobotNode);
             break;
         case CLOSED_LIFT:
             if(!pLiftNode)
@@ -356,6 +409,7 @@ void LifterScene::addActor(Point pos, CellType type)
                 pLiftNode=pNode;
             }
             pLiftNode->setPosition(vector3df(pos.x*CELLSIZE,pos.y*CELLSIZE,0));
+            setNode(pos,pLiftNode);
             break;
             
         case OPENED_LIFT:
@@ -368,6 +422,7 @@ void LifterScene::addActor(Point pos, CellType type)
                 pLiftNode=pNode;
             }
             pLiftNode->setPosition(vector3df(pos.x*CELLSIZE,pos.y*CELLSIZE,0));
+            setNode(pos,pLiftNode);
             break;
         default:
             break;
@@ -442,20 +497,37 @@ void LifterScene::clear()
         pEarthMeshBufferNode=0;
     }
     
-    if(pRobotNode)
+    if(NodeArr)
     {
-        pRobotNode->remove();
+        for(int i=0;i<pField->getSize().first*pField->getSize().second;i++)
+        {
+            if(NodeArr[i]!=0)
+            {
+                NodeArr[i]->remove();
+                NodeArr[i]=0;
+            }
+        }
+        
         pRobotNode=0;
-    }
-    
-    if(pLiftNode)
-    {
-        pLiftNode->remove();
         pLiftNode=0;
+        delete [] NodeArr;
+        NodeArr=0;
     }
     
-    for(unsigned int i=0;i<StoneArr.size();i++) StoneArr[i]->remove();
-    StoneArr.clear();
-    for(unsigned int i=0;i<LambdaArr.size();i++) LambdaArr[i]->remove();
-    LambdaArr.clear();
+//    if(pRobotNode)
+//    {
+//        pRobotNode->remove();
+//        pRobotNode=0;
+//    }
+//    
+//    if(pLiftNode)
+//    {
+//        pLiftNode->remove();
+//        pLiftNode=0;
+//    }
+    
+//    for(unsigned int i=0;i<StoneArr.size();i++) StoneArr[i]->remove();
+//    StoneArr.clear();
+//    for(unsigned int i=0;i<LambdaArr.size();i++) LambdaArr[i]->remove();
+//    LambdaArr.clear();
 }

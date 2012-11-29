@@ -29,6 +29,8 @@ using namespace gui;
 #include "base/Path.h"
 #include "base/FieldSim.h"
 
+#include "Utilities.h"
+
 #include "MeshBuffer.h"
 
 #include "ShaderBumpCallback.h"

@@ -18,9 +18,10 @@ LifterGUI::LifterGUI() {
 LifterGUI::~LifterGUI() {
 }
 
-void LifterGUI::initGUI(IrrlichtDevice *device, IVideoDriver* driver_,ISceneManager* smgr_,IGUIEnvironment* guienv_)
+void LifterGUI::initGUI(IrrlichtDevice *device_, IVideoDriver* driver_,ISceneManager* smgr_,IGUIEnvironment* guienv_)
 {
     release();
+    device=device_;
     driver=driver_;
     smgr=smgr_;
     guienv=guienv_;
@@ -107,7 +108,7 @@ void LifterGUI::initGUI(IrrlichtDevice *device, IVideoDriver* driver_,ISceneMana
     SetLogger(pLogger);
     
     LOGINFO("Started");
-    lifterScene.init(driver,smgr);
+    lifterScene.init(device,driver,smgr);
     
     updateGUI();
 }

@@ -3,6 +3,7 @@
 #include <cerrno>
 
 #include <pthread.h>
+#include <fstream>
 #include <time.h>
 #include <unistd.h>
 
@@ -71,8 +72,12 @@ int main(int argc, char** argv) {
     long long int min = curTimestamp->tm_min;
     pathToReport += to_string(min);
     pathToReport += ".txt";
-    // &pathToReport[0] : не самый очевидный способ преобразования из string в char *
-    FILE *report = fopen(&pathToReport[0], "w");
+
+    ofstream report(pathToReport.c_str());
+    if (!report.is_open()) {
+    	cout << "Can't create report file: " << pathToReport << "\n";
+    	return -1;
+    }
 
     // ToDo: generify with Boost filesystem
     const int arrSize = 12;
@@ -147,12 +152,13 @@ int main(int argc, char** argv) {
          * to_string(long long unsigned int)
          */
         long long int score = simRes.score;
-        msg += std::to_string(score);
+        msg += to_string(score);
         msg += "\n";
-        // &msg[0] : не самый очевидный способ преобразования из string в char *
-        fwrite(&msg[0], sizeof(char), msg.length(), report);
+
+        report << msg;
     }
 
+    report.close();
     return 0;
 
 }
