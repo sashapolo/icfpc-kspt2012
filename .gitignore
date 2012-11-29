@@ -35,8 +35,7 @@ Debug/
 doc/doxygen/html
 
 # Logger data
-LOG.html
-log.html
+*.html
 
 # Score harnessing data
 scoreharnessingreports/
