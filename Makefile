@@ -52,7 +52,7 @@ SH_DEP_OBJS = $(OBJ_DIR)/HTMLLogger.o $(OBJ_DIR)/Logger.o $(OBJ_DIR)/SignalHandl
 	      $(OBJ_DIR)/algo/Solver.o $(OBJ_DIR)/algo/TwoOptOptimizer.o \
 	      $(OBJ_DIR)/base/Field.o $(OBJ_DIR)/base/FieldSim.o \
 	      $(OBJ_DIR)/base/Point.o $(OBJ_DIR)/base/Path.o
-SH_REPORT_DIR = scoreharnessingreports
+SH_REPORT_DIR = scoreharnessreports
 
 DOXYGENCFG = doc/doxygen/doxygen-config
 
@@ -124,7 +124,7 @@ $(SHEXE): $(SH_OBJS) $(SH_DEP_OBJS)
 	$(LD) $(LFLAGS) $^ -o $@ -L/usr/local/lib -lpthread
 
 $(SH_OBJ_DIR)/%.o: $(SH_SRC_DIR)/%.cpp
-	$(CC) -I $(SH_HDR_DIR) -I $(HDR_DIR) $(CFLAGS) -std=c++ox -lpthread -c $< -o $@
+	$(CC) -I $(SH_HDR_DIR) -I $(HDR_DIR) $(CFLAGS) -std=c++0x -lpthread -c $< -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CC) -I $(HDR_DIR) $(CFLAGS) -c $< -o $@

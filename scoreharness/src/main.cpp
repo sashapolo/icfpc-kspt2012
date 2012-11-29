@@ -1,11 +1,5 @@
-#include <cstdlib>
-#include <cstring>
-#include <cerrno>
-
-#include <pthread.h>
 #include <fstream>
 #include <time.h>
-#include <unistd.h>
 
 #include "algo/Solver.h"
 #include "base/Field.h"
@@ -15,27 +9,9 @@
 using namespace std;
 
 /**
- * Функция с таймером для запуска в отдельной нити.
- * Через 150 с посылает SIGINT процессу с заданным PID.
- * 
- * Возвращаемый указатель указывает на heap,
- * после использования необходимо освободить память с помощью delete.
- * 
- * @param pPID указатель на целое, содержащее PID процесса
- * @return NULL
- */
-// ToDo: подумать, как реализовать отправку SIGKILL.
-void* timer(void *pPID);
-
-/**
  * Подсчет количества очков на тестовой выборке карт.
  */
 int main(int argc, char** argv) {
-
-    // Инициализация обработчика SIGINT
-    SignalHandler::setupSignalHandler();
-    // PID текущего процесса, чтобы послать самому себе SIGINT.
-    pid_t pid = getpid();
 
     // Инициализация лога
     HTMLLogger logger;
@@ -45,19 +21,10 @@ int main(int argc, char** argv) {
     // Инициализация файла с результатами
     // timestamp для имени отчета
     time_t curTimestampEpoch = time(NULL);
-    // ToDo: получать время с учетом часового пояса.
     tm* curTimestamp = gmtime(&curTimestampEpoch);
     string pathToReport = "scoreharnessreports/ScoreHarness-";
-    /*
-     * Придется ввести эту переменную,
-     * так как передача int в to_string() приводит к невозможности разрешения
-     * между
-     * to_string(long long int)
-     * и
-     * to_string(long long unsigned int)
-     */
-    long long int year = curTimestamp->tm_year;
-    pathToReport += to_string(1900+year);
+    // Приведение к long long int - иначе неоднозначность выбора перегрузок
+    pathToReport += to_string(1900+(long long int)curTimestamp->tm_year);
     pathToReport += "-";
     long long int mon = curTimestamp->tm_mon;
     // +1: month is from 0 to 11
@@ -75,8 +42,8 @@ int main(int argc, char** argv) {
 
     ofstream report(pathToReport.c_str());
     if (!report.is_open()) {
-    	cout << "Can't create report file: " << pathToReport << "\n";
-    	return -1;
+     cout << "Can't create report file: " << pathToReport << "\n";
+     return -1;
     }
 
     // ToDo: generify with Boost filesystem
@@ -115,21 +82,7 @@ int main(int argc, char** argv) {
         pathToMap += mapNames[i];
         // Отыскиваем путь для данной карты
         Field field(pathToMap);
-        /*
-         * Создаем в отдельной нити таймер, который через 150 с
-         * выдаст этому же процессу.
-         */
-        pthread_t timerTID;
-        int retVal;
-        retVal = pthread_create(&timerTID, NULL, timer, &pid);
-        if(retVal) {
-            puts("Error while creating timer thread.");
-        }
         Solver solver(&field);
-        retVal = pthread_join(timerTID, NULL);
-        if(retVal) {
-            puts("Error while joining timer thread.");
-        }
         string path = solver.solve();
         // Запускаем симулятор для нахождения количества очков
         sSimResult simRes;
@@ -143,16 +96,8 @@ int main(int argc, char** argv) {
         string msg = mapNames[i];
         msg += ": ";
         // Преобразование score из int в string
-        /*
-         * Придется ввести эту переменную,
-         * так как передача int в to_string() приводит к невозможности разрешения
-         * между
-         * to_string(long long int)
-         * и
-         * to_string(long long unsigned int)
-         */
-        long long int score = simRes.score;
-        msg += to_string(score);
+        // Приведение к long long int - иначе неоднозначность выбора перегрузок
+        msg += std::to_string((long long int)simRes.score);
         msg += "\n";
 
         report << msg;
@@ -161,15 +106,4 @@ int main(int argc, char** argv) {
     report.close();
     return 0;
 
-}
-
-void* timer(void *pPID) {
-    const int sleepInterval = 150;    // в секундах
-    sleep(sleepInterval);
-    //int pid = *pPID;
-    int retVal = kill(getpid(), SIGINT);
-    if(retVal != 0) {
-        strerror(errno);
-    }
-    return NULL;
 }
