@@ -1,7 +1,10 @@
 #include <cstdlib>
 #include <cstring>
+#include <cerrno>
 
+#include <pthread.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "algo/Solver.h"
 #include "base/Field.h"
@@ -11,20 +14,39 @@
 using namespace std;
 
 /**
+ * Функция с таймером для запуска в отдельной нити.
+ * Через 150 с посылает SIGINT процессу с заданным PID.
+ * 
+ * Возвращаемый указатель указывает на heap,
+ * после использования необходимо освободить память с помощью delete.
+ * 
+ * @param pPID указатель на целое, содержащее PID процесса
+ * @return NULL
+ */
+// ToDo: подумать, как реализовать отправку SIGKILL.
+void* timer(void *pPID);
+
+/**
  * Подсчет количества очков на тестовой выборке карт.
  */
 int main(int argc, char** argv) {
 
+    // Инициализация обработчика SIGINT
+    SignalHandler::setupSignalHandler();
+    // PID текущего процесса, чтобы послать самому себе SIGINT.
+    pid_t pid = getpid();
+
     // Инициализация лога
     HTMLLogger logger;
-    logger.Init("scoreharnessingreports/ScoreHarnessLog.html","ScoreHarness");
+    logger.Init("scoreharnessreports/ScoreHarnessLog.html","ScoreHarness");
     SetLogger(&logger);
 
     // Инициализация файла с результатами
     // timestamp для имени отчета
     time_t curTimestampEpoch = time(NULL);
+    // ToDo: получать время с учетом часового пояса.
     tm* curTimestamp = gmtime(&curTimestampEpoch);
-    string pathToReport = "scoreharnessingreports/ScoreHarness-";
+    string pathToReport = "scoreharnessreports/ScoreHarness-";
     /*
      * Придется ввести эту переменную,
      * так как передача int в to_string() приводит к невозможности разрешения
@@ -88,7 +110,21 @@ int main(int argc, char** argv) {
         pathToMap += mapNames[i];
         // Отыскиваем путь для данной карты
         Field field(pathToMap);
+        /*
+         * Создаем в отдельной нити таймер, который через 150 с
+         * выдаст этому же процессу.
+         */
+        pthread_t timerTID;
+        int retVal;
+        retVal = pthread_create(&timerTID, NULL, timer, &pid);
+        if(retVal) {
+            puts("Error while creating timer thread.");
+        }
         Solver solver(&field);
+        retVal = pthread_join(timerTID, NULL);
+        if(retVal) {
+            puts("Error while joining timer thread.");
+        }
         string path = solver.solve();
         // Запускаем симулятор для нахождения количества очков
         sSimResult simRes;
@@ -118,5 +154,16 @@ int main(int argc, char** argv) {
     }
 
     return 0;
+
 }
 
+void* timer(void *pPID) {
+    const int sleepInterval = 150;    // в секундах
+    sleep(sleepInterval);
+    //int pid = *pPID;
+    int retVal = kill(getpid(), SIGINT);
+    if(retVal != 0) {
+        strerror(errno);
+    }
+    return NULL;
+}

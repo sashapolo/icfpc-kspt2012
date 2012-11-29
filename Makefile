@@ -23,7 +23,7 @@ SH_OBJ_DIR = $(SH_DIR)/obj
 SH_HDR_DIR = $(SH_DIR)/hdr
 
 CC = g++
-CFLAGS = -Wall -g -std=c++0x
+CFLAGS = -Wall -g
 
 LD = g++
 LFLAGS = -Wall
@@ -119,13 +119,13 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 # Score Harnessing
 $(SHEXE): $(SH_OBJS) $(SH_DEP_OBJS)
-	$(LD) $(LFLAGS) $^ -o $@ -L/usr/local/lib
+	$(LD) $(LFLAGS) $^ -o $@ -L/usr/local/lib -lpthread
 
 $(SH_OBJ_DIR)/%.o: $(SH_SRC_DIR)/%.cpp
-	$(CC) -I $(SH_HDR_DIR) -I $(HDR_DIR) $(CFLAGS) -c $< -o $@
+	$(CC) -I $(SH_HDR_DIR) -I $(HDR_DIR) $(CFLAGS) -std=c++0x -c $< -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CC) -I $(HDR_DIR) $(CFLAGS) -c $< -o $@
+	$(CC) -I $(HDR_DIR) $(CFLAGS) -std=c++0x -c $< -o $@
 
 # Generate documentation
 doxygen:
