@@ -23,9 +23,6 @@ private:
 		sigIntFlag = true;
 	}
 public:
-	/**
-	 * todo
-	 */
 	inline static void setupSignalHandler() {
 		signal(SIGINT, sigIntSignalHandler);
 	}
