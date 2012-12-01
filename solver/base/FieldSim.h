@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   FieldSim.h
  * Author: kirill
  *
@@ -9,9 +9,9 @@
 #define	FIELDSIM_H
 
 #include <iostream>
-#include "base/Field.h"
-#include "base/Point.h"
-#include "base/Path.h"
+#include "Field.h"
+#include "Point.h"
+#include "Path.h"
 
 enum eEndState
 {
@@ -38,7 +38,7 @@ struct sSimChange
         changeType=CH_NONE;
         cellType=EMPTY;
     }
-    
+
     sSimChange(eChangeType changeType_,CellType cellType_,Point pos1_,Point pos2_)
     {
         changeType=changeType_;
@@ -46,7 +46,7 @@ struct sSimChange
         pos1=pos1_;
         pos2=pos2_;
     }
-    
+
     eChangeType changeType;
     CellType cellType;
     Point pos1;
@@ -63,12 +63,12 @@ struct sSimResult
         state=ES_NONE;
         score=0;
     }
-          
+
     int lambdaReceived;
     int stepsTaken;
     int score;
     eEndState state;
-    
+
     FieldChanges Changes;
 };
 

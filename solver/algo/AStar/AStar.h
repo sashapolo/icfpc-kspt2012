@@ -8,10 +8,10 @@
 #ifndef ASTAR_H_
 #define ASTAR_H_
 
-#include "stdinclude.h"
-#include "algo/AStar/AStarPoint.h"
-#include "algo/AStar/AStarGoal.h"
-#include "algo/AStar/Heuristic.h"
+#include "../../stdinclude.h"
+#include "AStarPoint.h"
+#include "AStarGoal.h"
+#include "Heuristic.h"
 
 typedef std::priority_queue<AStarPoint*,
 						    std::vector<AStarPoint*>,
@@ -43,7 +43,7 @@ private:
      	 */
 	AStarClosedList closedList;
 
-	
+
 	/**
 	 * Кэш "плохих" лямбд. Лямбда считается плохой, если в процессе решения
 	 * выяснилось, что эта лямбда приводит к ловушке.

@@ -8,7 +8,8 @@
 #ifndef ASTARPOINT_H_
 #define ASTARPOINT_H_
 
-#include "base/Field.h"
+#include "../../base/Field.h"
+
 /**
  * А* Point.<br />
  * Описывает точку, используемую в алгоритме А*.
@@ -26,7 +27,7 @@ private:
 	/**
 	 * Стоимость.
 	 */
-	int G;	
+	int G;
 	/**
 	 * Значение эвристики.
 	 */
@@ -38,7 +39,7 @@ private:
 	/**
 	 * Путь до точки.
 	 */
-	std::string path;	
+	std::string path;
 
 public:
 	/**

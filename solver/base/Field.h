@@ -9,8 +9,8 @@
 #include <list>
 #include <climits>
 #include "Point.h"
-#include "Logger.h"
-#include "HTMLLogger.h"
+#include "../Logger.h"
+#include "../HTMLLogger.h"
 
 typedef std::list<Point*> FieldCache;
 

@@ -7,6 +7,9 @@
 
 #ifndef ASTARGOAL_H_
 #define ASTARGOAL_H_
+
+#include "AStarPoint.h"
+
 /**
  * А* Цель.<br />
  */

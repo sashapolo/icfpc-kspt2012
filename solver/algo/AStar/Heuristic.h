@@ -8,7 +8,7 @@
 #ifndef HEURISTIC_H_
 #define HEURISTIC_H_
 
-#include "algo/AStar/AStarPoint.h"
+#include "AStarPoint.h"
 /**
  * Эвристика.<br />
  */

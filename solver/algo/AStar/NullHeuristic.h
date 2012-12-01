@@ -7,9 +7,9 @@
 
 #ifndef NULLHEURISTIC_H_
 #define NULLHEURISTIC_H_
-/**
- * todo.<br />
- */
+
+#include "Heuristic.h"
+
 class NullHeuristic: public Heuristic {
 public:
 	/**

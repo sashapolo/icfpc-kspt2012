@@ -8,7 +8,7 @@
 #ifndef NEARESTNEIGHBOUR_H_
 #define NEARESTNEIGHBOUR_H_
 
-#include "stdinclude.h"
+#include "../stdinclude.h"
 
 
 class NearestNeighbour {

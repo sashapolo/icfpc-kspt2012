@@ -8,6 +8,8 @@
 #ifndef SOLVERSNAPSHOT_H_
 #define SOLVERSNAPSHOT_H_
 
+#include "../base/Field.h"
+
 class SolverSnapshot {
 public:
 	const Field *snapshot;

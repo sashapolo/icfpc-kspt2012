@@ -10,23 +10,32 @@
 
 #include <signal.h>
 
+
+
 class SignalHandler {
 private:
+	static bool sigIntFlag;
 	/**
 	 * Разрешение обработки сигнала sigInt.
 	 * @param int param - сообщение.
 	 */
-	static void sigIntSignalHandler(int param);
+	inline static void sigIntSignalHandler(int param) {
+		sigIntFlag = true;
+	}
 public:
 	/**
 	 * todo
 	 */
-	static void setupSignalHandler();
+	inline static void setupSignalHandler() {
+		signal(SIGINT, sigIntSignalHandler);
+	}
 	/**
 	 * Обработчик получения сигнала sigInt.
 	 * @return true, если получен сигнал sigInt, false, если нет.
 	 */
-	static bool sigIntReceived();
+	static bool sigIntReceived(){
+		return sigIntFlag;
+	}
 };
 
 #endif /* SIGNALHANDLER_H_ */

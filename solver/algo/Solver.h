@@ -8,13 +8,13 @@
 #ifndef SOLVER_H_
 #define SOLVER_H_
 
-#include "stdinclude.h"
-#include "algo/AStar/AStar.h"
-#include "algo/AStar/ManualGoal.h"
-#include "algo/AStar/ManhattanHeuristic.h"
-#include "algo/SolverSnapshot.h"
-#include "algo/NearestNeighbour.h"
-#include "algo/TwoOptOptimizer.h"
+#include "../stdinclude.h"
+#include "AStar/AStar.h"
+#include "AStar/ManualGoal.h"
+#include "AStar/ManhattanHeuristic.h"
+#include "SolverSnapshot.h"
+#include "NearestNeighbour.h"
+#include "TwoOptOptimizer.h"
 
 class Solver {
 private:

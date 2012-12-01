@@ -7,9 +7,9 @@
 
 #ifndef MANUALGOAL_H_
 #define MANUALGOAL_H_
-/**
- * todo.<br />
- */
+
+#include "AStarGoal.h"
+
 class ManualGoal: public AStarGoal {
 private:
 	/**
@@ -32,7 +32,7 @@ public:
 	virtual bool isGoalReached(const AStarPoint& state) const {
 		return (*state.getField()->getRobot() == *goal);
 	}
-	
+
 	/**
 	 * Установка цели.
 	 * @param const Point* goal - точка.

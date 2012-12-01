@@ -8,8 +8,8 @@
 #ifndef MANHATTANHEURISTIC_H_
 #define MANHATTANHEURISTIC_H_
 
-#include "algo/AStar/Heuristic.h"
-#include "base/Point.h"
+#include "Heuristic.h"
+#include "../../base/Point.h"
 /**
  * Манхеттенская эвристика.<br />
  */

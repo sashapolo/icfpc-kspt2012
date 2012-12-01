@@ -7,9 +7,9 @@
 
 #ifndef ANYLAMBDAGOAL_H_
 #define ANYLAMBDAGOAL_H_
-/**
- * todo.<br />
- */
+
+#include "AStarGoal.h"
+
 class AnyLambdaGoal: public AStarGoal {
 public:
 	/**
