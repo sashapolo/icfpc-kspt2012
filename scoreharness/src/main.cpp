@@ -9,7 +9,7 @@ using namespace std;
 
 static const int sleepTime = 150;
 
-bool solveDone = false;
+bool solvingDone = false;
 void* timer(void*);
 
 /**
@@ -19,23 +19,18 @@ int main(int argc, char** argv) {
     // Инициализация файла с результатами
     // timestamp для имени отчета
     time_t curTimestampEpoch = time(NULL);
-    tm* curTimestamp = gmtime(&curTimestampEpoch);
+    tm* curTimestamp = localtime(&curTimestampEpoch);
     string pathToReport = "scoreharness/reports/ScoreHarness-";
-    // Приведение к long long int - иначе неоднозначность выбора перегрузок
-    pathToReport += to_string(1900+(long long int)curTimestamp->tm_year);
+    pathToReport += to_string(1900 + curTimestamp->tm_year);
     pathToReport += "-";
-    long long int mon = curTimestamp->tm_mon;
     // +1: month is from 0 to 11
-    pathToReport += to_string(mon+1);
+    pathToReport += to_string(curTimestamp->tm_mon + 1);
     pathToReport += "-";
-    long long int mday = curTimestamp->tm_mday;
-    pathToReport += to_string(mday);
+    pathToReport += to_string(curTimestamp->tm_mday);
     pathToReport += "-";
-    long long int hour = curTimestamp->tm_hour;
-    pathToReport += to_string(hour);
+    pathToReport += to_string(curTimestamp->tm_hour);
     pathToReport += "-";
-    long long int min = curTimestamp->tm_min;
-    pathToReport += to_string(min);
+    pathToReport += to_string(curTimestamp->tm_min);
     pathToReport += ".txt";
 
     ofstream report(pathToReport.c_str());
@@ -47,46 +42,41 @@ int main(int argc, char** argv) {
     // Итерируемся по именам карт
     for (int i = 1; i < argc; i++) {
     	SignalHandler::setupSignalHandler();
-    	solveDone = false;
+    	solvingDone = false;
+		try {
+			Field field(string(argv[i]));
 
-    	pthread_t timerThread;
-		int err = pthread_create(&timerThread, NULL, timer, NULL);
-		if (err) {
-			cout << "Error: can't create new thread\n";
-			return -1;
+			pthread_t timerThread;
+			int err = pthread_create(&timerThread, NULL, timer, NULL);
+			if (err) {
+				cout << "Error: can't create new thread\n";
+				return -1;
+			}
+
+			Solver solver(&field);
+			string path = solver.solve();
+			// Запускаем симулятор для нахождения количества очков
+			sSimResult simRes;
+			const Field *pField = FieldSim::calcNextStateEx(&field, path[0], &simRes);
+			for (unsigned int j = 1; j < path.length(); j++) {
+				const Field *oldField = pField;
+				pField = FieldSim::calcNextStateEx(oldField, path[j], &simRes);
+				delete oldField;
+			}
+			delete pField;
+
+			solvingDone = true;
+			err = pthread_join(timerThread, NULL);
+			if (err) {
+				cout << "Error: can't join timer thread\n";
+				return -1;
+			}
+
+			report << argv[i] << ": " << simRes.score << endl;
+		} catch (FieldParseException&) {
+			cout << "Error while parsing input file: " << argv[i] << "\n";
+			i++;
 		}
-
-        // Отыскиваем путь для данной карты
-        Field field(string(argv[i]));
-        Solver solver(&field);
-        string path = solver.solve();
-
-        // Запускаем симулятор для нахождения количества очков
-        sSimResult simRes;
-        const Field *pField = &field;    // указатель на карту нужен постоянно + мелкая оптимизация
-        pField = FieldSim::calcNextStateEx(pField, path[0], &simRes);
-        for(unsigned int j = 1; j < path.length(); j++) {
-            const Field *oldField = pField;
-            pField = FieldSim::calcNextStateEx(oldField, path[j], &simRes);
-            delete oldField;
-        }
-        delete pField;
-
-        solveDone = true;
-        err = pthread_join(timerThread, NULL);
-        if (err) {
-        	cout << "Error: can't join timer thread\n";
-        	return -1;
-        }
-
-        string msg = argv[i];
-        msg += ": ";
-        // Преобразование score из int в string
-        // Приведение к long long int - иначе неоднозначность выбора перегрузок
-        msg += std::to_string((long long)simRes.score);
-        msg += "\n";
-
-        report << msg;
     }
 
     report.close();
@@ -95,10 +85,10 @@ int main(int argc, char** argv) {
 
 
 void* timer(void *param) {
-	for (int i = 0; i < sleepTime && !solveDone; i++) {
+	for (int i = 0; i < sleepTime && !solvingDone; i++) {
 		sleep(1);
 	}
-	if (!solveDone) {
+	if (!solvingDone) {
 		kill(getpid(), SIGINT);
 	}
 	return NULL;
