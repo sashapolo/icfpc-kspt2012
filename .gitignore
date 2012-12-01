@@ -38,7 +38,7 @@ doc/doxygen/html
 *.html
 
 # Score harnessing data
-scoreharnessreports/
+scoreharness/reports/
 
 # Emacs temporary files
 *~
