@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
 		Solver s(&field);
 		std::string result = s.solve();
 		std::cout<<result<<"\n";
-		//FieldSim::drawStepByStep(&field, result);
+		FieldSim::drawStepByStep(&field, result);
 	} catch (const FieldParseException& e) {
 		//std::cout << "Map load error! (See LOG.html)\n";
 		std::cout << "A\n";

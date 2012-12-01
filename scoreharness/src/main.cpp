@@ -1,28 +1,26 @@
 #include <fstream>
+#include <pthread.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "algo/Solver.h"
-#include "base/Field.h"
-#include "base/FieldSim.h"
-#include "HTMLLogger.h"
 
 using namespace std;
+
+static const int sleepTime = 150;
+
+bool solveDone = false;
+void* timer(void*);
 
 /**
  * Подсчет количества очков на тестовой выборке карт.
  */
 int main(int argc, char** argv) {
-
-    // Инициализация лога
-    HTMLLogger logger;
-    logger.Init("scoreharnessreports/ScoreHarnessLog.html","ScoreHarness");
-    SetLogger(&logger);
-
     // Инициализация файла с результатами
     // timestamp для имени отчета
     time_t curTimestampEpoch = time(NULL);
     tm* curTimestamp = gmtime(&curTimestampEpoch);
-    string pathToReport = "scoreharnessreports/ScoreHarness-";
+    string pathToReport = "scoreharness/reports/ScoreHarness-";
     // Приведение к long long int - иначе неоднозначность выбора перегрузок
     pathToReport += to_string(1900+(long long int)curTimestamp->tm_year);
     pathToReport += "-";
@@ -42,48 +40,27 @@ int main(int argc, char** argv) {
 
     ofstream report(pathToReport.c_str());
     if (!report.is_open()) {
-     cout << "Can't create report file: " << pathToReport << "\n";
-     return -1;
+		cout << "Can't create report file: " << pathToReport << "\n";
+		return -1;
     }
 
-    // ToDo: generify with Boost filesystem
-    const int arrSize = 12;
-    string mapNames[arrSize] = {
-        "test",
-//        "bigmap",
-//        "lightning6",
-//        "lightning8",
-//        "lightning7",
-//        "lightning9",
-        "lightning10",
-        "map1",
-        "map10",
-        "map2",
-        "map3",
-        "map4",
-        "map5",
-        "map6",
-        "map7",
-//        "map8",
-//        "map9",
-        "map100",
-//        "map122",
-//        "map177",
-//        "map420",
-//        "map434",
-        "map442"
-    };
-
     // Итерируемся по именам карт
-    string pathToMapDir = "res/maps/";
-    string pathToMap;
-    for(int i = 0; i < arrSize; i++) {
-        pathToMap = pathToMapDir;
-        pathToMap += mapNames[i];
+    for (int i = 1; i < argc; i++) {
+    	SignalHandler::setupSignalHandler();
+    	solveDone = false;
+
+    	pthread_t timerThread;
+		int err = pthread_create(&timerThread, NULL, timer, NULL);
+		if (err) {
+			cout << "Error: can't create new thread\n";
+			return -1;
+		}
+
         // Отыскиваем путь для данной карты
-        Field field(pathToMap);
+        Field field(string(argv[i]));
         Solver solver(&field);
         string path = solver.solve();
+
         // Запускаем симулятор для нахождения количества очков
         sSimResult simRes;
         const Field *pField = &field;    // указатель на карту нужен постоянно + мелкая оптимизация
@@ -93,11 +70,20 @@ int main(int argc, char** argv) {
             pField = FieldSim::calcNextStateEx(oldField, path[j], &simRes);
             delete oldField;
         }
-        string msg = mapNames[i];
+        delete pField;
+
+        solveDone = true;
+        err = pthread_join(timerThread, NULL);
+        if (err) {
+        	cout << "Error: can't join timer thread\n";
+        	return -1;
+        }
+
+        string msg = argv[i];
         msg += ": ";
         // Преобразование score из int в string
         // Приведение к long long int - иначе неоднозначность выбора перегрузок
-        msg += std::to_string((long long int)simRes.score);
+        msg += std::to_string((long long)simRes.score);
         msg += "\n";
 
         report << msg;
@@ -105,5 +91,15 @@ int main(int argc, char** argv) {
 
     report.close();
     return 0;
+}
 
+
+void* timer(void *param) {
+	for (int i = 0; i < sleepTime && !solveDone; i++) {
+		sleep(1);
+	}
+	if (!solveDone) {
+		kill(getpid(), SIGINT);
+	}
+	return NULL;
 }

@@ -11,7 +11,6 @@
 #include <signal.h>
 
 
-
 class SignalHandler {
 private:
 	static bool sigIntFlag;
@@ -24,6 +23,7 @@ private:
 	}
 public:
 	inline static void setupSignalHandler() {
+		sigIntFlag = false;
 		signal(SIGINT, sigIntSignalHandler);
 	}
 	/**
