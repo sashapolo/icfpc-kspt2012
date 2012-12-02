@@ -27,7 +27,7 @@ enum GUI_ID
     GUI_ID_BUTTON_WAIT,
     
 };
-
+    
 class MyEventReceiver;
 class LifterGUI 
 {

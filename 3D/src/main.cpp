@@ -3,12 +3,13 @@
 
 #include "Logger.h"
 
-IVideoDriver* driver=0;
-ISceneManager* smgr=0;
-IGUIEnvironment* guienv=0;
-
 LifterGUI lifterGUI;
 
+IrrlichtDevice *device;
+IVideoDriver* driver;
+ISceneManager* smgr;
+IGUIEnvironment* guienv;
+    
 dimension2d<u32> window_dim;
 IPostProcessBlur *Blur;
 IPostProcessBloom *Bloom;
@@ -21,8 +22,7 @@ int main()
 {
     wchar_t tmp[1024];
     window_dim=dimension2d<u32>(800,600);
-    IrrlichtDevice *device =
-            createDevice( video::EDT_OPENGL, window_dim,32,false,true);
+    device = createDevice( video::EDT_OPENGL, window_dim,32,false,true);
 
     if (!device)
             return 1;

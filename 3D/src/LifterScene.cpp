@@ -1,13 +1,14 @@
 #include "stdinclude.h"
 #include "LifterScene.h"
+#include "AnimSprite.h"
+#include "LifterEffects.h"
+//#include "LifterEffects.h"
 #define CELLSIZE 10.0f
 #define BILLBOARD_DISTANCE 200
 #define SCENE_UPDATE_TIME 300
 
 
 LifterScene::LifterScene() {
-    driver=0;
-    smgr=0;
     pField=0;
     
     earth_ind=0;
@@ -36,8 +37,12 @@ void LifterScene::init(IrrlichtDevice *device_, IVideoDriver* driver_, ISceneMan
     driver=driver_;
     smgr=smgr_;
     
-    pExplosionTexture=driver->getTexture(L"3D/res/textures/exp.tga");
+    effects.init(device,driver,smgr);
     
+    pExplosionTexture=driver->getTexture(L"3D/res/textures/exp.png");
+    pFogTex=driver->getTexture(L"3D/res/textures/fog.png");
+    pTeleTex=driver->getTexture(L"3D/res/textures/tele.tga");
+            
     pWallTex=driver->getTexture(L"3D/res/textures/wall.png");
     pWallBump=driver->getTexture(L"3D/res/textures/wall_n.tga");
     pWallGlow=driver->getTexture(L"3D/res/textures/wall_g.png");
@@ -55,7 +60,7 @@ void LifterScene::init(IrrlichtDevice *device_, IVideoDriver* driver_, ISceneMan
     pRobotBump=driver->getTexture(L"3D/res/textures/ufo_n.png");
     pFireTex=driver->getTexture(L"3D/res/textures/fireball.png");
     pLiftTex=driver->getTexture(L"3D/res/textures/lift_closed.png");
-    pSunTex=driver->getTexture(L"3D/res/textures/sun.png");
+    pSunTex=driver->getTexture(L"3D/res/textures/sun.tga");
     
     pStoneSpriteTex=driver->getTexture(L"3D/res/textures/stone_sprite.png");
     pStoneSpriteBump=driver->getTexture(L"3D/res/textures/stone_sprite_n.png");
@@ -92,7 +97,6 @@ void LifterScene::init(IrrlichtDevice *device_, IVideoDriver* driver_, ISceneMan
             "3D/res/shaders/parallax.vert","main",irr::video::EVST_VS_2_0,
             "3D/res/shaders/parallax.frag","main",irr::video::EPST_PS_2_0,
             parallaxCallback,irr::video::EMT_SOLID,1);
-
 }
 
 bool LifterScene::loadMap(wchar_t* Path)
@@ -172,9 +176,16 @@ eEndState LifterScene::step(char chStep)
     return result.state;
 }
 
+void LifterScene::onFrame()
+{
+    updateScene();
+    effects.update();
+}
+
 void LifterScene::updateScene()
 {
     if(!pField) return;
+    
     timespec currentTime;
     clock_gettime(CLOCK_MONOTONIC,&currentTime);
     if(msecDiff(currentTime,prevUpdateTime)<SCENE_UPDATE_TIME) return;
@@ -240,7 +251,8 @@ void LifterScene::updateScene()
 }
 
 void LifterScene::applyChanges(sSimResult& res)
-{
+{       
+    scene::ISceneNode* pNode=0;
     for(u32 i=0;i<res.Changes.size();i++)
     {
         res.Changes[i].pos1=Point(res.Changes[i].pos1.x,(pField->getSize().second-1)-res.Changes[i].pos1.y);
@@ -255,6 +267,18 @@ void LifterScene::applyChanges(sSimResult& res)
                 break;
             case CH_DESTROY:
                 removeActor(res.Changes[i].pos1);
+                
+                if(res.Changes[i].cellType==LAMBDA)
+                {
+                    pNode=effects.createAnimation(pTeleTex, pBlackTex,5,6,CELLSIZE*1.1, res.Changes[i].pos1,1000);
+                    //addLambdaExplosionParticles(pNode,pFogTex);
+                }
+                else
+                {
+                    pNode=effects.createAnimation(pExplosionTexture, pBlackTex,8,8,CELLSIZE*2.2, res.Changes[i].pos1,2000);
+                    addExplosionParticles(pNode,pFogTex,pSunTex);
+                }
+                
                 LOGINFO("Change: destroy (%d,%d)",
                         res.Changes[i].pos1.x,res.Changes[i].pos1.y)
                 break;
@@ -274,7 +298,7 @@ void LifterScene::moveActor(Point pos0,Point pos1)
     {
         ISceneNodeAnimator * anim=smgr->createFlyStraightAnimator(
                 core::vector3df(pos0.x*CELLSIZE,pos0.y*CELLSIZE,0),
-                core::vector3df(pos1.x*CELLSIZE,pos1.y*CELLSIZE,0),1000);
+                core::vector3df(pos1.x*CELLSIZE,pos1.y*CELLSIZE,0),600);
         pNode->addAnimator(anim);
         //pNode->setPosition(vector3df(pos1.x*CELLSIZE,pos1.y*CELLSIZE,0));
         setNode(pos0,0);
@@ -361,6 +385,7 @@ void LifterScene::addActor(Point pos, char type)
                 pNode->setScale(vector3df(0.05,0.05,0.05));
 
                 setDefaultMaterial(pNode,video::EMT_NORMAL_MAP_SOLID,pRobotTex,pRobotBump);
+                pNode->setMaterialFlag(video::EMF_LIGHTING, false);
                 
                 anim = smgr->createRotationAnimator(core::vector3df(0,0.5f,0));
                 pNode->addAnimator(anim);
@@ -463,6 +488,98 @@ void LifterScene::setDefaultMaterial(scene::ISceneNode* pNode, E_MATERIAL_TYPE T
     pNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
     if(diffuse) pNode->setMaterialTexture(0,diffuse);
     if(normal) pNode->setMaterialTexture(1,normal);
+}
+
+void LifterScene::addExplosionParticles(scene::ISceneNode* pNode,ITexture* pTexture1,ITexture* pTexture2)
+{
+    scene::IParticleSystemSceneNode* ps =
+        smgr->addParticleSystemSceneNode(false,pNode);
+            
+    scene::IParticleEmitter* em = ps->createBoxEmitter(
+        core::aabbox3d<f32>(-7,0,-7,7,1,7), // emitter size
+        core::vector3df(0.0f,0.006f,0.0f),   // initial direction
+        20,50,                             // emit rate
+        video::SColor(0,255,255,255),       // darkest color
+        video::SColor(0,255,255,255),       // brightest color
+        200,1000,10,                         // min and max age, angle
+        core::dimension2df(4.f,4.f),         // min size
+        core::dimension2df(8.f,8.f));        // max size
+
+    ps->setEmitter(em); // this grabs the emitter
+    em->drop(); // so we can drop it here without deleting it
+
+    scene::IParticleAffector* paf = ps->createFadeOutParticleAffector();
+
+    ps->addAffector(paf); // same goes for the affector
+    paf->drop();
+
+    ps->setScale(core::vector3df(1,1,1));
+    ps->setMaterialFlag(video::EMF_LIGHTING, false);
+    ps->setMaterialFlag(video::EMF_ZWRITE_ENABLE, false);
+    ps->setMaterialTexture(0, pTexture1);
+    ps->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+    
+    /////////////
+    
+    ps =
+        smgr->addParticleSystemSceneNode(false,pNode);
+    
+    em = ps->createSphereEmitter(
+        core::vector3df(0.0f,0.0f,0.0f), // emitter size
+        4,
+        core::vector3df(0.0f,-0.003f,0.0f),   // initial direction
+        80,100,                             // emit rate
+        video::SColor(0,255,255,255),       // darkest color
+        video::SColor(0,255,255,255),       // brightest color
+        800,2000,10,                         // min and max age, angle
+        core::dimension2df(1.f,1.f),         // min size
+        core::dimension2df(2.f,2.f));        // max size
+    
+    ps->setEmitter(em); // this grabs the emitter
+    em->drop(); // so we can drop it here without deleting it
+
+    paf = ps->createFadeOutParticleAffector();
+
+    ps->addAffector(paf); // same goes for the affector
+    paf->drop();
+
+    ps->setScale(core::vector3df(1,1,1));
+    ps->setMaterialFlag(video::EMF_LIGHTING, false);
+    ps->setMaterialFlag(video::EMF_ZWRITE_ENABLE, false);
+    ps->setMaterialTexture(0, pTexture2);
+    ps->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+}
+
+void LifterScene::addLambdaExplosionParticles(scene::ISceneNode* pNode,ITexture* pTexture1)
+{
+    scene::IParticleSystemSceneNode* ps =
+        smgr->addParticleSystemSceneNode(false,pNode);
+            
+    scene::IParticleEmitter* em = ps->createSphereEmitter(
+        core::vector3df(0.0f,0.0f,0.0f), // emitter size
+        4,
+        core::vector3df(0.0f,0.01f,0.0f),   // initial direction
+        80,100,                             // emit rate
+        video::SColor(0,255,255,255),       // darkest color
+        video::SColor(0,255,255,255),       // brightest color
+        800,2000,10,                         // min and max age, angle
+        core::dimension2df(3.f,3.f),         // min size
+        core::dimension2df(6.f,6.f));        // max size
+
+
+    ps->setEmitter(em); // this grabs the emitter
+    em->drop(); // so we can drop it here without deleting it
+
+    scene::IParticleAffector* paf = ps->createFadeOutParticleAffector();
+
+    ps->addAffector(paf); // same goes for the affector
+    paf->drop();
+
+    ps->setScale(core::vector3df(1,1,1));
+    ps->setMaterialFlag(video::EMF_LIGHTING, false);
+    ps->setMaterialFlag(video::EMF_ZWRITE_ENABLE, false);
+    ps->setMaterialTexture(0, pTexture1);
+    ps->setMaterialType(video::EMT_TRANSPARENT_VERTEX_ALPHA);
 }
 
 void LifterScene::release()

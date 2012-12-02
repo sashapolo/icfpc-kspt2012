@@ -26,13 +26,19 @@ public:
     void setParallaxMaterial(scene::ISceneNode* pNode, ITexture* diffuse=0, ITexture* normal=0, ITexture* specular=0, ITexture* glow=0);
     void setBumpMaterial(scene::ISceneNode* pNode, ITexture* diffuse=0, ITexture* normal=0, ITexture* specular=0, ITexture* glow=0);
     void setDefaultMaterial(scene::ISceneNode* pNode, E_MATERIAL_TYPE Type, ITexture* diffuse=0, ITexture* normal=0);
+    void addExplosionParticles(scene::ISceneNode* pNode,ITexture* pTexture1,ITexture* pTexture2);
+    void addLambdaExplosionParticles(scene::ISceneNode* pNode,ITexture* pTexture1);
     
+    void onFrame();
 private:
     IrrlichtDevice *device;
     IVideoDriver* driver;
     ISceneManager* smgr;
     
     ITexture* pExplosionTexture;
+    
+    ITexture* pFogTex;
+    ITexture* pTeleTex;
     
     ITexture* pWallTex;
     ITexture* pWallBump;
@@ -79,6 +85,8 @@ private:
 
     MeshBuffer mbWall;
     MeshBuffer mbEarth;
+    
+    LifterEffects effects;
     
     scene::ISceneNode** NodeArr;
     

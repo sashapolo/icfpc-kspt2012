@@ -38,5 +38,7 @@ using namespace gui;
 #include "PostBlurCallback.h"
 #include "PostBloomCallback.h"
 
+#include "AnimSprite.h"
+#include "LifterEffects.h"
 #include "LifterScene.h"
 #include "LifterGUI.h"

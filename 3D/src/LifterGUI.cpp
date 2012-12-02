@@ -177,7 +177,7 @@ void LifterGUI::updateImageLists()
 
 void LifterGUI::onFrame()
 {
-    lifterScene.updateScene();
+    lifterScene.onFrame();
 }
 
 void LifterGUI::updateGUI()
@@ -217,6 +217,7 @@ void LifterGUI::release()
     lifterScene.release();
     if(pReceiver)
     {
+        device->setEventReceiver(0);
         delete pReceiver;
         pReceiver=0;
     }

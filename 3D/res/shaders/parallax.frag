@@ -2,6 +2,8 @@
  
 varying vec3 LightDirection; 
 varying vec3 ViewDirection;
+uniform vec2 TexOffset;
+uniform vec2 TexScale;
 
 uniform sampler2D colorMap;
 uniform sampler2D bumpHeightMap;
@@ -81,7 +83,9 @@ void main()
    vec3 L = normalize(LightDirection);
    vec3 E = normalize(ViewDirection);
    
-   vec2 tex=ParallaxOcclusionMap(gl_TexCoord[0].xy,0.0,E,15,0.03);
+   vec2 tex=TexOffset.xy+gl_TexCoord[0].xy*TexScale.xy;
+
+   tex=ParallaxOcclusionMap(tex,0.0,E,15,0.03);
 
 
    vec3 N = normalize( ( texture2D( bumpHeightMap, tex).xyz * 2.0 ) - 1.0 );
