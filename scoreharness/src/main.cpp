@@ -21,16 +21,16 @@ int main(int argc, char** argv) {
     time_t curTimestampEpoch = time(NULL);
     tm* curTimestamp = localtime(&curTimestampEpoch);
     string pathToReport = "scoreharness/reports/ScoreHarness-";
-    pathToReport += to_string(1900 + curTimestamp->tm_year);
+    pathToReport += to_string((long long int)(1900 + curTimestamp->tm_year));
     pathToReport += "-";
     // +1: month is from 0 to 11
-    pathToReport += to_string(curTimestamp->tm_mon + 1);
+    pathToReport += to_string((long long int)curTimestamp->tm_mon + 1);
     pathToReport += "-";
-    pathToReport += to_string(curTimestamp->tm_mday);
+    pathToReport += to_string((long long int)curTimestamp->tm_mday);
     pathToReport += "-";
-    pathToReport += to_string(curTimestamp->tm_hour);
+    pathToReport += to_string((long long int)curTimestamp->tm_hour);
     pathToReport += "-";
-    pathToReport += to_string(curTimestamp->tm_min);
+    pathToReport += to_string((long long int)curTimestamp->tm_min);
     pathToReport += ".txt";
 
     ofstream report(pathToReport.c_str());
