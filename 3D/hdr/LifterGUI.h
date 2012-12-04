@@ -26,7 +26,8 @@ enum GUI_ID
     GUI_ID_BUTTON_RIGHT,
     GUI_ID_BUTTON_WAIT,
     GUI_ID_BUTTON_ABORT,
-    GUI_ID_END_GAME
+    GUI_ID_END_GAME,
+    GUI_ID_BUTTON_BLOOM
     
 };
     
@@ -115,6 +116,13 @@ public:
         }
     };
     
+    void onButtonBloom()
+    {
+        bEnableBloom=!bEnableBloom;
+    }
+    
+    bool isBloomEnabled() {return bEnableBloom;};
+    
     void updateGameInfo();
     void clearScene();
     void endGame(const wchar_t* reason=0);
@@ -162,6 +170,7 @@ private:
     ITexture* pErrorTex;
     
     bool bImmediateSteps;
+    bool bEnableBloom;
 };
 
 class MyEventReceiver : public IEventReceiver
@@ -208,6 +217,7 @@ public:
                         case GUI_ID_BUTTON_NEXT: pLifterGUI->onButtonNext(); break;
                         case GUI_ID_BUTTON_ABORT: pLifterGUI->onButtonAbort(); break;
                         case GUI_ID_BUTTON_IMMEDIATE_STEPS: pLifterGUI->onButtonImmediateSteps(); break;
+                        case GUI_ID_BUTTON_BLOOM: pLifterGUI->onButtonBloom(); break;
                     }
                     break;
                 case EGET_FILE_SELECTED:         

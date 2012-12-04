@@ -13,6 +13,7 @@ LifterGUI::LifterGUI() {
     imgListOffsetY=0;
     pMarkImage=0;
     bImmediateSteps=true;
+    bEnableBloom=false;
 }
 
 LifterGUI::~LifterGUI() {
@@ -75,6 +76,9 @@ void LifterGUI::initGUI(IrrlichtDevice *device_, IVideoDriver* driver_,ISceneMan
     toolBar->addButton(GUI_ID_BUTTON_IMMEDIATE_STEPS, 0, L"Immediate//By step",image, image2, true, true);
     image = driver->getTexture("3D/res/textures/GUI/log64.png");
     toolBar->addButton(GUI_ID_BUTTON_OPEN_LOG, 0, L"Open/Close log",image, 0, false, true);
+    image = driver->getTexture("3D/res/textures/GUI/bloom_ena64.png");
+    image2 = driver->getTexture("3D/res/textures/GUI/bloom_dis64.png");
+    toolBar->addButton(GUI_ID_BUTTON_BLOOM, 0, L"Bloom enable//disable",image, image2, true, true);
     
     image = driver->getTexture("3D/res/textures/GUI/mov/up-icon64.png");
     button= guienv->addButton(rect<s32>(64,192,128,256),0,GUI_ID_BUTTON_UP);
