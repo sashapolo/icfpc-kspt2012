@@ -303,6 +303,7 @@ void LifterScene::moveActor(Point pos0,Point pos1)
         //pNode->setPosition(vector3df(pos1.x*CELLSIZE,pos1.y*CELLSIZE,0));
         setNode(pos0,0);
         setNode(pos1,pNode);
+        
     }
 }
 
@@ -618,7 +619,7 @@ void LifterScene::clear()
     {
         for(int i=0;i<pField->getSize().first*pField->getSize().second;i++)
         {
-            if(NodeArr[i]!=0)
+            if((NodeArr[i]!=0) && (NodeArr[i]!=pLiftNode))
             {
                 NodeArr[i]->remove();
                 NodeArr[i]=0;
@@ -626,25 +627,19 @@ void LifterScene::clear()
         }
         
         pRobotNode=0;
-        pLiftNode=0;
+
+        if(pLiftNode)
+        {
+            pLiftNode->remove();
+            pLiftNode=0;
+        }
         delete [] NodeArr;
         NodeArr=0;
     }
     
-//    if(pRobotNode)
-//    {
-//        pRobotNode->remove();
-//        pRobotNode=0;
-//    }
-//    
-//    if(pLiftNode)
-//    {
-//        pLiftNode->remove();
-//        pLiftNode=0;
-//    }
-    
-//    for(unsigned int i=0;i<StoneArr.size();i++) StoneArr[i]->remove();
-//    StoneArr.clear();
-//    for(unsigned int i=0;i<LambdaArr.size();i++) LambdaArr[i]->remove();
-//    LambdaArr.clear();
+    if(pField)
+    {
+        delete pField;
+        pField=0;
+    }
 }

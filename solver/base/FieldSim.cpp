@@ -79,6 +79,7 @@ const Field* FieldSim::calcNextStateEx(const Field* pField, char step, sSimResul
 	Field* ret = calcNextFieldState(
 			calcRobotStep(pField, step, &(pResult->Changes)),
 			&(pResult->Changes));
+        pResult->score--;
 	if (ret->getLambdaCount() < lambdaCount) {
 		pResult->lambdaReceived++;
 		pResult->state = ES_EAT_LAMBDA;

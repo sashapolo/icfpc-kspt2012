@@ -33,6 +33,7 @@ void LifterGUI::initGUI(IrrlichtDevice *device_, IVideoDriver* driver_,ISceneMan
     pDownTex=driver->getTexture("3D/res/textures/GUI/mov/down-icon32.png");
     pLeftTex=driver->getTexture("3D/res/textures/GUI/mov/left-icon32.png");
     pRightTex=driver->getTexture("3D/res/textures/GUI/mov/right-icon32.png");
+    pAbortTex=driver->getTexture("3D/res/textures/GUI/mov/block-icon32.png");
     
     pEatLambdaTex=driver->getTexture("3D/res/textures/GUI/mov/present-icon32.png");
     pDestroyedTex=driver->getTexture("3D/res/textures/GUI/mov/delete-icon32.png");
@@ -95,11 +96,18 @@ void LifterGUI::initGUI(IrrlichtDevice *device_, IVideoDriver* driver_,ISceneMan
     button= guienv->addButton(rect<s32>(64,256,128,320),0,GUI_ID_BUTTON_WAIT);
     button->setImage(image);
     button->setUseAlphaChannel(true);
+    image = driver->getTexture("3D/res/textures/GUI/mov/block-icon64.png");
+    button= guienv->addButton(rect<s32>(0,192,64,256),0,GUI_ID_BUTTON_ABORT);
+    button->setImage(image);
+    button->setUseAlphaChannel(true);
         
     
     logListbox = guienv->addListBox(rect<s32>(0, 0, window_dim.Width, 150));
     logListbox->setVisible(false);
     infoText=guienv->addStaticText (L"Camera pos: 0.0, 0.0, 0.0\r\nFPS: 0",rect<s32>(0,0,window_dim.Width,40));
+    gameInfoText=guienv->addStaticText (L"",rect<s32>(window_dim.Width-100,window_dim.Height-60,window_dim.Width,window_dim.Height));
+    gameInfoText->setOverrideColor(SColor(255,0,255,0));
+    updateGameInfo();
     
     pMarkImage=guienv->addImage(pMarkTex,core::position2d< s32 >(0,imgListOffsetY));
     
@@ -143,6 +151,7 @@ void LifterGUI::updateImageLists()
             case 'D': pathImageList[listPos]->setImage(pDownTex); break;
             case 'L': pathImageList[listPos]->setImage(pLeftTex); break;
             case 'R': pathImageList[listPos]->setImage(pRightTex); break;
+            case 'A': pathImageList[listPos]->setImage(pAbortTex); break;
             default:
                 break;
         }
@@ -153,6 +162,7 @@ void LifterGUI::updateImageLists()
     
     //////////STATE////////
     listPos=-1;
+    const wchar_t* End=0;
     for(u32 i=nCharFirst;i<nCharLast;i++)
     {
         listPos=i-nCharFirst;
@@ -161,9 +171,9 @@ void LifterGUI::updateImageLists()
         {
             case ES_NONE: stateImageList[listPos]->setVisible(false); break;
             case ES_EAT_LAMBDA: stateImageList[listPos]->setImage(pEatLambdaTex); break;
-            case ES_DESTROYED: stateImageList[listPos]->setImage(pDestroyedTex); break;
-            case ES_FINISHED: stateImageList[listPos]->setImage(pFinishedTex); break;
-            case ES_ABORTED: stateImageList[listPos]->setImage(pAbortedTex); break;
+            case ES_DESTROYED: stateImageList[listPos]->setImage(pDestroyedTex); End=L"Destroyed"; break;
+            case ES_FINISHED: stateImageList[listPos]->setImage(pFinishedTex); End=L"Finished"; break;
+            case ES_ABORTED: stateImageList[listPos]->setImage(pAbortedTex); End=L"Aborted"; break;
             case ES_WRONG_STEP: stateImageList[listPos]->setImage(pWrongStepTex); break;
             case ES_ERROR: stateImageList[listPos]->setImage(pErrorTex); break;
             default:
@@ -171,8 +181,29 @@ void LifterGUI::updateImageLists()
         }
         stateImageList[listPos]->setRelativePosition(core::position2d< s32 >(listPos*32,imgListOffsetY));
         if(robotStates[i]!=ES_NONE) stateImageList[listPos]->setVisible(true);
+        if(End) break;
     }
     for(u32 i=listPos+1;i<stateImageList.size();i++) stateImageList[i]->setVisible(false);
+    
+    if(End) endGame(End);
+}
+
+void LifterGUI::clearScene()
+{
+    getScene().clear();
+    robotPath.clear();
+    robotStates.clear();
+    currentRobotStep=0;
+    updateGUI();
+}
+
+void LifterGUI::endGame(const wchar_t* reason)
+{
+    wchar_t tmp[1024];
+    swprintf(tmp,1024,L"End of Game!\nReason: %ls \nScore: %d\nSteps: %d\nLambdas harvested: %d",
+            reason,lifterScene.getScore(),lifterScene.getNumSteps(),lifterScene.getNumHarvestedLambdas());
+    guienv->addMessageBox(L"Results:", tmp,true,EMBF_OK,0,GUI_ID_END_GAME);
+    
 }
 
 void LifterGUI::onFrame()
@@ -189,6 +220,8 @@ void LifterGUI::updateGUI()
     int infoOffset=logListbox->isVisible()? 150 : 0;
     infoText->setRelativePosition(rect<s32>(0,infoOffset,window_dim.Width,infoOffset+40));
     
+    gameInfoText->setRelativePosition(rect<s32>(window_dim.Width-100,window_dim.Height-60,window_dim.Width,window_dim.Height));
+ 
     imgListOffsetY=(window_dim.Height-barRect.getSize().Height)-64;
     updateImageLists();
 }
@@ -204,6 +237,14 @@ void LifterGUI::SetGUIColor(SColor col)
 void LifterGUI::setInfo(const wchar_t* txt)
 {
     infoText->setText(txt);
+}
+
+void LifterGUI::updateGameInfo()
+{
+    wchar_t tmp[1024];
+    swprintf(tmp,1024,L"Score: %d\nSteps: %d\nLambdas: %d",
+            lifterScene.getScore(),lifterScene.getNumSteps(),lifterScene.getNumHarvestedLambdas());
+    gameInfoText->setText(tmp);
 }
 
 void LifterGUI::resizeWindow(dimension2d<u32> newDim)

@@ -30,6 +30,10 @@ public:
     void addLambdaExplosionParticles(scene::ISceneNode* pNode,ITexture* pTexture1);
     
     void onFrame();
+    
+    int getScore() {return result.score;};
+    int getNumSteps() {return result.stepsTaken;};
+    int getNumHarvestedLambdas() {return result.lambdaReceived;};
 private:
     IrrlichtDevice *device;
     IVideoDriver* driver;

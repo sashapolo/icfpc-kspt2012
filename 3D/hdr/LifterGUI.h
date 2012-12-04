@@ -25,6 +25,8 @@ enum GUI_ID
     GUI_ID_BUTTON_LEFT,
     GUI_ID_BUTTON_RIGHT,
     GUI_ID_BUTTON_WAIT,
+    GUI_ID_BUTTON_ABORT,
+    GUI_ID_END_GAME
     
 };
     
@@ -52,11 +54,8 @@ public:
         guienv->addFileOpenDialog(L"Select path file:",true,0,GUI_ID_FD_PATHSELECT);
     }
     void onButtonMapSelected(wchar_t* Path){
+        clearScene();
         getScene().loadMap(Path);
-        robotPath.clear();
-        robotStates.clear();
-        currentRobotStep=0;
-        updateGUI();
     }
     void onButtonPathSelected(wchar_t* Path){
         
@@ -71,6 +70,7 @@ public:
         {
                 robotStates.push_back(lifterScene.step(robotPath[currentRobotStep++]));
                 updateImageLists();
+                updateGameInfo();
         };
     }
     void onButtonUp(){
@@ -98,6 +98,11 @@ public:
         updateImageLists();
         if(bImmediateSteps) onButtonNext();
     }
+    void onButtonAbort(){
+        robotPath+='A';
+        updateImageLists();
+        if(bImmediateSteps) onButtonNext();
+    }
     void onButtonImmediateSteps()
     {
         bImmediateSteps=!bImmediateSteps;
@@ -110,6 +115,9 @@ public:
         }
     };
     
+    void updateGameInfo();
+    void clearScene();
+    void endGame(const wchar_t* reason=0);
     void release();
 private:
     IrrlichtDevice *device;
@@ -119,6 +127,7 @@ private:
 
     IGUIListBox * logListbox;
     IGUIStaticText* infoText;
+    IGUIStaticText* gameInfoText;
     IGUIToolBar* toolBar;
     
     std::string robotPath;
@@ -143,6 +152,7 @@ private:
     ITexture* pDownTex;
     ITexture* pLeftTex;
     ITexture* pRightTex;
+    ITexture* pAbortTex;
     
     ITexture* pEatLambdaTex;
     ITexture* pDestroyedTex;
@@ -158,6 +168,7 @@ class MyEventReceiver : public IEventReceiver
 {
 public:
     IGUIFileOpenDialog* dialog;
+    IGUIElement* element;
     LifterGUI* pLifterGUI;
    virtual bool OnEvent(const SEvent& event)
    {
@@ -171,29 +182,6 @@ public:
                 default:
                     LogInfo("[Irrlicht] %s",event.LogEvent.Text);
                     break;
-            }
-        }
-        
-        if (event.EventType == EET_GUI_EVENT)
-        {
-            switch(event.GUIEvent.EventType)
-            {
-                case EGET_FILE_SELECTED:         
-                    dialog = (IGUIFileOpenDialog*)event.GUIEvent.Caller;
-                    switch(dialog->getID())
-                    {
-                        case GUI_ID_FD_MAPSELECT: 
-                            pLifterGUI->onButtonMapSelected((wchar_t*)dialog->getFileName());
-                            break;
-                        case GUI_ID_FD_PATHSELECT:
-                            pLifterGUI->onButtonPathSelected((wchar_t*)dialog->getFileName());
-                            break;
-                        default: break;
-                    };
-                    return true;
-                
-                default:
-                        break;
             }
         }
 
@@ -218,8 +206,33 @@ public:
                         case GUI_ID_BUTTON_RIGHT: pLifterGUI->onButtonRight(); break;
                         case GUI_ID_BUTTON_WAIT: pLifterGUI->onButtonWait(); break;
                         case GUI_ID_BUTTON_NEXT: pLifterGUI->onButtonNext(); break;
+                        case GUI_ID_BUTTON_ABORT: pLifterGUI->onButtonAbort(); break;
                         case GUI_ID_BUTTON_IMMEDIATE_STEPS: pLifterGUI->onButtonImmediateSteps(); break;
                     }
+                    break;
+                case EGET_FILE_SELECTED:         
+                    dialog = (IGUIFileOpenDialog*)event.GUIEvent.Caller;
+                    switch(dialog->getID())
+                    {
+                        case GUI_ID_FD_MAPSELECT: 
+                            pLifterGUI->onButtonMapSelected((wchar_t*)dialog->getFileName());
+                            break;
+                        case GUI_ID_FD_PATHSELECT:
+                            pLifterGUI->onButtonPathSelected((wchar_t*)dialog->getFileName());
+                            break;
+                        default: break;
+                    };
+                    break;
+                case EGET_MESSAGEBOX_OK:
+                    element = (IGUIElement*)event.GUIEvent.Caller;
+                    switch(element->getID())
+                    {
+                        case GUI_ID_END_GAME:
+                            pLifterGUI->clearScene();
+                            break;
+                        default: break;
+                    }
+                    break;
                 default:
                     break;
             }
