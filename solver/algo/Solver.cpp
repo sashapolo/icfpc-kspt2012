@@ -5,10 +5,10 @@
  *      Author: alexander
  */
 
-#include "algo/Solver.h"
+#include "Solver.h"
 
 
-Solver::Solver(Field *f): totalLambdas(f->getLambdaCount()){
+Solver::Solver(Field *f): totalLambdas(f->getLambdaCount()) {
 	pField = new Field(*f);
 	nextGoalIndex = 0;
 	optimalPath = NULL;

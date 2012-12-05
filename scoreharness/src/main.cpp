@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
 			}
 
 			report << argv[i] << ": " << simRes.score << endl;
-		} catch (FieldParseException&) {
+		} catch (Field::FieldParseException&) {
 			cout << "Error while parsing input file: " << argv[i] << "\n";
 			i++;
 		}

@@ -13,8 +13,7 @@
 
 class NearestNeighbour {
 private:
-	static const Point* findNearestNeighbour(const Point&,
-											 std::list<const Point*>*);
+	static const Point* findNearestNeighbour(const Point&, std::list<const Point*>*);
 public:
 	static Path* createTour(const Point&, const Field&);
 };

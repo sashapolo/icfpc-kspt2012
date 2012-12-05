@@ -7,41 +7,14 @@
 
 #include "base/Path.h"
 
-Path::Path(): path() {
-}
-
 Path::~Path() {
 	std::vector<const Point*>::iterator it = path.begin();
-	while (it != path.end()) {
+	std::vector<const Point*>::iterator end = path.end();
+	for (; it != end; it++) {
 		delete *it;
-		it = path.erase(it);
 	}
+	path.clear();
 }
-
-
-const Point* Path::getCell(int index) const {
-    return path[index];
-}
-
-
-void Path::addCell(const Point& c) {
-    /*
-     * ToDo проверка того,
-     * что добавляемая точка находится рядом с последней добавленной.
-     */
-    path.push_back(new Point(c));
-}
-
-
-int Path::getSize() const {
-    return path.size();
-}
-
-
-bool Path::isEmpty() const {
-	return path.empty();
-}
-
 
 int Path::getDistance() const {
 	int result = 0;

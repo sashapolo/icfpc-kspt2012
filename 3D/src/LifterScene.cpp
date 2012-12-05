@@ -10,22 +10,22 @@
 
 LifterScene::LifterScene() {
     pField=0;
-    
+
     earth_ind=0;
     wall_ind=0;
-    
+
     pWallTex=0;
     pEarthTex=0;
-    
+
     pRobotNode=0;
     pLiftNode=0;
-    
+
     pWallMeshBufferNode=0;
     pEarthMeshBufferNode=0;
-    
+
     pCamera=0;
     NodeArr=0;
-    
+
     animationSpeed=500;
     clock_gettime(CLOCK_MONOTONIC,&prevAnimTime);
 }
@@ -39,23 +39,23 @@ void LifterScene::init(IrrlichtDevice *device_, IVideoDriver* driver_, ISceneMan
     device=device_;
     driver=driver_;
     smgr=smgr_;
-    
+
     effects.init(device,driver,smgr);
-    
+
     pExplosionTexture=driver->getTexture(L"3D/res/textures/exp.png");
     pFogTex=driver->getTexture(L"3D/res/textures/fog.png");
     pTeleTex=driver->getTexture(L"3D/res/textures/tele.tga");
-            
+
     pWallTex=driver->getTexture(L"3D/res/textures/wall.png");
     pWallBump=driver->getTexture(L"3D/res/textures/wall_n.tga");
     pWallGlow=driver->getTexture(L"3D/res/textures/wall_g.png");
     pWallSpecular=driver->getTexture(L"3D/res/textures/wall_s.png");
-    
+
     pEarthTex=driver->getTexture(L"3D/res/textures/earth.png");
     pEarthBump=driver->getTexture(L"3D/res/textures/earth_n.tga");
     pEarthGlow=driver->getTexture(L"3D/res/textures/earth_g.png");
     pEarthSpecular=driver->getTexture(L"3D/res/textures/earth_s.png");
-    
+
     pStoneTex=driver->getTexture(L"3D/res/textures/stone.png");
     pStoneBump=driver->getTexture(L"3D/res/textures/stone_n.png");
     pStoneSpecular=driver->getTexture(L"3D/res/textures/stone_s.png");
@@ -64,36 +64,36 @@ void LifterScene::init(IrrlichtDevice *device_, IVideoDriver* driver_, ISceneMan
     pFireTex=driver->getTexture(L"3D/res/textures/fireball.png");
     pLiftTex=driver->getTexture(L"3D/res/textures/lift_closed.png");
     pSunTex=driver->getTexture(L"3D/res/textures/sun.tga");
-    
+
     pStoneSpriteTex=driver->getTexture(L"3D/res/textures/stone_sprite.png");
     pStoneSpriteBump=driver->getTexture(L"3D/res/textures/stone_sprite_n.png");
     pStoneSpriteSpecular=driver->getTexture(L"3D/res/textures/stone_sprite_s.png");
     pLambdaSpriteTex=driver->getTexture(L"3D/res/textures/lambda_sprite.png");
-    
+
     pBlackTex=driver->getTexture(L"3D/res/textures/black.png");
     pWhiteTex=driver->getTexture(L"3D/res/textures/white.png");
     pGreyTex=driver->getTexture(L"3D/res/textures/grey.png");
-    
+
     pStoneMesh=smgr->getMesh(L"3D/res/models/stone.3DS");
     pLambdaMesh=smgr->getMesh(L"3D/res/models/lambda.3DS");
     pRobotMesh=smgr->getMesh(L"3D/res/models/ufo.3DS");
-    
+
 
     light1 = smgr->addLightSceneNode(0, core::vector3df(0,0,-50),
             video::SColorf(1.0f, 1.0f, 1.0f, 0.0f), 2500);
-    
+
     pCamera=smgr->addCameraSceneNodeMaya(0,-150,150,150);
     pCamera->setFarValue(2000.f);
     pCamera->setTarget(core::vector3df(0,0,0));
     smgr->setActiveCamera(pCamera);
-    
+
     video::IGPUProgrammingServices* gpu = driver->getGPUProgrammingServices();
     ShaderBumpCallback* bumpCallback = new ShaderBumpCallback();
     bumpMaterial = gpu-> addHighLevelShaderMaterialFromFiles(
             "3D/res/shaders/bump.vert","main",irr::video::EVST_VS_2_0,
             "3D/res/shaders/bump.frag","main",irr::video::EPST_PS_2_0,
             bumpCallback,irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL,1);
-    
+
     ShaderParallaxCallback* parallaxCallback = new ShaderParallaxCallback();
     parallaxCallback->SceneManager=smgr;
     parallaxMaterial = gpu-> addHighLevelShaderMaterialFromFiles(
@@ -111,20 +111,20 @@ bool LifterScene::loadMap(wchar_t* Path)
     mbPath[len-1]='\0';
     try {
         pField=new Field( mbPath);
-    } catch (const FieldParseException& e) {
+    } catch (const Field::FieldParseException& e) {
         LOGERROR("Map load error!");
         return false;
     }
-    
+
     result=sSimResult();
-    
+
     earth_ind=new char[pField->getSize().first*pField->getSize().second];
     wall_ind=new char[pField->getSize().first*pField->getSize().second];
     NodeArr=new scene::ISceneNode*[pField->getSize().first*pField->getSize().second];
     memset(NodeArr,0,pField->getSize().first*pField->getSize().second*sizeof(scene::ISceneNode*));
     memset(earth_ind,0,pField->getSize().first*pField->getSize().second*sizeof(char));
     memset(wall_ind,0,pField->getSize().first*pField->getSize().second*sizeof(char));
-    
+
     mbWall.create(pField->getSize().first,pField->getSize().second,CELLSIZE,
             float(pField->getSize().first)/18.f*2.f, float(pField->getSize().second)/18.f*2.f,
             0,driver,smgr);
@@ -144,16 +144,16 @@ bool LifterScene::loadMap(wchar_t* Path)
     mbWall.update(wall_ind);
     mbEarth.update(earth_ind);
 
-    
+
     pWallMeshBufferNode=smgr -> addMeshSceneNode(mbWall.mesh);
     setParallaxMaterial(pWallMeshBufferNode,pWallTex,pWallBump,pWallSpecular,pWallGlow);
     pEarthMeshBufferNode=smgr -> addMeshSceneNode(mbEarth.mesh);
     setParallaxMaterial(pEarthMeshBufferNode,pEarthTex,pEarthBump,pEarthSpecular,pEarthGlow);
-    
+
     float sx=pField->getSize().first*CELLSIZE;
     float sy=pField->getSize().second*CELLSIZE;
     float gip=sqrt(sx*sx+sy*sy);
-    
+
     light1->setPosition(core::vector3df((pField->getSize().first/2)*CELLSIZE,(pField->getSize().second/2)*CELLSIZE,-gip));
     pCamera->setTarget(core::vector3df((pField->getSize().first/2)*CELLSIZE,(pField->getSize().second/2)*CELLSIZE,0));
     return (bool)pField;
@@ -177,7 +177,7 @@ eEndState LifterScene::step(char chStep)
     result.Changes.clear();
     const Field* pNextField=FieldSim::calcNextStateEx(pField,chStep,&result);
     applyChanges(result);
-    
+
     delete pField;
     pField=pNextField;
     //setBaseSceneNodes();
@@ -193,32 +193,32 @@ void LifterScene::onFrame()
 void LifterScene::updateScene()
 {
     if(!pField) return;
-    
+
     timespec currentTime;
     clock_gettime(CLOCK_MONOTONIC,&currentTime);
     if(msecDiff(currentTime,prevUpdateTime)<SCENE_UPDATE_TIME) return;
     prevUpdateTime=currentTime;
-    
-    
+
+
     core::list<ISceneNode*>::ConstIterator nodeIt;
     scene::ICameraSceneNode* pCurrCamera=smgr -> getActiveCamera();
 
-    FieldCache::const_iterator it=pField->getStoneCacheIt();
+    Field::FieldCache::const_iterator it=pField->getStoneCacheIt();
     while(it!=pField->getStoneCacheEnd())
     {
         Point pt=*(*it);
         pt.y=(pField->getSize().second-1)-pt.y;
         scene::ISceneNode* pNode=getNode(pt);
-        if(!pNode) 
+        if(!pNode)
         {
             LOGERROR("Wrong node");
             it++;
             continue;
         }
-        
+
         bool bVisible=false;
         if(pCurrCamera->getPosition().getDistanceFrom(pNode->getPosition())<BILLBOARD_DISTANCE) bVisible=true;
-        
+
         nodeIt=pNode->getChildren().begin();
         if(pNode->getChildren().size()==2)
         {
@@ -226,26 +226,26 @@ void LifterScene::updateScene()
             nodeIt++;
             (*nodeIt)->setVisible(!bVisible);
         }
-        
+
         it++;
     }
-    
+
     it=pField->getLambdaCacheIt();
     while(it!=pField->getLambdaCacheEnd())
     {
         Point pt=*(*it);
         pt.y=(pField->getSize().second-1)-pt.y;
         scene::ISceneNode* pNode=getNode(pt);
-        if(!pNode) 
+        if(!pNode)
         {
             LOGERROR("Wrong node");
             it++;
             continue;
         }
-        
+
         bool bVisible=false;
         if(pCurrCamera->getPosition().getDistanceFrom(pNode->getPosition())<BILLBOARD_DISTANCE) bVisible=true;
-        
+
         nodeIt=pNode->getChildren().begin();
         if(pNode->getChildren().size()==2)
         {
@@ -253,13 +253,13 @@ void LifterScene::updateScene()
             nodeIt++;
             (*nodeIt)->setVisible(!bVisible);
         }
-        
+
         it++;
     }
 }
 
 void LifterScene::applyChanges(sSimResult& res)
-{       
+{
     scene::ISceneNode* pNode=0;
     for(u32 i=0;i<res.Changes.size();i++)
     {
@@ -275,7 +275,7 @@ void LifterScene::applyChanges(sSimResult& res)
                 break;
             case CH_DESTROY:
                 removeActor(res.Changes[i].pos1);
-                
+
                 if(res.Changes[i].cellType==LAMBDA)
                 {
                     pNode=effects.createAnimation(pTeleTex, pBlackTex,5,6,CELLSIZE*1.1, res.Changes[i].pos1,animationSpeed*2);
@@ -286,7 +286,7 @@ void LifterScene::applyChanges(sSimResult& res)
                     pNode=effects.createAnimation(pExplosionTexture, pBlackTex,8,8,CELLSIZE*2.2, res.Changes[i].pos1,animationSpeed*3);
                     addExplosionParticles(pNode,pFogTex,pSunTex);
                 }
-                
+
                 LOGINFO("Change: destroy (%d,%d)",
                         res.Changes[i].pos1.x,res.Changes[i].pos1.y)
                 break;
@@ -302,7 +302,7 @@ void LifterScene::applyChanges(sSimResult& res)
 void LifterScene::moveActor(Point pos0,Point pos1)
 {
     scene::ISceneNode* pNode=getNode(pos0);
-    if(pNode) 
+    if(pNode)
     {
         clock_gettime(CLOCK_MONOTONIC,&prevAnimTime);
         ISceneNodeAnimator * anim=smgr->createFlyStraightAnimator(
@@ -312,7 +312,7 @@ void LifterScene::moveActor(Point pos0,Point pos1)
         //pNode->setPosition(vector3df(pos1.x*CELLSIZE,pos1.y*CELLSIZE,0));
         setNode(pos0,0);
         setNode(pos1,pNode);
-        
+
     }
 }
 
@@ -327,13 +327,13 @@ bool LifterScene::isAnimation()
 void LifterScene::removeActor(Point pos)
 {
     char cell=pField->getXY(Point(pos.x,(pField->getSize().second-1)-pos.y));
-    
+
     if(cell==WALL) wall_ind[pos.y*pField->getSize().first+pos.x]=0;
     else if(cell==EARTH) earth_ind[pos.y*pField->getSize().first+pos.x]=0;
     else
     {
         scene::ISceneNode* pNode=getNode(pos);
-        if(pNode) 
+        if(pNode)
         {
             pNode->remove();
             setNode(pos,0);
@@ -348,19 +348,19 @@ void LifterScene::addActor(Point pos, char type)
     scene::IParticleSystemSceneNode* ps;
     scene::IParticleEmitter* em;
     scene::IParticleAffector* paf;
-    
+
     scene::ISceneNode* pNodeLow;
     scene::ISceneNode* pNodeHi;
-    
-    
+
+
     removeActor(pos);
     switch(type)
     {
         case WALL:
-           wall_ind[pos.y*pField->getSize().first+pos.x]=1; 
+           wall_ind[pos.y*pField->getSize().first+pos.x]=1;
            break;
         case EARTH:
-           earth_ind[pos.y*pField->getSize().first+pos.x]=1; 
+           earth_ind[pos.y*pField->getSize().first+pos.x]=1;
            break;
         case STONE:
             //pNode=smgr -> addMeshSceneNode(pStoneMesh);//addOctreeSceneNode
@@ -369,7 +369,7 @@ void LifterScene::addActor(Point pos, char type)
             pNodeHi=smgr -> addBillboardSceneNode();
             pNode->addChild(pNodeLow);
             pNode->addChild(pNodeHi);//addOctreeSceneNode
-            
+
             pNode->setPosition(vector3df(pos.x*CELLSIZE,pos.y*CELLSIZE,0));
             pNode->setRotation(vector3df(pos.x*49,pos.y*49,pos.x*49));
             //pNode->setScale(vector3df(0.5,0.5,0.5));
@@ -384,7 +384,7 @@ void LifterScene::addActor(Point pos, char type)
             pNodeHi=smgr -> addBillboardSceneNode();
             pNode->addChild(pNodeLow);
             pNode->addChild(pNodeHi);
-            
+
             pNode->setPosition(vector3df(pos.x*CELLSIZE,pos.y*CELLSIZE,0));
             pNode->setScale(vector3df(CELLSIZE,CELLSIZE,CELLSIZE));
 
@@ -404,11 +404,11 @@ void LifterScene::addActor(Point pos, char type)
 
                 setDefaultMaterial(pNode,video::EMT_NORMAL_MAP_SOLID,pRobotTex,pRobotBump);
                 pNode->setMaterialFlag(video::EMF_LIGHTING, false);
-                
+
                 anim = smgr->createRotationAnimator(core::vector3df(0,0.5f,0));
                 pNode->addAnimator(anim);
                 anim->drop();
-                
+
                 ps = smgr->addParticleSystemSceneNode(false, pNode);
 
                 // create and set emitter
@@ -432,7 +432,7 @@ void LifterScene::addActor(Point pos, char type)
                 // create and set affector
                 paf = ps->createFadeOutParticleAffector();
                 ps->addAffector(paf);
-                paf->drop();    
+                paf->drop();
                 pRobotNode=pNode;
             }
             pRobotNode->setPosition(vector3df(pos.x*CELLSIZE,pos.y*CELLSIZE,0));
@@ -446,22 +446,22 @@ void LifterScene::addActor(Point pos, char type)
                 pNode->setMaterialType(video::EMT_SOLID);
                 pNode->setMaterialFlag(video::EMF_LIGHTING, true);
                 pNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
-                pNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);    
+                pNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
                 pNode->setMaterialTexture(0,pLiftTex);
-                
+
                 pLiftNode=pNode;
             }
             pLiftNode->setPosition(vector3df(pos.x*CELLSIZE,pos.y*CELLSIZE,0));
             setNode(pos,pLiftNode);
             break;
-            
+
         case OPENED_LIFT:
             if(!pLiftNode)
             {
                 pNode=smgr -> addCubeSceneNode(CELLSIZE);
 
                 setDefaultMaterial(pNode,video::EMT_SOLID,pLiftTex);
-                
+
                 pLiftNode=pNode;
             }
             pLiftNode->setPosition(vector3df(pos.x*CELLSIZE,pos.y*CELLSIZE,0));
@@ -512,7 +512,7 @@ void LifterScene::addExplosionParticles(scene::ISceneNode* pNode,ITexture* pText
 {
     scene::IParticleSystemSceneNode* ps =
         smgr->addParticleSystemSceneNode(false,pNode);
-            
+
     scene::IParticleEmitter* em = ps->createBoxEmitter(
         core::aabbox3d<f32>(-7,0,-7,7,1,7), // emitter size
         core::vector3df(0.0f,0.006f,0.0f),   // initial direction
@@ -536,12 +536,12 @@ void LifterScene::addExplosionParticles(scene::ISceneNode* pNode,ITexture* pText
     ps->setMaterialFlag(video::EMF_ZWRITE_ENABLE, false);
     ps->setMaterialTexture(0, pTexture1);
     ps->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
-    
+
     /////////////
-    
+
     ps =
         smgr->addParticleSystemSceneNode(false,pNode);
-    
+
     em = ps->createSphereEmitter(
         core::vector3df(0.0f,0.0f,0.0f), // emitter size
         4,
@@ -552,7 +552,7 @@ void LifterScene::addExplosionParticles(scene::ISceneNode* pNode,ITexture* pText
         800,2000,10,                         // min and max age, angle
         core::dimension2df(1.f,1.f),         // min size
         core::dimension2df(2.f,2.f));        // max size
-    
+
     ps->setEmitter(em); // this grabs the emitter
     em->drop(); // so we can drop it here without deleting it
 
@@ -572,7 +572,7 @@ void LifterScene::addLambdaExplosionParticles(scene::ISceneNode* pNode,ITexture*
 {
     scene::IParticleSystemSceneNode* ps =
         smgr->addParticleSystemSceneNode(false,pNode);
-            
+
     scene::IParticleEmitter* em = ps->createSphereEmitter(
         core::vector3df(0.0f,0.0f,0.0f), // emitter size
         4,
@@ -609,29 +609,29 @@ void LifterScene::release()
 
 void LifterScene::clear()
 {
-    if(earth_ind) 
+    if(earth_ind)
     {
         delete [] earth_ind;
         earth_ind=0;
     }
-    if(wall_ind) 
+    if(wall_ind)
     {
         delete [] wall_ind;
         wall_ind=0;
     }
-    
-    if(pWallMeshBufferNode) 
+
+    if(pWallMeshBufferNode)
     {
         pWallMeshBufferNode->remove();
         pWallMeshBufferNode=0;
     };
-    
-    if(pEarthMeshBufferNode) 
+
+    if(pEarthMeshBufferNode)
     {
         pEarthMeshBufferNode->remove();
         pEarthMeshBufferNode=0;
     }
-    
+
     if(NodeArr)
     {
         for(int i=0;i<pField->getSize().first*pField->getSize().second;i++)
@@ -642,7 +642,7 @@ void LifterScene::clear()
                 NodeArr[i]=0;
             }
         }
-        
+
         pRobotNode=0;
 
         if(pLiftNode)
@@ -653,7 +653,7 @@ void LifterScene::clear()
         delete [] NodeArr;
         NodeArr=0;
     }
-    
+
     if(pField)
     {
         delete pField;

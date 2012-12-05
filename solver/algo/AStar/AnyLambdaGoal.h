@@ -18,8 +18,8 @@ public:
 	 * @return true, если цель достигнута; false - в противном случае.
 	 */
 	virtual bool isGoalReached(const AStarPoint& state) const {
-		FieldCache::const_iterator it = state.getField()->getLambdaCacheIt();
-		FieldCache::const_iterator end = state.getField()->getLambdaCacheEnd();
+		Field::FieldCache::const_iterator it = state.getField()->getLambdaCacheIt();
+		Field::FieldCache::const_iterator end = state.getField()->getLambdaCacheEnd();
 		for (; it != end; it++) {
 			if (**it == *state.getField()->getRobot()) {
 				return true;

@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
 		std::string result = s.solve();
 		std::cout<<result<<"\n";
 		//FieldSim::drawStepByStep(&field, result);
-	} catch (const FieldParseException& e) {
+	} catch (const Field::FieldParseException&) {
 		//std::cout << "Map load error! (See LOG.html)\n";
 		std::cout << "A\n";
 		return 0;

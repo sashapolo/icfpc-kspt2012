@@ -258,8 +258,7 @@ Field* FieldSim::calcRobotStep(const Field* pField, char step,FieldChanges* pCha
 	default:
 		LOGWARNING("Wrong robot step from(%d,%d) to (%d,%d)[%c]",
 				newField->getRobot()->x, newField->getRobot()->y, absNextPos.x,
-				absNextPos.y,
-				cellTypeToChar((CellType) newField->getXY(absNextPos)));
+				absNextPos.y, cellTypeToChar((CellType) newField->getXY(absNextPos)));
 		delete nextPos;
 		return newField;
 	}

@@ -13,18 +13,18 @@
 #include "AStarGoal.h"
 #include "Heuristic.h"
 
-typedef std::priority_queue<AStarPoint*,
-						    std::vector<AStarPoint*>,
-						    Comparators::PointerComparatorMore<AStarPoint*> >
-		AStarOpenedList;
-typedef std::list<AStarPoint*> AStarClosedList;
-
 /**
  * А*.<br />
  * Описывает алгоритм поиска А*.
  */
 
 class AStar {
+public:
+	typedef std::priority_queue<AStarPoint*,
+							    std::vector<AStarPoint*>,
+							    Comparators::PointerComparatorMore<AStarPoint*> >
+			AStarOpenedList;
+	typedef std::list<AStarPoint*> AStarClosedList;
 private:
 	/**
      	 * Значение эвристики.
@@ -84,7 +84,9 @@ private:
 	 * @param const AStarPoint& - цель.
 	 * @return true, если достигнута; false - в протианом случае.
 	 */
-	bool isGoalReached(const AStarPoint&);
+	bool isGoalReached(const AStarPoint& current) const {
+		return current.getHeuristics() == 0;
+	}
 
 public:
 	/**

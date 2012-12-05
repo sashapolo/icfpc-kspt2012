@@ -40,15 +40,14 @@ void PathTest::testPath() {
     testNPointPath(2);
     testNPointPath(3);
     testNPointPath(42);
-    // TODO: Здесь виснет тестер
-    //testNPointPath(1000000);
+    testNPointPath(1000000);
 }
 
 void PathTest::testNPointPath(int numOfPoints) {
     Path path;
     CPPUNIT_ASSERT(path.isEmpty() );
     fillPathWithNPoints(path, numOfPoints);
-    CPPUNIT_ASSERT(!path.isEmpty() );
+    CPPUNIT_ASSERT(!path.isEmpty());
     CPPUNIT_ASSERT(path.getSize() == numOfPoints );
     // ToDo: think how to use getCell()
     // ToDo: think how to use getDistance()
