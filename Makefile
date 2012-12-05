@@ -41,9 +41,12 @@ OBJS_WITHOUT_MAIN = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS_WITHOUT_
 
 3D_SRCS = $(foreach sdir, $(3D_SRC_DIR), $(wildcard $(sdir)/*.cpp))
 3D_OBJS = $(patsubst $(3D_SRC_DIR)/%.cpp, $(3D_OBJ_DIR)/%.o, $(3D_SRCS))
-3D_DEP_OBJS = $(OBJ_DIR)/base/Field.o $(OBJ_DIR)/base/Point.o\
-			  $(OBJ_DIR)/base/FieldSim.o $(OBJ_DIR)/Logger.o \
-			  $(OBJ_DIR)/base/Path.o
+3D_DEP_OBJS = $(OBJ_DIR)/algo/AStar.o $(OBJ_DIR)/algo/AStarPoint.o $(OBJ_DIR)/SignalHandler.o\
+	      	  $(OBJ_DIR)/algo/ManhattanHeuristic.o $(OBJ_DIR)/algo/NearestNeighbour.o \
+	      	  $(OBJ_DIR)/algo/Solver.o $(OBJ_DIR)/algo/TwoOptOptimizer.o \
+		  $(OBJ_DIR)/base/Field.o $(OBJ_DIR)/base/Point.o\
+		  $(OBJ_DIR)/base/FieldSim.o $(OBJ_DIR)/Logger.o \
+		  $(OBJ_DIR)/base/Path.o 
 
 SH_SRCS = $(foreach sdir, $(SH_SRC_DIR), $(wildcard $(sdir)/*.cpp))
 SH_OBJS = $(patsubst $(SH_SRC_DIR)/%.cpp, $(SH_OBJ_DIR)/%.o, $(SH_SRCS))

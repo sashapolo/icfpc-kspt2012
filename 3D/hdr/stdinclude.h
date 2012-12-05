@@ -28,6 +28,7 @@ using namespace gui;
 
 #include "base/Path.h"
 #include "base/FieldSim.h"
+#include "algo/Solver.h"
 
 #include "Utilities.h"
 

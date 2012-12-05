@@ -8,12 +8,14 @@
 #include "stdinclude.h"
 #include "LifterGUI.h"
 
+#define CHECK_OFFSET 400
+
 LifterGUI::LifterGUI() {
     pReceiver=0;
     imgListOffsetY=0;
     pMarkImage=0;
-    bImmediateSteps=true;
-    bEnableBloom=false;
+    bEnableBloom=true;
+    bPlayed=false;
 }
 
 LifterGUI::~LifterGUI() {
@@ -51,7 +53,7 @@ void LifterGUI::initGUI(IrrlichtDevice *device_, IVideoDriver* driver_,ISceneMan
     
     IGUISkin* skin = guienv->getSkin();
     IGUIFont* font = guienv->getFont("3D/res/fonts/fontlucida.png");
-    IGUIButton* button=0;
+
     if (font)
             skin->setFont(font);
 
@@ -64,46 +66,40 @@ void LifterGUI::initGUI(IrrlichtDevice *device_, IVideoDriver* driver_,ISceneMan
     video::ITexture* image = driver->getTexture("3D/res/textures/GUI/map64.png");
     toolBar->addButton(GUI_ID_BUTTON_OPEN_MAP, 0, L"Open a map",image, 0, false, true);
     image = driver->getTexture("3D/res/textures/GUI/footsteps64.png");
-    toolBar->addButton(GUI_ID_BUTTON_OPEN_MAP, 0, L"Open a path",image, 0, false, true);
+    toolBar->addButton(GUI_ID_BUTTON_SOLVE, 0, L"Solve",image, 0, false, true);
     
     image = driver->getTexture("3D/res/textures/GUI/play64.png");
     video::ITexture* image2=driver->getTexture("3D/res/textures/GUI/pause64.png");
     toolBar->addButton(GUI_ID_BUTTON_PLAY, 0, L"Play/Pause",image, image2, true, true);
     image = driver->getTexture("3D/res/textures/GUI/forward.png");
     toolBar->addButton(GUI_ID_BUTTON_NEXT, 0, L"Next step",image, 0, false, true);
-    image = driver->getTexture("3D/res/textures/GUI/ufo_step64.png");
-    image2 = driver->getTexture("3D/res/textures/GUI/ufo_immediate64.png");
-    toolBar->addButton(GUI_ID_BUTTON_IMMEDIATE_STEPS, 0, L"Immediate//By step",image, image2, true, true);
     image = driver->getTexture("3D/res/textures/GUI/log64.png");
     toolBar->addButton(GUI_ID_BUTTON_OPEN_LOG, 0, L"Open/Close log",image, 0, false, true);
-    image = driver->getTexture("3D/res/textures/GUI/bloom_ena64.png");
-    image2 = driver->getTexture("3D/res/textures/GUI/bloom_dis64.png");
-    toolBar->addButton(GUI_ID_BUTTON_BLOOM, 0, L"Bloom enable//disable",image, image2, true, true);
     
     image = driver->getTexture("3D/res/textures/GUI/mov/up-icon64.png");
-    button= guienv->addButton(rect<s32>(64,192,128,256),0,GUI_ID_BUTTON_UP);
-    button->setImage(image);
-    button->setUseAlphaChannel(true);
+    MoveButtons[0]= guienv->addButton(rect<s32>(64,192,128,256),0,GUI_ID_BUTTON_UP);
+    MoveButtons[0]->setImage(image);
+    MoveButtons[0]->setUseAlphaChannel(true);
     image = driver->getTexture("3D/res/textures/GUI/mov/down-icon64.png");
-    button= guienv->addButton(rect<s32>(64,320,128,384),0,GUI_ID_BUTTON_DOWN);
-    button->setImage(image);
-    button->setUseAlphaChannel(true);
+    MoveButtons[1]= guienv->addButton(rect<s32>(64,320,128,384),0,GUI_ID_BUTTON_DOWN);
+    MoveButtons[1]->setImage(image);
+    MoveButtons[1]->setUseAlphaChannel(true);
     image = driver->getTexture("3D/res/textures/GUI/mov/left-icon64.png");
-    button= guienv->addButton(rect<s32>(0,256,64,320),0,GUI_ID_BUTTON_LEFT);
-    button->setImage(image);
-    button->setUseAlphaChannel(true);
+    MoveButtons[2]= guienv->addButton(rect<s32>(0,256,64,320),0,GUI_ID_BUTTON_LEFT);
+    MoveButtons[2]->setImage(image);
+    MoveButtons[2]->setUseAlphaChannel(true);
     image = driver->getTexture("3D/res/textures/GUI/mov/right-icon64.png");
-    button= guienv->addButton(rect<s32>(128,256,192,320),0,GUI_ID_BUTTON_RIGHT);
-    button->setImage(image);
-    button->setUseAlphaChannel(true);
+    MoveButtons[3]= guienv->addButton(rect<s32>(128,256,192,320),0,GUI_ID_BUTTON_RIGHT);
+    MoveButtons[3]->setImage(image);
+    MoveButtons[3]->setUseAlphaChannel(true);
     image = driver->getTexture("3D/res/textures/GUI/mov/clock-icon64.png");
-    button= guienv->addButton(rect<s32>(64,256,128,320),0,GUI_ID_BUTTON_WAIT);
-    button->setImage(image);
-    button->setUseAlphaChannel(true);
+    MoveButtons[4]= guienv->addButton(rect<s32>(64,256,128,320),0,GUI_ID_BUTTON_WAIT);
+    MoveButtons[4]->setImage(image);
+    MoveButtons[4]->setUseAlphaChannel(true);
     image = driver->getTexture("3D/res/textures/GUI/mov/block-icon64.png");
-    button= guienv->addButton(rect<s32>(0,192,64,256),0,GUI_ID_BUTTON_ABORT);
-    button->setImage(image);
-    button->setUseAlphaChannel(true);
+    MoveButtons[5]= guienv->addButton(rect<s32>(0,192,64,256),0,GUI_ID_BUTTON_ABORT);
+    MoveButtons[5]->setImage(image);
+    MoveButtons[5]->setUseAlphaChannel(true);
         
     
     logListbox = guienv->addListBox(rect<s32>(0, 0, window_dim.Width, 150));
@@ -112,6 +108,20 @@ void LifterGUI::initGUI(IrrlichtDevice *device_, IVideoDriver* driver_,ISceneMan
     gameInfoText=guienv->addStaticText (L"",rect<s32>(window_dim.Width-100,window_dim.Height-60,window_dim.Width,window_dim.Height));
     gameInfoText->setOverrideColor(SColor(255,0,255,0));
     updateGameInfo();
+    
+    bloomCheck=guienv->addCheckBox(true,rect<s32>(CHECK_OFFSET,window_dim.Height-70,CHECK_OFFSET+30,window_dim.Height-50),0,GUI_ID_CHECK_BLOOM);
+    bloomText=guienv->addStaticText (L"Bloom",rect<s32>(CHECK_OFFSET+30,window_dim.Height-68,CHECK_OFFSET+80,window_dim.Height-50));
+    
+    buttonsCheck=guienv->addCheckBox(true,rect<s32>(CHECK_OFFSET,window_dim.Height-50,CHECK_OFFSET+30,window_dim.Height-30),0,GUI_ID_CHECK_BUTTONS);
+    buttonsText=guienv->addStaticText (L"Buttons",rect<s32>(CHECK_OFFSET+30,window_dim.Height-48,CHECK_OFFSET+80,window_dim.Height-30));
+    
+    speedCheck=guienv->addCheckBox(true,rect<s32>(CHECK_OFFSET,window_dim.Height-30,CHECK_OFFSET+30,window_dim.Height-10),0,GUI_ID_CHECK_SPEED);
+    speedText=guienv->addStaticText (L"Speed",rect<s32>(CHECK_OFFSET+30,window_dim.Height-28,CHECK_OFFSET+80,window_dim.Height-10));
+    
+    animationScroll=guienv->addScrollBar(false,rect<s32>(window_dim.Width-25,192,window_dim.Width,window_dim.Height-192),0,GUI_ID_SCROLL_SPEED);
+    animationScroll->setMin(0);
+    animationScroll->setMax(2000);
+    animationScroll->setPos(lifterScene.getAnimationSpeed());
     
     pMarkImage=guienv->addImage(pMarkTex,core::position2d< s32 >(0,imgListOffsetY));
     
@@ -213,6 +223,13 @@ void LifterGUI::endGame(const wchar_t* reason)
 void LifterGUI::onFrame()
 {
     lifterScene.onFrame();
+    if(bPlayed)
+    {
+        if(!lifterScene.isAnimation())
+        {
+            onButtonNext();
+        }
+    }
 }
 
 void LifterGUI::updateGUI()
@@ -225,6 +242,17 @@ void LifterGUI::updateGUI()
     infoText->setRelativePosition(rect<s32>(0,infoOffset,window_dim.Width,infoOffset+40));
     
     gameInfoText->setRelativePosition(rect<s32>(window_dim.Width-100,window_dim.Height-60,window_dim.Width,window_dim.Height));
+    
+    bloomCheck->setRelativePosition(rect<s32>(CHECK_OFFSET,window_dim.Height-70,CHECK_OFFSET+30,window_dim.Height-50));
+    bloomText->setRelativePosition(rect<s32>(CHECK_OFFSET+30,window_dim.Height-68,CHECK_OFFSET+80,window_dim.Height-50));
+    
+    buttonsCheck->setRelativePosition(rect<s32>(CHECK_OFFSET,window_dim.Height-50,CHECK_OFFSET+30,window_dim.Height-30));
+    buttonsText->setRelativePosition(rect<s32>(CHECK_OFFSET+30,window_dim.Height-48,CHECK_OFFSET+80,window_dim.Height-30));
+    
+    speedCheck->setRelativePosition(rect<s32>(CHECK_OFFSET,window_dim.Height-30,CHECK_OFFSET+30,window_dim.Height-10));
+    speedText->setRelativePosition(rect<s32>(CHECK_OFFSET+30,window_dim.Height-28,CHECK_OFFSET+80,window_dim.Height-10));
+    
+    animationScroll->setRelativePosition(rect<s32>(window_dim.Width-25,192,window_dim.Width,window_dim.Height-192));
  
     imgListOffsetY=(window_dim.Height-barRect.getSize().Height)-64;
     updateImageLists();

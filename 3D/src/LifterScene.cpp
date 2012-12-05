@@ -25,6 +25,9 @@ LifterScene::LifterScene() {
     
     pCamera=0;
     NodeArr=0;
+    
+    animationSpeed=500;
+    clock_gettime(CLOCK_MONOTONIC,&prevAnimTime);
 }
 
 
@@ -106,10 +109,15 @@ bool LifterScene::loadMap(wchar_t* Path)
     char* mbPath=new char[len];
     for(int i=0;i<len-1;i++) mbPath[i]=(char)Path[i];
     mbPath[len-1]='\0';
-    pField=new Field( mbPath);
+    try {
+        pField=new Field( mbPath);
+    } catch (const FieldParseException& e) {
+        LOGERROR("Map load error!");
+        return false;
+    }
+    
     result=sSimResult();
     
-    if(!pField) return false;
     earth_ind=new char[pField->getSize().first*pField->getSize().second];
     wall_ind=new char[pField->getSize().first*pField->getSize().second];
     NodeArr=new scene::ISceneNode*[pField->getSize().first*pField->getSize().second];
@@ -270,12 +278,12 @@ void LifterScene::applyChanges(sSimResult& res)
                 
                 if(res.Changes[i].cellType==LAMBDA)
                 {
-                    pNode=effects.createAnimation(pTeleTex, pBlackTex,5,6,CELLSIZE*1.1, res.Changes[i].pos1,1000);
+                    pNode=effects.createAnimation(pTeleTex, pBlackTex,5,6,CELLSIZE*1.1, res.Changes[i].pos1,animationSpeed*2);
                     //addLambdaExplosionParticles(pNode,pFogTex);
                 }
                 else
                 {
-                    pNode=effects.createAnimation(pExplosionTexture, pBlackTex,8,8,CELLSIZE*2.2, res.Changes[i].pos1,2000);
+                    pNode=effects.createAnimation(pExplosionTexture, pBlackTex,8,8,CELLSIZE*2.2, res.Changes[i].pos1,animationSpeed*3);
                     addExplosionParticles(pNode,pFogTex,pSunTex);
                 }
                 
@@ -296,15 +304,24 @@ void LifterScene::moveActor(Point pos0,Point pos1)
     scene::ISceneNode* pNode=getNode(pos0);
     if(pNode) 
     {
+        clock_gettime(CLOCK_MONOTONIC,&prevAnimTime);
         ISceneNodeAnimator * anim=smgr->createFlyStraightAnimator(
                 core::vector3df(pos0.x*CELLSIZE,pos0.y*CELLSIZE,0),
-                core::vector3df(pos1.x*CELLSIZE,pos1.y*CELLSIZE,0),600);
+                core::vector3df(pos1.x*CELLSIZE,pos1.y*CELLSIZE,0),animationSpeed);
         pNode->addAnimator(anim);
         //pNode->setPosition(vector3df(pos1.x*CELLSIZE,pos1.y*CELLSIZE,0));
         setNode(pos0,0);
         setNode(pos1,pNode);
         
     }
+}
+
+bool LifterScene::isAnimation()
+{
+    timespec currentTime;
+    clock_gettime(CLOCK_MONOTONIC,&currentTime);
+    if(msecDiff(currentTime,prevAnimTime)<animationSpeed) return true;
+    return false;
 }
 
 void LifterScene::removeActor(Point pos)
