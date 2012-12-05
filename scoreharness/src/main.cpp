@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
     }
 
     // Итерируемся по именам карт
-    for (int i = 1; i < argc; i++) {
+    for (int i = 1; i < argc - 1; i++) {
     	SignalHandler::setupSignalHandler();
     	solvingDone = false;
 		try {

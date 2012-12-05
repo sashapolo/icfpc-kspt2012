@@ -1,6 +1,5 @@
 #include "base/Field.h"
 
-
 char cellTypeToChar(CellType type) {
 	switch(type) {
 		case ROBOT: return 'R';
@@ -191,7 +190,7 @@ void Field::init(const std::string& ASCIIMap) {
     	field[i] = new char[xSize];
     	std::fill_n(field[i], xSize, EMPTY);
     }
-    
+
     currX = 0;
     currY = 0;
     for (unsigned int i = 0; i < ASCIIMap.length(); i++) {
@@ -408,7 +407,7 @@ void Field::swap(const Point &cell1, const Point &cell2) {
 	if (cell1 == *lift || cell2 == *lift) {
 		throw IllegalWriteException();
 	}
-    char tmp = field[cell1.y][cell1.x];
+	char tmp = field[cell1.y][cell1.x];
     field[cell1.y][cell1.x] = field[cell2.y][cell2.x];
     field[cell2.y][cell2.x] = tmp;
     if (cell1 == *robot) {

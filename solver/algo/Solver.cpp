@@ -8,8 +8,7 @@
 #include "algo/Solver.h"
 
 
-Solver::Solver(Field *f): lambdaRoute(), bestLambdaRoute(), snapshots(),
-						  shittyLambdas() {
+Solver::Solver(Field *f): totalLambdas(f->getLambdaCount()){
 	pField = new Field(*f);
 	nextGoalIndex = 0;
 	optimalPath = NULL;
@@ -67,6 +66,9 @@ std::string Solver::solve() {
 			// но лямбды на карте еще есть => откат.
 			// если откаты не последовательные, то нужно удалить последний снэпшот
 			if (backtracksCount == 0) {
+				if (pField != snapshots.back()->snapshot) {
+					delete snapshots.back()->snapshot;
+				}
 				delete snapshots.back();
 				snapshots.pop_back();
 			} else if (backtracksCount >= 2) {
@@ -200,10 +202,6 @@ Solver::~Solver() {
 	for (; it1 != end1; it1++) {
 		delete (*it1)->snapshot;
 		delete *it1;
-	}
-
-	if (!SignalHandler::sigIntReceived()) {
-		delete pField;
 	}
 
 	clearShittyList();
