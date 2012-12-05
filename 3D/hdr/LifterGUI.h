@@ -29,7 +29,9 @@ enum GUI_ID
     GUI_ID_CHECK_BLOOM,
     GUI_ID_CHECK_BUTTONS,
     GUI_ID_CHECK_SPEED,
-    GUI_ID_SCROLL_SPEED
+    GUI_ID_SCROLL_SPEED,
+    GUI_ID_BUTTON_STOP_SOLVER,
+    GUI_ID_WND_SOLVER
     
 };
     
@@ -53,17 +55,8 @@ public:
     void onButtonOpenMap(){
         guienv->addFileOpenDialog(L"Select map file:",true,0,GUI_ID_FD_MAPSELECT);
     }
-    void onButtonSolve(){
-        if(lifterScene.getField()==0) return;
-        Solver s((Field*)lifterScene.getField());
-        std::string result = s.solve();
-        robotPath+=result;
-        updateImageLists();
-    }
-    void onButtonMapSelected(wchar_t* Path){
-        clearScene();
-        getScene().loadMap(Path);
-    }
+    void onButtonSolve();
+    void onButtonMapSelected(wchar_t* Path);
     void onButtonPathSelected(wchar_t* Path){
         
     };
@@ -128,8 +121,11 @@ public:
         lifterScene.setAnimationSpeed(animationScroll->getPos());
     }
     
+    void onStopSolver();
+    
     bool isBloomEnabled() {return bEnableBloom;};
     
+    void updateSolverState();
     void updateGameInfo();
     void clearScene();
     void endGame(const wchar_t* reason=0);
@@ -153,6 +149,9 @@ private:
     IGUIStaticText* bloomText;
     IGUIStaticText* buttonsText;
     IGUIStaticText* speedText;
+    IGUIWindow* solverWnd;
+    IGUIStaticText* solverStateTxt;
+    IGUIButton* solverButton;
     
     std::string robotPath;
     std::vector<eEndState> robotStates;
@@ -166,6 +165,7 @@ private:
     dimension2d<u32> window_dim;
     
     LifterScene lifterScene;
+    SolverThread solverTh;
     
     MyEventReceiver* pReceiver;
     
@@ -236,6 +236,7 @@ public:
                         case GUI_ID_BUTTON_ABORT: pLifterGUI->onButtonAbort(); break;
                         case GUI_ID_BUTTON_PLAY: pLifterGUI->onButtonPlay(); break;
                         case GUI_ID_BUTTON_SOLVE: pLifterGUI->onButtonSolve(); break;
+                        case GUI_ID_BUTTON_STOP_SOLVER: pLifterGUI->onStopSolver(); break;
                     }
                     break;
                 case EGET_FILE_SELECTED:         
@@ -282,6 +283,14 @@ public:
                             pLifterGUI->onSpeedScrollChanged();
                             break;
                         default: break;
+                    }
+                    break;
+                case EGET_ELEMENT_CLOSED :
+                    element = (IGUIElement*)event.GUIEvent.Caller;
+                    if(element->getID()==GUI_ID_WND_SOLVER)
+                    {
+                        pLifterGUI->onStopSolver();
+                        return true;
                     }
                     break;
                 default:

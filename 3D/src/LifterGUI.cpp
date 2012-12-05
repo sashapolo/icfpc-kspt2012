@@ -7,6 +7,7 @@
 
 #include "stdinclude.h"
 #include "LifterGUI.h"
+#include "SolverThread.h"
 
 #define CHECK_OFFSET 400
 
@@ -15,7 +16,7 @@ LifterGUI::LifterGUI() {
     imgListOffsetY=0;
     pMarkImage=0;
     bEnableBloom=true;
-    bPlayed=false;
+    bPlayed=true;
 }
 
 LifterGUI::~LifterGUI() {
@@ -70,7 +71,7 @@ void LifterGUI::initGUI(IrrlichtDevice *device_, IVideoDriver* driver_,ISceneMan
     
     image = driver->getTexture("3D/res/textures/GUI/play64.png");
     video::ITexture* image2=driver->getTexture("3D/res/textures/GUI/pause64.png");
-    toolBar->addButton(GUI_ID_BUTTON_PLAY, 0, L"Play/Pause",image, image2, true, true);
+    toolBar->addButton(GUI_ID_BUTTON_PLAY, 0, L"Play/Pause",image2, image, true, true);
     image = driver->getTexture("3D/res/textures/GUI/forward.png");
     toolBar->addButton(GUI_ID_BUTTON_NEXT, 0, L"Next step",image, 0, false, true);
     image = driver->getTexture("3D/res/textures/GUI/log64.png");
@@ -202,6 +203,17 @@ void LifterGUI::updateImageLists()
     if(End) endGame(End);
 }
 
+void LifterGUI::onButtonMapSelected(wchar_t* Path)
+{
+    clearScene();
+    if(!getScene().loadMap(Path))
+    {
+        wchar_t tmp[1024];
+        swprintf(tmp,1024,L"Can't load map from file: %ls",Path);
+        guienv->addMessageBox(L"Results:", tmp,true,EMBF_OK);
+    }
+}
+
 void LifterGUI::clearScene()
 {
     getScene().clear();
@@ -230,6 +242,61 @@ void LifterGUI::onFrame()
             onButtonNext();
         }
     }
+    updateSolverState();
+}
+
+void LifterGUI::updateSolverState()
+{
+    if(solverStateTxt==0) return;
+    wchar_t tmp[1024];
+    int Time=solverTh.getTime();
+    const wchar_t* StateTxt;
+    if(solverTh.isRunning()) StateTxt=L"Processed";
+    else StateTxt=L"Finished";
+    
+    swprintf(tmp,1024,L"State: %ls\nTime: %d:%d.%d (%ds)",StateTxt,Time/60000,(Time%60000)/1000,(Time%60000)%1000,Time/1000);
+    solverStateTxt->setText(tmp);
+    if(!solverTh.isRunning()) 
+    {
+        solverTh.stop();
+        solverButton->setText(L"Close");
+    }
+}
+
+void LifterGUI::onButtonSolve()
+{
+    if(lifterScene.getField()==0) return;
+    robotPath.clear();
+    robotStates.clear();
+    currentRobotStep=0;
+    updateGUI();
+    
+    SignalHandler::setupSignalHandler();
+    
+    solverTh.start((Field*)lifterScene.getField());
+    solverWnd=guienv->addWindow(
+                        rect<s32>(0, 0, 300, 200),
+                        true, // modal?
+                        L"Solver state:",0,GUI_ID_WND_SOLVER);
+    solverStateTxt=guienv->addStaticText(L"Solver state:",
+                        rect<s32>(35,35,265,165),
+                        false, // border?
+                        false, // wordwrap?
+                        solverWnd);
+    solverButton=guienv->addButton(rect<s32>(35,150,265,190),solverWnd,GUI_ID_BUTTON_STOP_SOLVER,L"Stop");
+    solverWnd->setRelativePosition(core::position2di(window_dim.Width/2-150,window_dim.Height/2-100));
+}
+
+void LifterGUI::onStopSolver()
+{
+    solverTh.stop();
+    robotPath+=solverTh.getResult();
+    updateImageLists();
+    
+    solverWnd->remove();
+    solverWnd=0;
+    solverStateTxt=0;
+    solverButton=0;
 }
 
 void LifterGUI::updateGUI()
