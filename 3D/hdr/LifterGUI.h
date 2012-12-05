@@ -54,6 +54,7 @@ public:
         guienv->addFileOpenDialog(L"Select map file:",true,0,GUI_ID_FD_MAPSELECT);
     }
     void onButtonSolve(){
+        if(lifterScene.getField()==0) return;
         Solver s((Field*)lifterScene.getField());
         std::string result = s.solve();
         robotPath+=result;
