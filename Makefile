@@ -28,7 +28,7 @@ CFLAGS = -Wall -g
 LD = g++
 LFLAGS = -Wall
 TEST_LIBS = -lcppunit
-3D_LIBS = -lGL -lXxf86vm -lXext -lX11 -lrt -L/usr/local/lib -lIrrlicht
+3D_LIBS = -lGL -lXxf86vm -lXext -lX11 -lrt -L/usr/local/lib -lIrrlicht -lpthread
 SH_LIBS = -L/usr/local/lib -lpthread
 
 SRCS = $(shell find $(SRC_DIR) -type f -name *.cpp)

@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
+#include <pthread.h>
+#include <signal.h>
 
 using namespace std;
 
@@ -31,6 +33,7 @@ using namespace gui;
 #include "algo/Solver.h"
 
 #include "Utilities.h"
+#include "SolverThread.h"
 
 #include "MeshBuffer.h"
 

@@ -86,7 +86,6 @@ public:
         {
             int nFrame=(float(timeLeft)/float(lifeTime))*float(hFrames*wFrames);
             setFrame(nFrame);
-            LOGINFO("Timeleft: %d, %d",timeLeft,0);
         } 
         else
         {
