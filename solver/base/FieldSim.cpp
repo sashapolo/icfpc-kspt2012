@@ -149,6 +149,8 @@ Field* FieldSim::calcNextFieldState(Field* pField, FieldChanges* pChanges) {
 
     if (newField->lambdaCacheEmpty() && newField->isLiftClosed()) {
         newField->write(*newField->getLift(), OPENED_LIFT);
+        if (pChanges)
+                pChanges->push_back(sSimChange(CH_LIFT_OPEN, CLOSED_LIFT, *(newField->getLift()),Point(0,0)));
     }
 
     //test for robot destruction

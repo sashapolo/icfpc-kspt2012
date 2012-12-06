@@ -62,7 +62,8 @@ void LifterScene::init(IrrlichtDevice *device_, IVideoDriver* driver_, ISceneMan
     pRobotTex=driver->getTexture(L"3D/res/textures/ufo.png");
     pRobotBump=driver->getTexture(L"3D/res/textures/ufo_n.png");
     pFireTex=driver->getTexture(L"3D/res/textures/fireball.png");
-    pLiftTex=driver->getTexture(L"3D/res/textures/lift_closed.png");
+    pLiftClosedTex=driver->getTexture(L"3D/res/textures/lift_closed.png");
+    pLiftOpenedTex=driver->getTexture(L"3D/res/textures/lift_opened.png");
     pSunTex=driver->getTexture(L"3D/res/textures/sun.tga");
 
     pStoneSpriteTex=driver->getTexture(L"3D/res/textures/stone_sprite.png");
@@ -290,6 +291,9 @@ void LifterScene::applyChanges(sSimResult& res)
                 LOGINFO("Change: destroy (%d,%d)",
                         res.Changes[i].pos1.x,res.Changes[i].pos1.y)
                 break;
+            case CH_LIFT_OPEN:
+                addActor(res.Changes[i].pos1,OPENED_LIFT);
+                break;
             default:
                 LOGINFO("Change: none");
                 break;
@@ -333,11 +337,14 @@ void LifterScene::removeActor(Point pos)
     else
     {
         scene::ISceneNode* pNode=getNode(pos);
+        if(pLiftNode==pNode) pLiftNode=0;
+        if(pRobotNode==pNode) pRobotNode=0;
         if(pNode)
         {
             pNode->remove();
             setNode(pos,0);
         }
+        
     }
 }
 
@@ -443,11 +450,7 @@ void LifterScene::addActor(Point pos, char type)
             {
                 pNode=smgr -> addCubeSceneNode(CELLSIZE);
 
-                pNode->setMaterialType(video::EMT_SOLID);
-                pNode->setMaterialFlag(video::EMF_LIGHTING, true);
-                pNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, true);
-                pNode->setMaterialFlag(video::EMF_ANTI_ALIASING, true);
-                pNode->setMaterialTexture(0,pLiftTex);
+                setDefaultMaterial(pNode,video::EMT_SOLID,pLiftClosedTex);
 
                 pLiftNode=pNode;
             }
@@ -460,7 +463,7 @@ void LifterScene::addActor(Point pos, char type)
             {
                 pNode=smgr -> addCubeSceneNode(CELLSIZE);
 
-                setDefaultMaterial(pNode,video::EMT_SOLID,pLiftTex);
+                setDefaultMaterial(pNode,video::EMT_SOLID,pLiftOpenedTex);
 
                 pLiftNode=pNode;
             }

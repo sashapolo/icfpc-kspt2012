@@ -64,7 +64,8 @@ private:
     ITexture* pRobotTex;
     ITexture* pRobotBump;
     ITexture* pFireTex;
-    ITexture* pLiftTex;
+    ITexture* pLiftClosedTex;
+    ITexture* pLiftOpenedTex;
     ITexture* pSunTex;
     
     ITexture* pBlackTex;
