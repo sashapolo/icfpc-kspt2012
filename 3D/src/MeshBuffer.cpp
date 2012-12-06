@@ -84,7 +84,8 @@ int MeshBuffer::addCubes(int& x_start, int& y_start,int max_cnt, u32 bufNum,char
     int n_ind=0;
     int curr_cnt=0;
     int bFirst=0;
-    int x,y;
+    int x=0;
+    int y=0;
     float size=cellsize/2;
     float texX=0;
     float texY=0;

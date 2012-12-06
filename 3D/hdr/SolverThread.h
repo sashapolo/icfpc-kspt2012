@@ -31,6 +31,16 @@ public:
     int getTime();
     std::string getResult() {return solverData.path;};
     bool isRunning() {return solverData.bThreadProcess;};
+    
+    int getLambdasCollected() const {
+            return solverData.pSolver ? solverData.pSolver->getLambdasCollected() : 0;
+    }
+    int getNumberOfSteps() const {
+            return solverData.pSolver ? solverData.pSolver->getNumberOfSteps() : 0;
+    }
+    double getSolvingPercentage() const {
+            return solverData.pSolver ? solverData.pSolver->getSolvingPercentage() : 0;
+    }
 private:
     pthread_t funcHandle;
     pthread_attr_t funcAttr;

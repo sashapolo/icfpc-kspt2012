@@ -10,6 +10,7 @@
 #include "SolverThread.h"
 
 #define CHECK_OFFSET 400
+#define GUI_UPDATE_TIME 100
 
 LifterGUI::LifterGUI() {
     pReceiver=0;
@@ -242,7 +243,18 @@ void LifterGUI::onFrame()
             onButtonNext();
         }
     }
+    onUpdateGUI();
+}
+
+void LifterGUI::onUpdateGUI()
+{
+    timespec currentTime;
+    clock_gettime(CLOCK_MONOTONIC,&currentTime);
+    if(msecDiff(currentTime,prevGUIUpdateTime)<GUI_UPDATE_TIME) return;
+    
     updateSolverState();
+    
+    clock_gettime(CLOCK_MONOTONIC,&prevGUIUpdateTime);
 }
 
 void LifterGUI::updateSolverState()
@@ -254,7 +266,9 @@ void LifterGUI::updateSolverState()
     if(solverTh.isRunning()) StateTxt=L"Processed";
     else StateTxt=L"Finished";
     
-    swprintf(tmp,1024,L"State: %ls\nTime: %d:%d.%d (%ds)",StateTxt,Time/60000,(Time%60000)/1000,(Time%60000)%1000,Time/1000);
+    swprintf(tmp,1024,L"State: %ls\nTime: %d:%d.%d (%ds)\nLambas collected: %d\nSteps: %d\nComplete: %.1f%%",
+            StateTxt,Time/60000,(Time%60000)/1000,(Time%60000)%1000,Time/1000,
+            solverTh.getLambdasCollected(),solverTh.getNumberOfSteps(),solverTh.getSolvingPercentage());
     solverStateTxt->setText(tmp);
     if(!solverTh.isRunning()) 
     {

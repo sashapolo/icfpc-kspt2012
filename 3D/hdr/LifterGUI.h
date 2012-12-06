@@ -126,6 +126,7 @@ public:
     bool isBloomEnabled() {return bEnableBloom;};
     
     void updateSolverState();
+    void onUpdateGUI();
     void updateGameInfo();
     void clearScene();
     void endGame(const wchar_t* reason=0);
@@ -166,6 +167,8 @@ private:
     
     LifterScene lifterScene;
     SolverThread solverTh;
+    
+    timespec prevGUIUpdateTime;
     
     MyEventReceiver* pReceiver;
     
