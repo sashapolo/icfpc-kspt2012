@@ -11,6 +11,7 @@ TST_DIR = tests
 TST_SRC_DIR = $(TST_DIR)/src
 TST_OBJ_DIR = $(TST_DIR)/obj
 TST_HDR_DIR = $(TST_DIR)/hdr
+TST_MAPS_DIR = $(TST_DIR)/res/testmaps
 
 3D_DIR = 3D
 3D_SRC_DIR = $(3D_DIR)/src
@@ -100,6 +101,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 # Executable to run the tests
 $(TESTEXE): $(TESTOBJS) $(OBJS_WITHOUT_MAIN)
+	@mkdir -p $(TST_MAPS_DIR)
 	$(LD)  $(LFLAGS) $^ -o $@ $(TEST_LIBS)
 
 $(TST_OBJ_DIR)/%.o: $(TST_SRC_DIR)/%.cpp
