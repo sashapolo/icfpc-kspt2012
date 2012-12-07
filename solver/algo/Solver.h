@@ -20,6 +20,8 @@ class Solver {
 private:
 	static const unsigned int SNAPSHOT_DEPTH = 20;
 
+	const int totalLambdas;
+
 	const Field *pField;
 	Path *optimalPath;
 	int nextGoalIndex;
@@ -62,6 +64,16 @@ public:
 	 * @return результат.
 	 */
 	std::string solve();
+
+	int getLambdasCollected() const {
+		return lambdasCollected;
+	}
+	int getNumberOfSteps() const {
+		return lambdaRoute.size();
+	}
+	double getSolvingPercentage() const {
+		return (double)lambdasCollected / totalLambdas * 100;
+	}
 };
 
 

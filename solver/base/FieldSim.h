@@ -28,7 +28,8 @@ enum eChangeType
 {
     CH_NONE,
     CH_MOVE,
-    CH_DESTROY
+    CH_DESTROY,
+    CH_LIFT_OPEN
 };
 
 struct sSimChange

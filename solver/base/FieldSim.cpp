@@ -1,7 +1,7 @@
-/* 
+/*
  * File:   FieldSim.cpp
  * Author: kirill
- * 
+ *
  * Created on October 1, 2012, 9:05 PM
  */
 
@@ -79,6 +79,7 @@ const Field* FieldSim::calcNextStateEx(const Field* pField, char step, sSimResul
 	Field* ret = calcNextFieldState(
 			calcRobotStep(pField, step, &(pResult->Changes)),
 			&(pResult->Changes));
+        pResult->score--;
 	if (ret->getLambdaCount() < lambdaCount) {
 		pResult->lambdaReceived++;
 		pResult->state = ES_EAT_LAMBDA;
@@ -104,7 +105,7 @@ Field* FieldSim::calcNextFieldState(Field* pField, FieldChanges* pChanges) {
     if(!pField->isRobotAlive()) {
         return pField;
     }
-    
+
     Field *newField = new Field(*pField);
 
 	for (int y = pField->getSize().second - 2; y >= 0; y--) {
@@ -145,9 +146,11 @@ Field* FieldSim::calcNextFieldState(Field* pField, FieldChanges* pChanges) {
 			}
 		}
 	}
-    
+
     if (newField->lambdaCacheEmpty() && newField->isLiftClosed()) {
         newField->write(*newField->getLift(), OPENED_LIFT);
+        if (pChanges)
+                pChanges->push_back(sSimChange(CH_LIFT_OPEN, CLOSED_LIFT, *(newField->getLift()),Point(0,0)));
     }
 
     //test for robot destruction
@@ -156,7 +159,7 @@ Field* FieldSim::calcNextFieldState(Field* pField, FieldChanges* pChanges) {
        (pField->getXY(destroyCrd) != STONE)) {
         newField->killRobot();
     }
-    
+
     delete pField;
     return newField;
 }
@@ -201,13 +204,10 @@ Field* FieldSim::calcRobotStep(const Field* pField, char step,FieldChanges* pCha
 		if ((step == 'L') || (step == 'R')) {
 			if (newField->getXY(absNextPos + *nextPos) == EMPTY) {
 				if (pChanges) {
-                                        pChanges->push_back(
-							sSimChange(CH_MOVE, STONE, absNextPos,
+					pChanges->push_back(sSimChange(CH_MOVE, STONE, absNextPos,
 									absNextPos + *nextPos));
-					pChanges->push_back(
-							sSimChange(CH_MOVE, ROBOT, *newField->getRobot(),
+					pChanges->push_back(sSimChange(CH_MOVE, ROBOT, *newField->getRobot(),
 									absNextPos));
-					
 				}
 				newField->swap(absNextPos + *nextPos, absNextPos);
 				newField->swap(absNextPos, *newField->getRobot());
@@ -260,8 +260,7 @@ Field* FieldSim::calcRobotStep(const Field* pField, char step,FieldChanges* pCha
 	default:
 		LOGWARNING("Wrong robot step from(%d,%d) to (%d,%d)[%c]",
 				newField->getRobot()->x, newField->getRobot()->y, absNextPos.x,
-				absNextPos.y,
-				cellTypeToChar((CellType) newField->getXY(absNextPos)));
+				absNextPos.y, cellTypeToChar((CellType) newField->getXY(absNextPos)));
 		delete nextPos;
 		return newField;
 	}

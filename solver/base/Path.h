@@ -23,10 +23,6 @@ class Path {
 	std::vector<const Point*> path;
 public:
 	/**
-	 * Конструктор класса Path.
-	 */
-	Path();
-	/**
 	 * Деструктор класса Path.
 	 * Очищает список пути.
 	 */
@@ -35,7 +31,9 @@ public:
 	 * Возвращает длину пути.
 	 * @return длина пути.
 	 */
-    	int getSize() const;
+	int getSize() const {
+		return path.size();
+	}
 	/**
 	* Возвращает координаты точки,
 	* в которой робот находился на заданном шаге.
@@ -43,17 +41,23 @@ public:
 	* @param index номер получаемого шага.
 	* @return координаты робота на шаге с заданным номером.
 	*/
-	const Point* getCell(int) const;
+	const Point* getCell(int index) const {
+		return path[index];
+	}
 	/**
 	* Добавляет шаг к пути.
  	* @param Point& c - точка, которая добавляется к пути.
  	*/
-	void addCell(const Point&);
+	void addCell(const Point& c) {
+		path.push_back(new Point(c));
+	}
 	/**
 	 * Проверка на отсутствие элементов в пути.
 	 * @return true, если путь пуст, false в противном случае.
 	 */
-	bool isEmpty() const;
+	bool isEmpty() const {
+		return path.empty();
+	}
 	/**
 	 * Получение значения длины пути.
 	 * @return значение длины пути.

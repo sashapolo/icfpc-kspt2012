@@ -1,6 +1,5 @@
 #pragma once
 
-
 class LifterScene {
 public:
     LifterScene();
@@ -30,6 +29,15 @@ public:
     void addLambdaExplosionParticles(scene::ISceneNode* pNode,ITexture* pTexture1);
     
     void onFrame();
+    
+    int getScore() {return result.score;};
+    int getNumSteps() {return result.stepsTaken;};
+    int getNumHarvestedLambdas() {return result.lambdaReceived;};
+    void setAnimationSpeed(u32 speed) {animationSpeed=speed;};
+    bool isAnimation();
+    
+    const Field* getField() {return pField;};
+    u32 getAnimationSpeed() {return animationSpeed;};
 private:
     IrrlichtDevice *device;
     IVideoDriver* driver;
@@ -56,7 +64,8 @@ private:
     ITexture* pRobotTex;
     ITexture* pRobotBump;
     ITexture* pFireTex;
-    ITexture* pLiftTex;
+    ITexture* pLiftClosedTex;
+    ITexture* pLiftOpenedTex;
     ITexture* pSunTex;
     
     ITexture* pBlackTex;
@@ -99,7 +108,8 @@ private:
     
     s32 bumpMaterial;
     s32 parallaxMaterial;
-    
+    u32 animationSpeed;
     struct timespec prevUpdateTime;
+    struct timespec prevAnimTime;
 };
 

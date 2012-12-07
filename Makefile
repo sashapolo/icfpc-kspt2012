@@ -21,15 +21,14 @@ TST_MAPS_DIR = $(TST_DIR)/res/testmaps
 SH_DIR = scoreharness
 SH_SRC_DIR = $(SH_DIR)/src
 SH_OBJ_DIR = $(SH_DIR)/obj
-SH_HDR_DIR = $(SH_DIR)/hdr
 
 CC = g++
-CFLAGS = -Wall -g
+CFLAGS = -Wall
 
 LD = g++
 LFLAGS = -Wall
 TEST_LIBS = -lcppunit
-3D_LIBS = -lGL -lXxf86vm -lXext -lX11 -lrt -L/usr/local/lib -lIrrlicht
+3D_LIBS = -L/usr/local/lib -lIrrlicht -lGL -lXxf86vm -lXext -lX11 -lrt -lpthread
 SH_LIBS = -L/usr/local/lib -lpthread
 
 SRCS = $(shell find $(SRC_DIR) -type f -name *.cpp)
@@ -37,34 +36,43 @@ OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
 
 TESTSRCS = $(foreach sdir, $(TST_SRC_DIR), $(wildcard $(sdir)/*.cpp))
 TESTOBJS = $(patsubst $(TST_SRC_DIR)/%.cpp, $(TST_OBJ_DIR)/%.o, $(TESTSRCS))
-SRCS_WITHOUT_MAIN = $(shell find $(SRC_DIR) -not -name main.cpp -not -name *.o -type f)
+SRCS_WITHOUT_MAIN = $(shell find $(SRC_DIR) -not -name main.cpp -not -name *.o -not -name *.h -type f)
 OBJS_WITHOUT_MAIN = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS_WITHOUT_MAIN))
 
 3D_SRCS = $(foreach sdir, $(3D_SRC_DIR), $(wildcard $(sdir)/*.cpp))
 3D_OBJS = $(patsubst $(3D_SRC_DIR)/%.cpp, $(3D_OBJ_DIR)/%.o, $(3D_SRCS))
-3D_DEP_OBJS = $(OBJ_DIR)/base/Field.o $(OBJ_DIR)/base/Point.o\
-			  $(OBJ_DIR)/base/FieldSim.o $(OBJ_DIR)/Logger.o \
-			  $(OBJ_DIR)/base/Path.o
+3D_DEP_OBJS = $(OBJ_DIR)/algo/AStar/AStar.o $(OBJ_DIR)/algo/AStar/AStarPoint.o $(OBJ_DIR)/SignalHandler.o\
+	      	  $(OBJ_DIR)/algo/NearestNeighbour.o $(OBJ_DIR)/algo/Solver.o \
+	      	  $(OBJ_DIR)/algo/TwoOptOptimizer.o $(OBJ_DIR)/base/Field.o \
+	      	  $(OBJ_DIR)/base/FieldSim.o $(OBJ_DIR)/Logger.o $(OBJ_DIR)/base/Path.o
 
 SH_SRCS = $(foreach sdir, $(SH_SRC_DIR), $(wildcard $(sdir)/*.cpp))
 SH_OBJS = $(patsubst $(SH_SRC_DIR)/%.cpp, $(SH_OBJ_DIR)/%.o, $(SH_SRCS))
 SH_DEP_OBJS = $(OBJ_DIR)/HTMLLogger.o $(OBJ_DIR)/Logger.o $(OBJ_DIR)/SignalHandler.o \
-	      	  $(OBJ_DIR)/algo/AStar.o $(OBJ_DIR)/algo/AStarPoint.o \
-	      	  $(OBJ_DIR)/algo/ManhattanHeuristic.o $(OBJ_DIR)/algo/NearestNeighbour.o \
-	      	  $(OBJ_DIR)/algo/Solver.o $(OBJ_DIR)/algo/TwoOptOptimizer.o \
-	     	  $(OBJ_DIR)/base/Field.o $(OBJ_DIR)/base/FieldSim.o \
-	      	  $(OBJ_DIR)/base/Point.o $(OBJ_DIR)/base/Path.o
+	      	  $(OBJ_DIR)/algo/AStar/AStar.o $(OBJ_DIR)/algo/AStar/AStarPoint.o \
+	      	  $(OBJ_DIR)/algo/NearestNeighbour.o $(OBJ_DIR)/algo/Solver.o \
+	      	  $(OBJ_DIR)/algo/TwoOptOptimizer.o $(OBJ_DIR)/base/Field.o \
+	      	  $(OBJ_DIR)/base/FieldSim.o $(OBJ_DIR)/base/Path.o
 SH_REPORT_DIR = $(SH_DIR)/reports
 
 DOXYGENCFG = doc/doxygen/doxygen-config
 
+all: release
 
-all: create_object_dir create_test_object_dir create_3d_object_dir create_sh_object_dir $(TESTEXE) $(EXE) $(3DEXE) $(SHEXE) run_tests
+exes: $(TESTEXE) $(EXE) $(3DEXE) $(SHEXE) 
+create_obj_dirs: create_solver_object_dir create_test_object_dir create_3d_object_dir create_sh_object_dir
 
-create_object_dir:
+release: CFLAGS += -O2
+release: create_obj_dirs exes run_tests
+
+debug: CFLAGS += -g
+debug: create_obj_dirs exes run_tests
+
+create_solver_object_dir:
 	@mkdir -p $(OBJ_DIR)
 	@mkdir -p $(OBJ_DIR)/base
 	@mkdir -p $(OBJ_DIR)/algo
+	@mkdir -p $(OBJ_DIR)/algo/AStar
 
 create_test_object_dir:
 	@mkdir -p $(TST_OBJ_DIR)
@@ -74,7 +82,6 @@ create_3d_object_dir:
 
 create_sh_object_dir:
 	@mkdir -p $(SH_OBJ_DIR)
-	@mkdir -p $(TST_OBJ_DIR)
 
 run_tests:
 	@echo
@@ -85,10 +92,10 @@ run_tests:
 	@./$(TESTEXE)
 	@echo
 
-solver: create_object_dir $(EXE)
-tests: create_object_dir create_test_object_dir $(TESTEXE)
-3dsolver: create_object_dir create_3d_object_dir $(3DEXE)
-scoreharness: create_object_dir create_sh_object_dir $(SHEXE)
+solver: create_solver_object_dir $(EXE)
+tests: create_solver_object_dir create_test_object_dir $(TESTEXE)
+3dsolver: create_solver_object_dir create_3d_object_dir $(3DEXE)
+scoreharness: create_solver_object_dir create_sh_object_dir $(SHEXE)
 
 
 # Main executable

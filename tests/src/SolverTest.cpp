@@ -62,7 +62,7 @@ void SolverTest::testSolverConsistency() {
 		// Проверка того, что одинаковы пути и количество набранных очков.
 		CPPUNIT_ASSERT(solution1 == solution2);
 		CPPUNIT_ASSERT(simResult1.score == simResult2.score);
-    } catch (const FieldParseException& e) {
+    } catch (const Field::FieldParseException&) {
 		std::cout << "Map load error. See log.html for details.\n";
 	}
 }

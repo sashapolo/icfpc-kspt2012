@@ -26,6 +26,7 @@ public:
 		nextGoalIndex = goalIndex;
 		delta = deltaPath;
 	}
+
 };
 
 

@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
     }
 
     // Итерируемся по именам карт
-    for (int i = 1; i < argc; i++) {
+    for (int i = 1; i < argc - 1; i++) {
     	SignalHandler::setupSignalHandler();
     	solvingDone = false;
 		try {
@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
 			}
 
 			report << argv[i] << ": " << simRes.score << endl;
-		} catch (FieldParseException&) {
+		} catch (Field::FieldParseException&) {
 			cout << "Error while parsing input file: " << argv[i] << "\n";
 			i++;
 		}

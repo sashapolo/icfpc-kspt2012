@@ -27,12 +27,12 @@ int main(int argc, char** argv) {
 
 	try {
 		Field field(std::cin);
-		//Field field("res/maps/map4");
+		//Field field("../../maps-without-extensions/map213");
 		Solver s(&field);
 		std::string result = s.solve();
 		std::cout<<result<<"\n";
-		FieldSim::drawStepByStep(&field, result);
-	} catch (const FieldParseException& e) {
+		//FieldSim::drawStepByStep(&field, result);
+	} catch (const Field::FieldParseException&) {
 		//std::cout << "Map load error! (See LOG.html)\n";
 		std::cout << "A\n";
 		return 0;

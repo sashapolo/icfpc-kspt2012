@@ -12,16 +12,6 @@
 #include "../Logger.h"
 #include "../HTMLLogger.h"
 
-typedef std::list<Point*> FieldCache;
-
-// ислючение, говорящее о неправильности задания карты
-struct FieldParseException {
-};
-
-// исключение, возникающее при попытке вызова write для перемещения лифта
-struct IllegalWriteException {
-};
-
 // возможные значения ячеек поля
 enum CellType { EMPTY = ' ',
 				CLOSED_LIFT = 'L',
@@ -33,25 +23,21 @@ enum CellType { EMPTY = ' ',
 				WALL = '#' };
 
 /**
- * Преобразование типа ячейки в символ.
- * @param CellType type - тип ячейки.
- * @return символ.
- */
-char cellTypeToChar(CellType type);
-/**
- * Преобразование символа в тип ячейки.
- * @param char c - символ.
- * @return тип ячейки.
- */
-CellType charToCellType(char c);
-
-
-
-/**
  * Класс Field.<br />
  * Описывает карту.
  */
 class Field {
+public:
+	typedef std::list<Point*> FieldCache;
+
+	// ислючение, говорящее о неправильности задания карты
+	struct FieldParseException {
+	};
+
+	// исключение, возникающее при попытке вызова write для перемещения лифта
+	struct IllegalWriteException {
+	};
+
 private:
 	/**
  	 * Карта.
@@ -114,51 +100,69 @@ public:
  	 * Кэш лямбд.
 	 * @return первый элемент этого списка.
 	 */
-	FieldCache::const_iterator getLambdaCacheIt() const;
+	FieldCache::const_iterator getLambdaCacheIt() const {
+		return lambdaCache.begin();
+	}
 	/**
  	 * Кэш лямбд.
 	 * @return последний элемент этого списка.
 	 */
-	FieldCache::const_iterator getLambdaCacheEnd() const;
+	FieldCache::const_iterator getLambdaCacheEnd() const {
+		return lambdaCache.end();
+	}
 	/**
  	 * Проверка кэша лямбд на отсутствие элементов.
 	 * @return true, если список пуст, false, если еще остались лямбды.
 	 */
-	bool lambdaCacheEmpty() const;
+	bool lambdaCacheEmpty() const {
+		return lambdaCache.empty();
+	}
 	/**
  	 * Подсчет элементов в кэше лямбд.
 	 * @return количество элементов в кэше лямбд.
 	 */
-	int getLambdaCount() const;
+	int getLambdaCount() const {
+		return lambdaCache.size();
+	}
 	/**
  	 * Кэш камней.
 	 * @return первый элемент этого списка.
 	 */
-	FieldCache::const_iterator getStoneCacheIt() const;
+	FieldCache::const_iterator getStoneCacheIt() const {
+		return stoneCache.begin();
+	}
 	/**
  	 * Кэш камней.
 	 * @return последний элемент этого списка.
 	 */
-	FieldCache::const_iterator getStoneCacheEnd() const;
+	FieldCache::const_iterator getStoneCacheEnd() const {
+		return stoneCache.end();
+	}
 	/**
  	 * Подсчет элементов в кэше камней.
 	 * @return количество элементов в кэше камней.
 	 */
-	int getStoneCount() const;
+	int getStoneCount() const {
+		return stoneCache.size();
+	}
 
 	/**
  	 * Получение элемента карты с координатами точки.
 	 * @param Point &point - точка.
 	 * @return элемент карты с координатами точки.
 	 */
-	char getXY(const Point &point) const;
+	char getXY(const Point &point) const {
+		return field[point.y][point.x];
+	}
 	/**
  	 * Получение элемента карты с координатами x и y.
 	 * @param int x - координата x.
 	 * @param int y - координата y.
 	 * @return элемент карты с координатами x и y.
 	 */
-	char getXY(int x, int y) const;
+	char getXY(int x, int y) const {
+		return field[y][x];
+	}
 	/**
  	 * Проверка возможности хода заданную точку.
 	 * @param int x - координата x.
@@ -171,38 +175,40 @@ public:
 	 * @param Point &point - точка.
 	 * @return true, если ход возможен, false, если не возможен.
 	 */
-	bool isPassable(const Point &point) const;
-	/**
- 	 * todo.
-	 * @param ?.
-	 * @return todo.
-	 */
+	bool isPassable(const Point &point) const {
+		return isPassable(point.x, point.y);
+	}
+
 	std::pair<int, int> getSize() const;
 	/**
  	 * Получение координаты робота.
 	 * @return координату робота.
 	 */
-	const Point* getRobot() const;
+	const Point* getRobot() const {
+		return robot;
+	}
 	/**
  	 * Жив ли робот.
 	 * @return true, если робот жив, false, если робот уничтожен.
 	 */
-	bool isRobotAlive() const;
+	bool isRobotAlive() const {
+		return !robotKilled;
+	}
 	/**
  	 * Получение координаты лифта.
 	 * @return координату лифта.
 	 */
-	const Point* getLift() const;
+	const Point* getLift() const {
+		return lift;
+	}
 	/**
  	 * Закрыт ли лифт.
 	 * @return true, если закрыт, false, если открыт.
 	 */
-	bool isLiftClosed() const;
-	/**
- 	 * todo.
-	 * @param const Field& - элемент карты.
-	 * @return todo.
-	 */
+	bool isLiftClosed() const {
+		return (field[lift->y][lift->x] == CLOSED_LIFT);
+	}
+
 	bool operator==(const Field&) const;
 
 	// неконстантные методы
@@ -215,21 +221,38 @@ public:
 	void swap(const Point &Cell1, const Point &Cell2);
 	/**
 	 * Запись нового значения в клетку поля.
-	 * @param Point& xy - клетка поля.
-	 * @param CellType type - тип клетки.
-	 */
-	void write(const Point& xy, CellType type);
-	/**
-	 * Запись нового значения в клетку поля.
 	 * @param int y - 1 координата.
 	 * @param int x - 2 координата.
 	 * @param CellType type - тип клетки.
 	 */
 	void write(int y, int x, CellType type);
 	/**
+	 * Запись нового значения в клетку поля.
+	 * @param Point& xy - клетка поля.
+	 * @param CellType type - тип клетки.
+	 */
+	void write(const Point& xy, CellType newCell) {
+		write(xy.x, xy.y, newCell);
+	}
+	/**
 	 * Убивает робота.
 	 */
-	void killRobot();
+	void killRobot() {
+		robotKilled = true;
+	}
 };
+
+/**
+ * Преобразование типа ячейки в символ.
+ * @param CellType type - тип ячейки.
+ * @return символ.
+ */
+char cellTypeToChar(CellType type);
+/**
+ * Преобразование символа в тип ячейки.
+ * @param char c - символ.
+ * @return тип ячейки.
+ */
+CellType charToCellType(char c);
 
 #endif	/* FIELD_H */

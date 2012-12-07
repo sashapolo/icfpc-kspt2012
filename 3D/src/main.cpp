@@ -2,6 +2,7 @@
 #define UPDATE_TIME 500
 
 #include "Logger.h"
+#include "LifterGUI.h"
 
 LifterGUI lifterGUI;
 
@@ -85,21 +86,30 @@ int main()
         
         driver->beginScene(true, true, SColor(255,100,101,140));
 
-        driver->setRenderTarget(Blur->rt0, true, true, video::SColor(0,0,0,0));
-        smgr->drawAll();
-        driver->setRenderTarget(Bloom->rt0, true, true, video::SColor(0,0,0,0)); 
-        Blur->render();
-        driver->setRenderTarget(0);     
-        Bloom->Material.setTexture(1,Blur->rt0);
-        Bloom->render();
+        if(lifterGUI.isBloomEnabled())
+        {
+            driver->setRenderTarget(Blur->rt0, true, true, video::SColor(0,0,0,0));
+            smgr->drawAll();
+            driver->setRenderTarget(Bloom->rt0, true, true, video::SColor(0,0,0,0)); 
+            Blur->render();
+            driver->setRenderTarget(0);     
+            Bloom->Material.setTexture(1,Blur->rt0);
+            Bloom->render();
+        }
+        else
+        {
+            smgr->drawAll();
+        }
     
         guienv->drawAll();
         driver->endScene();
     }
 
+    
     lifterGUI.release();
     device->drop();
-
+    delete Blur;
+    delete Bloom;
     return 0;
 };
 

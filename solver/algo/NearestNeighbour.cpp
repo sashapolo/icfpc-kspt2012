@@ -12,8 +12,8 @@ Path* NearestNeighbour::createTour(const Point& start, const Field& field) {
 	Path *pPath = new Path();
 
 	std::list<const Point*> goals;
-	FieldCache::const_iterator it = field.getLambdaCacheIt();
-	FieldCache::const_iterator end = field.getLambdaCacheEnd();
+	Field::FieldCache::const_iterator it = field.getLambdaCacheIt();
+	Field::FieldCache::const_iterator end = field.getLambdaCacheEnd();
 	for (; it != end; it++) {
 		goals.push_back(*it);
 	}

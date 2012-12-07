@@ -13,11 +13,10 @@
 enum GUI_ID
 {
     GUI_ID_BUTTON_OPEN_MAP,
-    GUI_ID_BUTTON_OPEN_PATH,
+    GUI_ID_BUTTON_SOLVE,
     GUI_ID_BUTTON_OPEN_LOG,
     GUI_ID_BUTTON_PLAY,
     GUI_ID_BUTTON_NEXT,
-    GUI_ID_BUTTON_IMMEDIATE_STEPS,
     GUI_ID_FD_MAPSELECT,
     GUI_ID_FD_PATHSELECT,
     GUI_ID_BUTTON_UP,
@@ -25,6 +24,14 @@ enum GUI_ID
     GUI_ID_BUTTON_LEFT,
     GUI_ID_BUTTON_RIGHT,
     GUI_ID_BUTTON_WAIT,
+    GUI_ID_BUTTON_ABORT,
+    GUI_ID_END_GAME,
+    GUI_ID_CHECK_BLOOM,
+    GUI_ID_CHECK_BUTTONS,
+    GUI_ID_CHECK_SPEED,
+    GUI_ID_SCROLL_SPEED,
+    GUI_ID_BUTTON_STOP_SOLVER,
+    GUI_ID_WND_SOLVER
     
 };
     
@@ -48,16 +55,8 @@ public:
     void onButtonOpenMap(){
         guienv->addFileOpenDialog(L"Select map file:",true,0,GUI_ID_FD_MAPSELECT);
     }
-    void onButtonOpenPath(){
-        guienv->addFileOpenDialog(L"Select path file:",true,0,GUI_ID_FD_PATHSELECT);
-    }
-    void onButtonMapSelected(wchar_t* Path){
-        getScene().loadMap(Path);
-        robotPath.clear();
-        robotStates.clear();
-        currentRobotStep=0;
-        updateGUI();
-    }
+    void onButtonSolve();
+    void onButtonMapSelected(wchar_t* Path);
     void onButtonPathSelected(wchar_t* Path){
         
     };
@@ -65,52 +64,75 @@ public:
         logListbox->setVisible(!logListbox->isVisible ());
         updateGUI();
     }
-    void onButtonPlay();
+    void onButtonPlay()
+    {
+        bPlayed=!bPlayed;
+    }
     void onButtonNext(){
         if(currentRobotStep<robotPath.size())
         {
                 robotStates.push_back(lifterScene.step(robotPath[currentRobotStep++]));
                 updateImageLists();
+                updateGameInfo();
         };
     }
     void onButtonUp(){
         robotPath+='U';
         updateImageLists();
-        if(bImmediateSteps) onButtonNext();
     }
     void onButtonDown(){
         robotPath+='D';
         updateImageLists();
-        if(bImmediateSteps) onButtonNext();
     }
     void onButtonLeft(){
         robotPath+='L';
         updateImageLists();
-        if(bImmediateSteps) onButtonNext();
     }
     void onButtonRight(){
         robotPath+='R';
         updateImageLists();
-        if(bImmediateSteps) onButtonNext();
     }
     void onButtonWait(){
         robotPath+='W';
         updateImageLists();
-        if(bImmediateSteps) onButtonNext();
     }
-    void onButtonImmediateSteps()
-    {
-        bImmediateSteps=!bImmediateSteps;
-        if(bImmediateSteps)
-        {
-            robotPath.resize(currentRobotStep);
-            if(robotStates.size()>currentRobotStep)
-                robotStates.resize(currentRobotStep);
-            updateImageLists();
-        }
-    };
+    void onButtonAbort(){
+        robotPath+='A';
+        updateImageLists();
+    }
     
+    void onButtonBloom()
+    {
+        bEnableBloom=!bEnableBloom;
+    }
+    
+    void onButtonMoveButtons()
+    {
+        for(int i=0;i<6;i++) MoveButtons[i]->setVisible(!(MoveButtons[i]->isVisible()));
+    }
+    
+    void onButtonAnimationSpeed()
+    {
+        animationScroll->setVisible(!(animationScroll->isVisible()));
+    }
+    
+    void onSpeedScrollChanged()
+    {
+        lifterScene.setAnimationSpeed(animationScroll->getPos());
+    }
+    
+    void onStopSolver();
+    
+    bool isBloomEnabled() {return bEnableBloom;};
+    
+    void updateSolverState();
+    void onUpdateGUI();
+    void updateGameInfo();
+    void clearScene();
+    void endGame(const wchar_t* reason=0);
     void release();
+    
+    
 private:
     IrrlichtDevice *device;
     IVideoDriver* driver;
@@ -119,7 +141,18 @@ private:
 
     IGUIListBox * logListbox;
     IGUIStaticText* infoText;
+    IGUIStaticText* gameInfoText;
     IGUIToolBar* toolBar;
+    IGUIScrollBar* animationScroll;
+    IGUICheckBox* bloomCheck;
+    IGUICheckBox* buttonsCheck;
+    IGUICheckBox* speedCheck;
+    IGUIStaticText* bloomText;
+    IGUIStaticText* buttonsText;
+    IGUIStaticText* speedText;
+    IGUIWindow* solverWnd;
+    IGUIStaticText* solverStateTxt;
+    IGUIButton* solverButton;
     
     std::string robotPath;
     std::vector<eEndState> robotStates;
@@ -133,6 +166,9 @@ private:
     dimension2d<u32> window_dim;
     
     LifterScene lifterScene;
+    SolverThread solverTh;
+    
+    timespec prevGUIUpdateTime;
     
     MyEventReceiver* pReceiver;
     
@@ -143,6 +179,7 @@ private:
     ITexture* pDownTex;
     ITexture* pLeftTex;
     ITexture* pRightTex;
+    ITexture* pAbortTex;
     
     ITexture* pEatLambdaTex;
     ITexture* pDestroyedTex;
@@ -151,13 +188,17 @@ private:
     ITexture* pWrongStepTex;
     ITexture* pErrorTex;
     
-    bool bImmediateSteps;
+    IGUIButton* MoveButtons[6];
+    bool bEnableBloom;
+    bool bPlayed;
 };
 
 class MyEventReceiver : public IEventReceiver
 {
 public:
     IGUIFileOpenDialog* dialog;
+    IGUIElement* element;
+    IGUIScrollBar* scroll;
     LifterGUI* pLifterGUI;
    virtual bool OnEvent(const SEvent& event)
    {
@@ -171,29 +212,6 @@ public:
                 default:
                     LogInfo("[Irrlicht] %s",event.LogEvent.Text);
                     break;
-            }
-        }
-        
-        if (event.EventType == EET_GUI_EVENT)
-        {
-            switch(event.GUIEvent.EventType)
-            {
-                case EGET_FILE_SELECTED:         
-                    dialog = (IGUIFileOpenDialog*)event.GUIEvent.Caller;
-                    switch(dialog->getID())
-                    {
-                        case GUI_ID_FD_MAPSELECT: 
-                            pLifterGUI->onButtonMapSelected((wchar_t*)dialog->getFileName());
-                            break;
-                        case GUI_ID_FD_PATHSELECT:
-                            pLifterGUI->onButtonPathSelected((wchar_t*)dialog->getFileName());
-                            break;
-                        default: break;
-                    };
-                    return true;
-                
-                default:
-                        break;
             }
         }
 
@@ -218,8 +236,66 @@ public:
                         case GUI_ID_BUTTON_RIGHT: pLifterGUI->onButtonRight(); break;
                         case GUI_ID_BUTTON_WAIT: pLifterGUI->onButtonWait(); break;
                         case GUI_ID_BUTTON_NEXT: pLifterGUI->onButtonNext(); break;
-                        case GUI_ID_BUTTON_IMMEDIATE_STEPS: pLifterGUI->onButtonImmediateSteps(); break;
+                        case GUI_ID_BUTTON_ABORT: pLifterGUI->onButtonAbort(); break;
+                        case GUI_ID_BUTTON_PLAY: pLifterGUI->onButtonPlay(); break;
+                        case GUI_ID_BUTTON_SOLVE: pLifterGUI->onButtonSolve(); break;
+                        case GUI_ID_BUTTON_STOP_SOLVER: pLifterGUI->onStopSolver(); break;
                     }
+                    break;
+                case EGET_FILE_SELECTED:         
+                    dialog = (IGUIFileOpenDialog*)event.GUIEvent.Caller;
+                    switch(dialog->getID())
+                    {
+                        case GUI_ID_FD_MAPSELECT: 
+                            pLifterGUI->onButtonMapSelected((wchar_t*)dialog->getFileName());
+                            break;
+                        default: break;
+                    };
+                    break;
+                case EGET_MESSAGEBOX_OK:
+                    element = (IGUIElement*)event.GUIEvent.Caller;
+                    switch(element->getID())
+                    {
+                        case GUI_ID_END_GAME:
+                            pLifterGUI->clearScene();
+                            break;
+                        default: break;
+                    }
+                    break;
+                case EGET_CHECKBOX_CHANGED:
+                    element = (IGUIElement*)event.GUIEvent.Caller;
+                    switch(element->getID())
+                    {
+                        case GUI_ID_CHECK_BLOOM:
+                            pLifterGUI->onButtonBloom();
+                            break;
+                        case GUI_ID_CHECK_BUTTONS:
+                            pLifterGUI->onButtonMoveButtons();
+                            break;
+                        case GUI_ID_CHECK_SPEED:
+                            pLifterGUI->onButtonAnimationSpeed();
+                            break;
+                        default: break;
+                    }
+                    break;
+                case EGET_SCROLL_BAR_CHANGED:
+                    scroll = (IGUIScrollBar*)event.GUIEvent.Caller;
+                    switch(scroll->getID())
+                    {
+                        case GUI_ID_SCROLL_SPEED:
+                            pLifterGUI->onSpeedScrollChanged();
+                            break;
+                        default: break;
+                    }
+                    break;
+                case EGET_ELEMENT_CLOSED :
+                    element = (IGUIElement*)event.GUIEvent.Caller;
+                    if(element->getID()==GUI_ID_WND_SOLVER)
+                    {
+                        pLifterGUI->onStopSolver();
+                        return true;
+                    }
+                    break;
                 default:
                     break;
             }
