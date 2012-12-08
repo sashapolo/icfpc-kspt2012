@@ -31,6 +31,9 @@ void FieldTest::testConstructor() {
 }
 
 void FieldTest::testConstructorRightResults() {
+	HTMLLogger Logger;
+	Logger.Init("log.html","MainLog");
+	SetLogger(&Logger);
 
     // Простая маленькая корректно сформированная карта, содержащая все типы символов.
     const char* pathToMap = "tests/res/testmaps/OrdinaryCorrectMap";

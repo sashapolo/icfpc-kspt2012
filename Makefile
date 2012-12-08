@@ -26,7 +26,7 @@ CC = g++
 CFLAGS = -Wall
 
 LD = g++
-LFLAGS = -Wall
+LFLAGS =
 TEST_LIBS = -lcppunit
 3D_LIBS = -L/usr/local/lib -lIrrlicht -lGL -lXxf86vm -lXext -lX11 -lrt -lpthread
 SH_LIBS = -L/usr/local/lib -lpthread
@@ -135,7 +135,7 @@ $(SHEXE): $(SH_OBJS) $(SH_DEP_OBJS)
 	$(LD) $(LFLAGS) $^ -o $@ $(SH_LIBS)
 
 $(SH_OBJ_DIR)/%.o: $(SH_SRC_DIR)/%.cpp
-	$(CC) -I $(SH_HDR_DIR) -I $(HDR_DIR) $(CFLAGS) -std=c++11 -lpthread -c $< -o $@
+	$(CC) -I $(HDR_DIR) $(CFLAGS) -std=c++11 -lpthread -c $< -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CC) -I $(HDR_DIR) $(CFLAGS) -c $< -o $@
