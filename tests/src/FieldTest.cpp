@@ -28,6 +28,7 @@ void FieldTest::tearDown() {
  */
 void FieldTest::testConstructor() {
     testConstructorRightResults();
+//    testConstructorFieldParseException();
 }
 
 void FieldTest::testConstructorRightResults() {
@@ -77,4 +78,71 @@ void FieldTest::testConstructorRightResults() {
     CPPUNIT_ASSERT(fieldSize.first == maxLen);
     CPPUNIT_ASSERT(fieldSize.second == numOfLines);
 
+}
+
+void FieldTest::testConstructorFieldParseException() {
+    testConstructorWrongFileName();
+    testConstructorEmptyFile();
+    testConstructorEmptyLine();
+    testConstructorMoreThanOneRobot();
+    testConstructorMoreThanOneClosedLifts();
+    testConstructorContainsOpenedLift();
+    testConstructorIncorrectSymbols();
+    testConstructorNoRobot();
+    testConstructorNoLift();
+}
+
+void FieldTest::testConstructorWrongFileName() {
+    // Некорректное имя файла
+    const char* pathToMap = "";
+    CPPUNIT_ASSERT_THROW(Field field(pathToMap), Field::FieldParseException);
+}
+
+void FieldTest::testConstructorEmptyFile() {
+    // Пустой файл
+    const std::string pathToMap = "tests/res/testmaps/EmptyMap";
+    CPPUNIT_ASSERT_THROW(Field field(pathToMap), Field::FieldParseException);
+}
+
+void FieldTest::testConstructorEmptyLine() {
+    // Карта с пустой строкой
+    const char* pathToMap = "tests/res/testmaps/EmptyLineMap";
+    CPPUNIT_ASSERT_THROW(Field field(pathToMap), Field::FieldParseException);
+}
+
+void FieldTest::testConstructorMoreThanOneRobot() {
+
+    // Карта с двумя роботами
+    const char* pathToMap = "tests/res/testmaps/TwoRobotsMap";
+    CPPUNIT_ASSERT_THROW(Field field(pathToMap), Field::FieldParseException);
+}
+
+void FieldTest::testConstructorMoreThanOneClosedLifts() {
+    // Карта с двумя закрытыми лифтами
+    const char* pathToMap = "tests/res/testmaps/TwoClosedLiftsMap";
+    CPPUNIT_ASSERT_THROW(Field field(pathToMap), Field::FieldParseException);
+}
+
+void FieldTest::testConstructorContainsOpenedLift() {
+    // Карта с открытым лифтом
+    const char* pathToMap = "tests/res/testmaps/OpenedLiftMap";
+    CPPUNIT_ASSERT_THROW(Field field(pathToMap), Field::FieldParseException);
+}
+
+void FieldTest::testConstructorIncorrectSymbols() {
+    // Карта с некорректным символом (A)
+    const char* pathToMap = "tests/res/testmaps/IncorrectSymbolsMap";
+    CPPUNIT_ASSERT_THROW(Field field(pathToMap), Field::FieldParseException);
+}
+
+void FieldTest::testConstructorNoRobot() {
+    // Карта, на которой нет робота
+    const char* pathToMap = "tests/res/testmaps/NoRobotMap";
+    CPPUNIT_ASSERT_THROW(Field field(pathToMap), Field::FieldParseException);
+}
+
+void FieldTest::testConstructorNoLift() {
+    // Карта, на которой нет закрытого лифта
+    const char* pathToMap = "tests/res/testmaps/NoLiftMap";
+    CPPUNIT_ASSERT_THROW(Field field(pathToMap), Field::FieldParseException);
 }
